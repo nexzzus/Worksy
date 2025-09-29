@@ -1,43 +1,66 @@
 @model UserDTO
 
 @{
-    ViewBag.Title = "Register";
+    ViewBag.Title = "Registro";
     Layout = "_Layout";
 }
 
-<h2>Registro</h2>
-<form asp-action="Register" method="POST">
-    <div asp-validation-summary="ModelOnly"></div>
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+        <h3 class="m-0">Crear cuenta</h3>
+    </div>
 
-    <div>
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName"/>
-        <span asp-validation-for="FirstName"></span>
+    <div class="card-body">
+        <form asp-action="Register" method="POST" class="row g-3">
+            <!-- Resumen de validación -->
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="col-md-6 form-floating">
+                <input asp-for="FirstName" class="form-control" placeholder="Nombres"/>
+                <label asp-for="FirstName"></label>
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 form-floating">
+                <input asp-for="LastName" class="form-control" placeholder="Apellidos"/>
+                <label asp-for="LastName"></label>
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12 form-floating">
+                <input asp-for="Email" class="form-control" placeholder="Correo electrónico"/>
+                <label asp-for="Email"></label>
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 form-floating">
+                <input asp-for="Password" type="password" class="form-control" placeholder="Contraseña"/>
+                <label asp-for="Password"></label>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6 form-floating">
+                <input asp-for="PhoneNumber" class="form-control" placeholder="Número de teléfono"/>
+                <label asp-for="PhoneNumber"></label>
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12 form-floating">
+                <input asp-for="Address" class="form-control" placeholder="Dirección"/>
+                <label asp-for="Address"></label>
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-success w-100">Registrarse</button>
+            </div>
+        </form>
     </div>
-    <div>
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName"/>
-        <span asp-validation-for="LastName"></span>
-    </div>
-    <div>
-        <label asp-for="Email"></label>
-        <input asp-for="Email"/>
-        <span asp-validation-for="Email"></span>
-    </div>
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password"/>
-        <span asp-validation-for="Password"></span>
-    </div>
-    <div>
-        <label asp-for="PhoneNumber"></label>
-        <input asp-for="PhoneNumber"/>
-        <span asp-validation-for="PhoneNumber"></span>
-    </div>
-    <div>
-        <label asp-for="Address"></label>
-        <input asp-for="Address"/>
-        <span asp-validation-for="Address"></span>
-    </div>
-    <button type="submit">Registrarse</button>
-</form>
+</div>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

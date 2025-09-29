@@ -15,6 +15,9 @@ public static class CustomConfig
         {
             option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
         });
+        // AutoMapper
+        builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
+        
         // Services
         AddServices(builder);
         
