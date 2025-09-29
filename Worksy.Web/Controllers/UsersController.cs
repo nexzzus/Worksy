@@ -12,9 +12,7 @@ namespace Worksy.Web.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
 
-        public UsersController(
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
+        public UsersController(UserManager<User> userManager, SignInManager<User> signInManager,
             IMapper mapper)
         {
             _userManager = userManager;
@@ -22,20 +20,17 @@ namespace Worksy.Web.Controllers
             _mapper = mapper;
         }
 
-        // GET: /Users/
         public IActionResult Index()
         {
             return View();
         }
 
-        // GET: /Users/Register
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        // POST: /Users/Register
         [HttpPost]
         public async Task<IActionResult> Register(UserDTO dto)
         {
@@ -58,10 +53,7 @@ namespace Worksy.Web.Controllers
 
             return View(dto);
         }
-
-
-
-        // GET: /Users/Login
+        
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -69,7 +61,6 @@ namespace Worksy.Web.Controllers
             return View();
         }
 
-        // POST: /Users/Login
         [HttpPost]
         public async Task<IActionResult> Login(LoginDTO dto, string? returnUrl = null)
         {
@@ -95,7 +86,6 @@ namespace Worksy.Web.Controllers
             return View(dto);
         }
 
-        // POST: /Users/Logout
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -103,11 +93,40 @@ namespace Worksy.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Users/AccessDenied
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+            if (result.Succeeded)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                // TODO: Mostrar mensaje de éxito
+                ViewData["Message"] = "Contraseña cambiada exitosamente.";
+                return RedirectToAction("Index", "Home");
+            }
+            return View(dto);
         }
     }
 }

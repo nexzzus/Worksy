@@ -14,8 +14,8 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-light py-4">
         <div class="container-fluid">
-            <a class="navbar-brand" href="https://library.livecanvas.com/sections/">
-                <img class="img-fluid" src="Imagen de WhatsApp 2025-09-28 a las 21.33.56_fb74c19e.ico" alt=""
+            <a class="navbar-brand" href="#">
+                <img class="img-fluid" src="Imagen de WhatsApp 2025-09-28 a las 21.33.56_fb74c19e.ico" alt="Logo"
                      width="48px" height="48px">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav_lc"
@@ -30,9 +30,42 @@
                     <li class="nav-item"><a class="nav-link" href="#">Contact us</a></li>
                 </ul>
                 <div>
-                    <a class="btn btn-outline-secondary me-2" asp-controller="Users" asp-action="Register">Sign In</a>
-                    <a class="btn btn-success" asp-controller="Users" asp-action="Login">Sign Up</a>
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <a class="btn btn-outline-secondary me-2" asp-controller="Users" asp-action="Register">Registrarse</a>
+                        <a class="btn btn-success" asp-controller="Users" asp-action="Login">Ingresar</a>
+                    }
+                    else
+                    {
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="userMenuButton"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                @User.Identity.Name
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Users" asp-action="Profile">Perfil</a>
+                                </li>
+                                
+                                <li>
+                                    <hr class="dropdown-divider"/>
+                                </li>
+                                
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Users" asp-action="ChangePassword">Cambiar contraseña</a>
+                                </li>
+                                
+                                <li>
+                                    <form asp-controller="Users" asp-action="Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item text-danger">Cerrar sesión</button>
+                                    </form>
+                                </li>
+
+                            </ul>
+                        </div>
+                    }
                 </div>
+
             </div>
         </div>
     </nav>
