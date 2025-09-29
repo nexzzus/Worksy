@@ -4,8 +4,6 @@ namespace Worksy.Web.DTOs;
 
 public class UserDTO
 {
-    public Guid Id { get; set; }
-    
     [MaxLength(32, ErrorMessage = "El campo '{0}' debe tener máximo {1} caracteres.")]
     [Required(ErrorMessage = "Este campo es requerido")]
     [Display(Name = "Nombres")]

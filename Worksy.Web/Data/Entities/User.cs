@@ -4,15 +4,12 @@ using Worksy.Web.Data.Abstractions;
 
 namespace Worksy.Web.Data.Entities;
 
-public class User: IdentityUser<Guid>, IId
+public class User: IdentityUser<Guid>
 {
-    [Key]
-    public Guid Id { get; set; }
-    
     [MaxLength(32, ErrorMessage = "El campo '{0}' debe tener máximo {1} carácteres.")]
     [Required(ErrorMessage = "Este campo es requerido")]
     [Display(Name = "Nombres")]
-    public required string FistName { get; set; }
+    public required string FirstName { get; set; }
     
     [MaxLength(32, ErrorMessage = "El campo '{0}' debe tener máximo {1} carácteres.")]
     [Required(ErrorMessage = "Este campo es requerido")]

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
-using Worksy.Web.Services.Implementations;
 
 namespace Worksy.Web;
 
@@ -29,7 +28,7 @@ public static class CustomConfig
 
     public static void AddServices(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<UserService>();
+        //builder.Services.AddScoped<UserService>();
         builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
@@ -39,14 +38,15 @@ public static class CustomConfig
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
+        
     }
 
     public static void AddCoockies(WebApplicationBuilder builder)
     {
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            options.LoginPath = "/Account/Login";
-            options.AccessDeniedPath = "/Account/AccessDenied";
+            options.LoginPath = "/Users/Login";
+            options.AccessDeniedPath = "/Users/AccessDenied";
         });
     }
 }

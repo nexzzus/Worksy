@@ -1,4 +1,4 @@
-using AutoMapper;
+/*using AutoMapper;
 using Worksy.Web.Core;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
@@ -38,4 +38,4 @@ public class UserService:CustomQueryableOperationService, IUserService
     {
         return UpdateAsync<User, UserDTO>(user, user.Id);
     }
-}
+}*/
