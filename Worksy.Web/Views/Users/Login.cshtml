@@ -1,0 +1,27 @@
+@model LoginDTO
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "_Layout";
+}
+
+<h2>Iniciar sesión</h2>
+
+<form asp-action="Login" method="POST">
+    <div asp-validation-summary="ModelOnly"></div>
+    
+    <div>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" type="password" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <div>
+        <input asp-for="RememberMe" type="checkbox" /> @Html.DisplayNameFor(m => m.RememberMe)
+    </div>
+    <button type="submit">Iniciar sesión</button>
+</form>
