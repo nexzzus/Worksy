@@ -3,6 +3,7 @@ using AspNetCoreHero.ToastNotification.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
+using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
 
@@ -48,6 +49,8 @@ public static class CustomConfig
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
+
         
     }
 

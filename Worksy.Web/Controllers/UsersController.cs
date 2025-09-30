@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
+using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.ViewModels;
@@ -15,14 +16,16 @@ namespace Worksy.Web.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
         private readonly INotyfService _notyf;
+        private readonly IEmailSender _emailSender;
 
         public UsersController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper,
-            INotyfService notyf)
+            INotyfService notyf, IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
             _notyf = notyf;
+            _emailSender = emailSender;
         }
 
 
@@ -182,12 +185,91 @@ namespace Worksy.Web.Controllers
                 }
                 else
                 {
-                    
                     ModelState.AddModelError(string.Empty, error.Description);
                     _notyf.Error("" + error.Description);
                 }
-
             }
+
+            return View(dto);
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete el campo requerido");
+                return View(dto);
+            }
+
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null )
+            {
+                _notyf.Success("Se envió un correo de recuperación al correo indicado");
+                    return View();
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = Url.Action("ResetPassword", "Users", new
+            {
+                token,
+                email = user.Email
+            }, Request.Scheme);
+            
+            await _emailSender.SendEmailAsync(user.Email, "Recuperar contraseña",
+                $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña");
+
+            _notyf.Success("Se envió un correo de recuperación al correo indicado");
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            if (token is null || email is null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var model = new ResetPasswordViewModel { Token = token, Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete los campos requeridos");
+                return View(dto);
+            }
+
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null)
+            {
+                _notyf.Error("Error al restablecer la contraseña");
+                return RedirectToAction("Login");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
+            if (result.Succeeded)
+            {
+                _notyf.Success("Contraseña restablecida exitosamente");
+                return RedirectToAction("Login");
+            }
+
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+                _notyf.Error("" + error.Description);
+            }
+
             return View(dto);
         }
     }
