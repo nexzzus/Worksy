@@ -36,4 +36,8 @@ public class UserDTO
     [Required(ErrorMessage = "Este campo es requerido")]
     [Display(Name = "Dirección")]
     public required string Address { get; set; }
+    
+    [MaxLength(512, ErrorMessage = "El campo '{0}' debe tener máximo {1} carácteres.")]
+    [Display(Name = "Biografía")]
+    public string? Biography { get; set; }
 }
