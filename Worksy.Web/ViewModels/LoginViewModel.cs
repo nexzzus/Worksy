@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Worksy.Web.DTOs
+namespace Worksy.Web.ViewModels
 {
-    public class LoginDTO
+    public class LoginViewModel
     {
         [Required(ErrorMessage = "El correo es obligatorio")]
         [EmailAddress(ErrorMessage = "Correo no válido")]

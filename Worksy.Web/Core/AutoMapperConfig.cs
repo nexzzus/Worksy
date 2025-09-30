@@ -2,27 +2,33 @@ using AutoMapper;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 
-public class AutoMapperConfig : Profile
+namespace Worksy.Web.Core
 {
-    public AutoMapperConfig()
+    public class AutoMapperConfig : Profile
     {
-        CreateMap<User, UserDTO>()
-            .ForMember(dest => dest.Password, opt => opt.Ignore());
+        public AutoMapperConfig()
+        {
+            // De entidad a DTO
+            CreateMap<User, UserDTO>()
+                .ForMember(dest => dest.Password, opt => opt.Ignore()); // nunca exponer la contraseña
 
-        CreateMap<UserDTO, User>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-            .ForMember(dest => dest.SecurityStamp, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
-            .ForMember(dest => dest.ConcurrencyStamp, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.NormalizedUserName, opt => opt.MapFrom(src => src.Email.ToUpper()))
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.NormalizedEmail, opt => opt.MapFrom(src => src.Email.ToUpper()))
-            .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(src => true))
-            .ForMember(dest => dest.LockoutEnabled, opt => opt.MapFrom(src => false))
-            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber ?? string.Empty))
-            .ForMember(dest => dest.PhoneNumberConfirmed, opt => opt.MapFrom(src => true))
-            .ForMember(dest => dest.TwoFactorEnabled, opt => opt.MapFrom(src => false))
-            .ForMember(dest => dest.AccessFailedCount, opt => opt.MapFrom(src => 0));
+            // De DTO a entidad
+            CreateMap<UserDTO, User>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.SecurityStamp, opt => opt.Ignore())
+                .ForMember(dest => dest.ConcurrencyStamp, opt => opt.Ignore())
+                .ForMember(dest => dest.NormalizedUserName, opt => opt.Ignore())
+                .ForMember(dest => dest.NormalizedEmail, opt => opt.Ignore())
+                // ✅ Ignorar propiedades nulls o vacías para no sobrescribir datos existentes
+                .ForAllMembers(opt => opt.Condition(
+                    (src, dest, srcMember) => srcMember != null && !(srcMember is string s && string.IsNullOrWhiteSpace(s))
+                ));
+            
+            CreateMap<User, UpdateProfileDTO>();
+
+            // Mapeo inverso si necesitas actualizar desde DTO
+            CreateMap<UpdateProfileDTO, User>();
+        }
     }
 }

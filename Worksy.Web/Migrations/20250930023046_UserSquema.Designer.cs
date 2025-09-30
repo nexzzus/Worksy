@@ -12,7 +12,7 @@ using Worksy.Web.Data;
 namespace Worksy.Web.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250929021453_UserSquema")]
+    [Migration("20250930023046_UserSquema")]
     partial class UserSquema
     {
         /// <inheritdoc />
@@ -170,6 +170,10 @@ namespace Worksy.Web.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("Biography")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -181,7 +185,7 @@ namespace Worksy.Web.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FistName")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");

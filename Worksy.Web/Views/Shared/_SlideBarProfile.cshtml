@@ -1,0 +1,24 @@
+<!-- Sidebar -->
+<div class="col-md-5 col-xl-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Ajustes de perfil</h5>
+        </div>
+        @{
+            var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+        }
+
+        <div class="list-group list-group-flush">
+            <a class="list-group-item list-group-item-action @(currentAction == "Profile" ? "active" : "")"
+               asp-controller="Users" asp-action="Profile">
+                Cuenta
+            </a>
+            <a class="list-group-item list-group-item-action @(currentAction == "ChangePassword" ? "active" : "")"
+               asp-controller="Users" asp-action="ChangePassword">
+                Contraseña
+            </a>
+        </div>
+    </div>
+
+
+</div>

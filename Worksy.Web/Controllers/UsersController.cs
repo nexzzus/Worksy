@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
+using Worksy.Web.ViewModels;
 
 namespace Worksy.Web.Controllers
 {
@@ -12,39 +13,35 @@ namespace Worksy.Web.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
 
-        public UsersController(UserManager<User> userManager, SignInManager<User> signInManager,
-            IMapper mapper)
+        public UsersController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        // ================= PROFILE GET =================
 
+
+        // ================= REGISTER =================
         [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(UserDTO dto)
         {
             if (!ModelState.IsValid)
                 return View(dto);
 
             var user = _mapper.Map<User>(dto);
-            user.UserName = dto.Email; // Identity necesita UserName
+            user.UserName = dto.Email;
 
             var result = await _userManager.CreateAsync(user, dto.Password);
-
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
+                TempData["Message"] = "Registro exitoso. ¡Bienvenido!";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -53,7 +50,8 @@ namespace Worksy.Web.Controllers
 
             return View(dto);
         }
-        
+
+        // ================= LOGIN =================
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -62,15 +60,16 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginDTO dto, string? returnUrl = null)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel viewModel, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
-                return View(dto);
+                return View(viewModel);
 
             var result = await _signInManager.PasswordSignInAsync(
-                dto.Email,
-                dto.Password,
-                dto.RememberMe,
+                viewModel.Email,
+                viewModel.Password,
+                viewModel.RememberMe,
                 lockoutOnFailure: false
             );
 
@@ -79,53 +78,88 @@ namespace Worksy.Web.Controllers
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
 
+                TempData["Message"] = "Inicio de sesión exitoso.";
                 return RedirectToAction("Index", "Home");
             }
 
             ModelState.AddModelError(string.Empty, "Credenciales inválidas");
-            return View(dto);
+            return View(viewModel);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            TempData["Message"] = "Sesión cerrada correctamente.";
             return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
-        public IActionResult AccessDenied()
+        public IActionResult AccessDenied() => View();
+
+        // ================= CHANGE PASSWORD =================
+
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
         {
-            return View();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+
+            var dto = _mapper.Map<UpdateProfileDTO>(user);
+            return View(dto);
         }
 
+// POST para actualizar perfil
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return View(dto);
+
+            var user = await _userManager.GetUserAsync(User);
+            _mapper.Map(dto, user);
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                TempData["Message"] = "Perfil actualizado exitosamente.";
+                return RedirectToAction("Profile");
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return View(dto);
+        }
+           
+        
         [HttpGet]
         public IActionResult ChangePassword()
         {
-            return View();
+            return View(new ChangePasswordViewModel());
         }
 
         [HttpPost]
-        public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
         {
             if (!ModelState.IsValid)
-            {
                 return View(dto);
-            }
-            var user = await _userManager.GetUserAsync(User);
-            if (user is null)
-            {
-                return RedirectToAction("Login");
-            }
 
+            var user = await _userManager.GetUserAsync(User);
             var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+
             if (result.Succeeded)
             {
                 await _signInManager.RefreshSignInAsync(user);
-                // TODO: Mostrar mensaje de éxito
-                ViewData["Message"] = "Contraseña cambiada exitosamente.";
-                return RedirectToAction("Index", "Home");
+                TempData["Message"] = "Contraseña cambiada exitosamente.";
+                return RedirectToAction("Profile");
             }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
             return View(dto);
         }
     }

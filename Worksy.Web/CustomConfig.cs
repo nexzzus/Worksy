@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Worksy.Web.Core;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
 
