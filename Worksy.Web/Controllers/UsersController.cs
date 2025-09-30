@@ -1,6 +1,8 @@
+using AspNetCoreHero.ToastNotification.Abstractions;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.ViewModels;
@@ -12,18 +14,18 @@ namespace Worksy.Web.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IMapper _mapper;
+        private readonly INotyfService _notyf;
 
-        public UsersController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
+        public UsersController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper,
+            INotyfService notyf)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
+            _notyf = notyf;
         }
 
-        // ================= PROFILE GET =================
 
-
-        // ================= REGISTER =================
         [HttpGet]
         public IActionResult Register() => View();
 
@@ -32,7 +34,10 @@ namespace Worksy.Web.Controllers
         public async Task<IActionResult> Register(UserDTO dto)
         {
             if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete los campos requeridos");
                 return View(dto);
+            }
 
             var user = _mapper.Map<User>(dto);
             user.UserName = dto.Email;
@@ -41,17 +46,15 @@ namespace Worksy.Web.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                TempData["Message"] = "Registro exitoso. ¡Bienvenido!";
+                _notyf.Success("Registro exitoso. ¡Bienvenido!");
                 return RedirectToAction("Index", "Home");
             }
 
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+            _notyf.Error("Error en el registro. Intente nuevamente.");
 
             return View(dto);
         }
 
-        // ================= LOGIN =================
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -64,7 +67,10 @@ namespace Worksy.Web.Controllers
         public async Task<IActionResult> Login(LoginViewModel viewModel, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete todos los campos");
                 return View(viewModel);
+            }
 
             var result = await _signInManager.PasswordSignInAsync(
                 viewModel.Email,
@@ -76,13 +82,15 @@ namespace Worksy.Web.Controllers
             if (result.Succeeded)
             {
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
                     return Redirect(returnUrl);
+                }
 
-                TempData["Message"] = "Inicio de sesión exitoso.";
+                _notyf.Success("Inicio de sesión exitoso.");
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "Credenciales inválidas");
+            _notyf.Error("Credenciales inválidas");
             return View(viewModel);
         }
 
@@ -91,32 +99,35 @@ namespace Worksy.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            TempData["Message"] = "Sesión cerrada correctamente.";
+            _notyf.Success("Sesión cerrada correctamente.");
             return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
         public IActionResult AccessDenied() => View();
 
-        // ================= CHANGE PASSWORD =================
-
-
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login");
+            if (user is null)
+            {
+                return RedirectToAction("Login");
+            }
 
             var dto = _mapper.Map<UpdateProfileDTO>(user);
             return View(dto);
         }
 
-// POST para actualizar perfil
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
         {
             if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete los campos requeridos");
                 return View(dto);
+            }
 
             var user = await _userManager.GetUserAsync(User);
             _mapper.Map(dto, user);
@@ -124,17 +135,15 @@ namespace Worksy.Web.Controllers
 
             if (result.Succeeded)
             {
-                TempData["Message"] = "Perfil actualizado exitosamente.";
+                _notyf.Success("Perfil actualizado exitosamente.");
                 return RedirectToAction("Profile");
             }
 
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
-
-            return View(dto);
+            _notyf.Error("Error al actualizar el perfil. Intente nuevamente.");
+            return View("Profile", dto);
         }
-           
-        
+
+
         [HttpGet]
         public IActionResult ChangePassword()
         {
@@ -142,24 +151,43 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
         {
             if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete los campos requeridos");
                 return View(dto);
+            }
 
             var user = await _userManager.GetUserAsync(User);
-            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+            if (user is null)
+            {
+                return RedirectToAction("Login");
+            }
 
+            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
             if (result.Succeeded)
             {
                 await _signInManager.RefreshSignInAsync(user);
-                TempData["Message"] = "Contraseña cambiada exitosamente.";
+                _notyf.Success("Contraseña actualizada exitosamente.");
                 return RedirectToAction("Profile");
             }
 
             foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+            {
+                if (error.Code.Equals("PasswordMismatch"))
+                {
+                    ModelState.AddModelError(nameof(dto.OldPassword), "La contraseña actual es incorrecta.");
+                }
+                else
+                {
+                    
+                    ModelState.AddModelError(string.Empty, error.Description);
+                    _notyf.Error("" + error.Description);
+                }
 
+            }
             return View(dto);
         }
     }

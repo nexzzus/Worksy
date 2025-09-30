@@ -1,3 +1,5 @@
+using AspNetCoreHero.ToastNotification;
+using AspNetCoreHero.ToastNotification.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
@@ -22,8 +24,15 @@ public static class CustomConfig
         AddServices(builder);
         
         // Cookies
-        AddCoockies(builder);
-
+        AddCookies(builder);
+        
+        // Toast Notification
+        builder.Services.AddNotyf(config =>
+        {
+            config.DurationInSeconds = 5;
+            config.IsDismissable = true;
+            config.Position = NotyfPosition.BottomRight;
+        });
         return builder;
     }
 
@@ -42,12 +51,19 @@ public static class CustomConfig
         
     }
 
-    public static void AddCoockies(WebApplicationBuilder builder)
+    public static void AddCookies(WebApplicationBuilder builder)
     {
         builder.Services.ConfigureApplicationCookie(options =>
         {
             options.LoginPath = "/Users/Login";
             options.AccessDeniedPath = "/Users/AccessDenied";
         });
+    }
+
+    public static WebApplication AddCustomAppConfig(this WebApplication app)
+    {
+        app.UseNotyf();
+        
+        return app;
     }
 }
