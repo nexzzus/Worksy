@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Mail;
 using Worksy.Web.Core.Abstractions;
 
+namespace Worksy.Web.Core.Implementations;
+
 public class EmailSender : IEmailSender
 {
     private readonly IConfiguration _config;
