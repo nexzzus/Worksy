@@ -20,13 +20,14 @@ namespace Worksy.Web.Core
                 .ForMember(dest => dest.ConcurrencyStamp, opt => opt.Ignore())
                 .ForMember(dest => dest.NormalizedUserName, opt => opt.Ignore())
                 .ForMember(dest => dest.NormalizedEmail, opt => opt.Ignore())
-                // Ignorar propiedades nulls o vacías para no sobrescribir datos existentes
+                // ✅ Ignorar propiedades nulls o vacías para no sobrescribir datos existentes
                 .ForAllMembers(opt => opt.Condition(
                     (src, dest, srcMember) => srcMember != null && !(srcMember is string s && string.IsNullOrWhiteSpace(s))
                 ));
             
             CreateMap<User, UpdateProfileDTO>();
 
+            // Mapeo inverso si necesitas actualizar desde DTO
             CreateMap<UpdateProfileDTO, User>();
         }
     }
