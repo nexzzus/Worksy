@@ -1,8 +1,116 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewBag.Title = "index";
+    Layout = "_Layout";
 }
 
-@*<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>*@
+
+
+<body>
+    <main id="main">
+        <!-- ======= Hero Section ======= -->
+        <section id="hero" class="hero d-flex align-items-center">
+            <div class="container">
+                <div class="row gy-4 d-flex justify-content-between">
+                    <div class="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center">
+                        <h2 data-aos="fade-up">"Tu plataforma de oportunidades laborales y servicios personalizados"</h2>
+                        <p data-aos="fade-up" data-aos-delay="100">¡Descubre Worksy, la plataforma para trabajadores y clientes!</p>
+
+                        <form action="#" class="form-search d-flex align-items-stretch mb-3" data-aos="fade-up" data-aos-delay="200">
+                            <input type="text" class="form-control" placeholder="Ciudad">
+                            <button type="submit" class="btn btn-primary">Buscar</button>
+                        </form>
+
+                        <div class="row gy-4" data-aos="fade-up" data-aos-delay="400">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5 order-1 order-lg-2 hero-img" data-aos="zoom-out">
+                        <img src="assets/img/hero-img.svg" class="img-fluid mb-3 mb-lg-0" alt="">
+                    </div>
+
+                </div>
+            </div>
+        </section><!-- End Hero Section -->
+
+        <section id="featured-services" class="featured-services">
+            <div class="container">
+
+                <div class="row gy-4">
+
+                    <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up">
+                        <div class="icon flex-shrink-0">
+                            <i class="fa-solid fa-cart-flatbed"></i>
+                        </div>
+                        <div>
+                            <h4 class="title">Fácil comunicación </h4>
+                            <p class="description">En worksy ofrecemos una fácil comunicación, somos un tercero para poder ayudar a estas personas a contratar a una persona mucho mas rapido y facil </p>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="100">
+                        <div class="icon flex-shrink-0"><i class="fa-solid fa-truck"></i></div>
+                        <div>
+                            <h4 class="title">Cerca de ti</h4>
+                            <p class="description">Con nuestro método de búsqueda con ubicación puedes encontrar personas que estén cerca de ti para facilitar tu acceso a ellas. </p>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 service-item d-flex" data-aos="fade-up" data-aos-delay="200">
+                        <div class="icon flex-shrink-0"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                        <div>
+                            <h4 class="title">Variedad de servicios</h4>
+                            <p class="description">Buscamos que las personas puedan ver todos los servicios que están disponibles en su zona y que puedan encontrar la gran variedad de servicios que están a su disposición.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    </div>
+
+    <!-- ======= About Us Section ======= -->
+    <section id="about" class="about pt-0">
+        <div class="container" data-aos="fade-up">
+
+            <div class="row gy-4">
+                <div class="col-lg-6 position-relative align-self-start order-lg-last order-first">
+                    <img src="assets/img/about.jpg" class="img-fluid" alt="">
+                    <a href="https://www.youtube.com/watch?v=LXb3EKWsInQ" class="glightbox play-btn"></a>
+                </div>
+                <div class="col-lg-6 content order-last  order-lg-first">
+                    <h3>Acerca de nosotros</h3>
+                    <p>
+                        Worksy tu la plataforma para encontrar trabajadores independientes.
+                        Nosotros, tenemos todos los trabajadores independientes que necesitas para tu negocio. Somos la mejor manera de conectarte con profesionales de Colombia. Ofrecemos una plataforma fácil de usar para que puedas encontrar el trabajo que necesitas, cuando lo necesites.
+                    </p>
+                    <ul>
+                        <li data-aos="fade-up" data-aos-delay="100">
+                            <i class="bi bi-diagram-3"></i>
+                            <div>
+                                <h5>Worksy es el mejor lugar para encontrar trabajadores independientes.</h5>
+                                <p></p>
+                            </div>
+                        </li>
+                        <li data-aos="fade-up" data-aos-delay="200">
+                            <i class="bi bi-fullscreen-exit"></i>
+                            <div>
+                                <h5> Ofrecemos una plataforma fácil de usar para que puedas encontrar el trabajo que necesitas.</h5>
+                            </div>
+                        </li>
+                        <li data-aos="fade-up" data-aos-delay="300">
+                            <i class="bi bi-broadcast"></i>
+                            <div>
+                                <h5>Conectamos a trabajadores independientes de todo el mundo con empresas y clientes que necesitan sus servicios.</h5>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section><!-- End About Us Section -->
+
+</body>
+</html>
