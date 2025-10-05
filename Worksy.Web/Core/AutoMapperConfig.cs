@@ -29,6 +29,21 @@ namespace Worksy.Web.Core
 
             // Mapeo inverso si necesitas actualizar desde DTO
             CreateMap<UpdateProfileDTO, User>();
+
+            // De entidad a DTO
+            CreateMap<Category, CategoryDTO>()
+                .ForMember(dest => dest.Services, opt => opt.MapFrom(src => src.Services));
+            // De DTO a entidad
+            CreateMap<CategoryDTO, Category>()
+                .ForMember(dest => dest.Services, opt => opt.Ignore()); // Evita sobrescribir la relación
+
+            // De entidad a DTO
+            CreateMap<Service, ServiceDTO>()
+                .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.Categories));
+            // De DTO a entidad
+            CreateMap<ServiceDTO, Service>()
+                .ForMember(dest => dest.Categories, opt => opt.Ignore()); // Evita sobrescribir la relación
         }
+
     }
 }
