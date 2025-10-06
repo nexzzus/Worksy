@@ -1,0 +1,30 @@
+@model ServiceDTO
+@{
+    ViewBag.Title = "Detalle de publicación";
+    Layout = "_Layout";
+}
+
+<h2>Detalle de publicación</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h4 class="card-title">@Model.Title</h4>
+        <p class="card-text"><strong>Descripción:</strong> @Model.Description</p>
+        <p class="card-text"><strong>Precio:</strong> @Model.Price.ToString("C")</p>
+        <p class="card-text"><strong>Categorías:</strong>
+            @if (Model.Categories != null && Model.Categories.Any())
+            {
+                @string.Join(", ", Model.Categories.Select(c => c.Name))
+            }
+            else
+            {
+                <span>Sin categorías</span>
+            }
+        </p>
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+        <a asp-action="Edit" asp-route-id="@Model.ServiceId" class="btn btn-warning">Editar</a>
+        <form asp-action="Delete" asp-route-id="@Model.ServiceId" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Seguro que deseas eliminar esta publicación?');">Eliminar</button>
+        </form>
+    </div>
+</div>

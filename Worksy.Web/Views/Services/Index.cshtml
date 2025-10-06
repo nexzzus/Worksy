@@ -1,0 +1,57 @@
+@model List<ServiceDTO>
+@{
+    ViewBag.Title = "Publicaciones";
+    Layout = "_Layout";
+}
+
+<div style="margin-top:90px;">
+
+@*TODO: IMPLEMENTAR CORRECTAMENTE EL FRONTEND*@
+
+<h2 class="mb-4">Publicaciones</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Crear publicación</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Categorías</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Description</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>
+                        @if (item.Categories != null && item.Categories.Any())
+                        {
+                            @string.Join(", ", item.Categories.Select(c => c.Name))
+                        }
+                        else
+                        {
+                            <span>Sin categorías</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.ServiceId" class="btn btn-info btn-sm">Ver</a>
+                        <a asp-action="Edit" asp-route-id="@item.ServiceId" class="btn btn-warning btn-sm">Editar</a>
+                        <form asp-action="Delete" asp-route-id="@item.ServiceId" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas eliminar esta publicación?');">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+</div>

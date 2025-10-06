@@ -25,6 +25,7 @@ namespace Worksy.Web.Services.Implementations
                     Title = dto.Title,
                     Description = dto.Description,
                     Price = dto.Price
+                    
                 };
                 await _context.Services.AddAsync(service);
                 await _context.SaveChangesAsync();

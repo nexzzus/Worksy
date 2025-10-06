@@ -6,6 +6,8 @@ using Worksy.Web.Core;
 using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
+using Worksy.Web.Services.Abstractions;
+using Worksy.Web.Services.Implementations;
 
 namespace Worksy.Web;
 
@@ -51,7 +53,8 @@ public static class CustomConfig
             .AddDefaultTokenProviders();
         builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-        
+        builder.Services.AddScoped<IServicesService, ServicesService>();
+
     }
 
     public static void AddCookies(WebApplicationBuilder builder)
