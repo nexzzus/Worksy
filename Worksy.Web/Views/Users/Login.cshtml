@@ -1,4 +1,4 @@
-@model Worksy.Web.ViewModels.LoginViewModel
+@model Worksy.Web.ViewModels.AuthViewModel
 
 @{
     ViewBag.Title = "Login";
@@ -14,22 +14,24 @@
     <div class="cont">
         <div class="form sign-in">
             <h2>Iniciar sesión</h2>
+            <form asp-action="Login" method="POST" id="loginForm">
             <label>
-                <span asp-validation-for="Email" type="text">Correo</span>
-                <input asp-for="Email" placeholder="Correo electrónico"/>
+                <span asp-validation-for="Login.Email" type="text">Correo</span>
+                <input asp-for="Login.Email" placeholder="Correo electrónico"/>
             </label>
             <label>
-                <span asp-validation-for="Password">Contraseña</span>
-                <input asp-for="Password" type="password" placeholder="Contraseña"/>
+                <span asp-validation-for="Login.Password">Contraseña</span>
+                <input asp-for="Login.Password" id="txtPasswordIniciar" type="password" placeholder="Contraseña"/>
                 <div class="input-group-append">
                     <button id="show_password" class="btn" type="button" onclick="mostrarPassword()">
-                        <img src="~/assets/img/ojo.png">
+                        <img src="~/img/ojo.png">
                     </button>
                 </div>
             </label>
             
             <button type="submit" class="submit">Iniciar sesión</button>
-            <p class="forgot-pass">¿Olvidaste tu contraseña?</p>
+            </form>
+            <p class="forgot-pass"><a asp-controller="Users" asp-action="ForgotPassword" class="forgot-pass"></a>¿Olvidaste tu contraseña?</p>
 
             <div class="social-media">
                 <ul>
@@ -57,77 +59,69 @@
                 </div>
             </div>
             <div class="form sign-up" id="sign-up">
+                <h2>Regístrate</h2>
 
-                <h2>Registrate</h2>
-                <div class="input-container">
-                    <label>
-                        <span>Nombres</span>
-                        <input type="text" id="txtNombres">
-                    </label>
-                </div>
+                <form asp-action="Register" method="POST" id="registerForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <div class="input-container">
-                    <label>
-                        <span>Apellidos</span>
-                        <input type="text" id="txtApellidos">
-                    </label>
-                </div>
+                    <div class="input-container">
+                        <label>
+                            <span>Nombres</span>
+                            <input asp-for="Register.FirstName" type="text" id="txtNombres" placeholder="Nombres" />
+                        </label>
+                        <span asp-validation-for="Register.FirstName" class="text-danger"></span>
+                    </div>
 
-                <div class="input-container">
-                    <label>
-                        <span>Nombre de usuario</span>
-                        <input type="text" id="txtUsername">
-                    </label>
-                </div>
+                    <div class="input-container">
+                        <label>
+                            <span>Apellidos</span>
+                            <input asp-for="Register.LastName" type="text" id="txtApellidos" placeholder="Apellidos" />
+                        </label>
+                        <span asp-validation-for="Register.LastName" class="text-danger"></span>
+                    </div>
 
-                <div class="input-container">
-                    <label>
-                        <span>Correo electrónico</span>
-                        <input type="email" id="txtEmail" onkeyup="validateEmail()" required>
-                        <div class="validation-msg" id="email-validation-msg"></div>
-                    </label>
-                </div>
+                    <div class="input-container">
+                        <label>
+                            <span>Correo electrónico</span>
+                            <input asp-for="Register.Email" type="email" id="txtEmail" placeholder="Correo electrónico" required />
+                        </label>
+                        <span asp-validation-for="Register.Email" class="text-danger"></span>
+                    </div>
 
-                <div class="input-container">
-                    <label>
-                        <span>Contraseña</span>
-                        <input type="password" id="txtPassword" onkeyup="validatePassword()" required>
-                        <div class="validation-msg" id="password-validation-msg"></div>
-                    </label>
-                </div>
+                    <div class="input-container">
+                        <label>
+                            <span>Contraseña</span>
+                            <input asp-for="Register.Password" type="password" id="txtPassword" placeholder="Contraseña" required />
+                        </label>
+                        <span asp-validation-for="Register.Password" class="text-danger"></span>
+                    </div>
 
-                <div class="input-container">
-                    <label>
-                        <span>Confirmar contraseña</span>
-                        <input type="password" id="txtRepetirPassword" onkeyup="validatePassword()" required>
-                        <div class="validation-msg" id="confirm-password-validation-msg"></div>
-                    </label>
-                </div>
+                    <div class="input-container">
+                        <label>
+                            <span>Número de teléfono</span>
+                            <input asp-for="Register.PhoneNumber" type="text" id="txtTelefono" placeholder="Teléfono" />
+                        </label>
+                        <span asp-validation-for="Register.PhoneNumber" class="text-danger"></span>
+                    </div>
 
-                <button type="button" class="submit" onclick="registrarUsuario()" id="btnRegistrar"
-                        disabled>
-                    Regístrate ahora
-                </button>
+                    <div class="input-container">
+                        <label>
+                            <span>Dirección</span>
+                            <input asp-for="Register.Address" type="text" id="txtDireccion" placeholder="Dirección" />
+                        </label>
+                        <span asp-validation-for="Register.Address" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="submit" id="btnRegistrar">Regístrate ahora</button>
+                </form>
             </div>
         </div>
     </div>
 </main>
 
-
-<!-- Vendor JS Files -->
-<script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="~/assets/vendor/purecounter/purecounter_vanilla.js"></script>
-<script src="~/assets/vendor/glightbox/js/glightbox.min.js"></script>
-<script src="~/assets/vendor/swiper/swiper-bundle.min.js"></script>
-<script src="~/assets/vendor/aos/aos.js"></script>
-<script src="~/assets/vendor/php-email-form/validate.js"></script>
-<script src="~/https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <!-- Template Main JS File -->
-<script src="~/assets/js/main.js"></script>
-<script src="~/assets/js/script.js"></script>
-<script src="~/assets/js/registrar.js"></script>
-<script src="~/assets/js/login.js"></script>
+<script src="~/js/script.js"></script>
+
 <script type="text/javascript">
     function mostrarPassword() {
         var cambio = document.getElementById("txtPasswordIniciar");

@@ -39,7 +39,15 @@ namespace Worksy.Web.Controllers
             if (!ModelState.IsValid)
             {
                 _notyf.Error("Complete los campos requeridos");
-                return View(dto);
+                var model = new AuthViewModel { Register = new RegisterViewModel
+                {
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    Email = dto.Email,
+                    PhoneNumber = dto.PhoneNumber,
+                    Address = dto.Address
+                }};
+                return View("Login", model);
             }
 
             var user = _mapper.Map<User>(dto);
@@ -54,16 +62,30 @@ namespace Worksy.Web.Controllers
             }
 
             _notyf.Error("Error en el registro. Intente nuevamente.");
-
-            return View(dto);
+            var errorModel = new AuthViewModel { Register = new RegisterViewModel
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Address = dto.Address
+            }};
+            return View("Login", errorModel);
         }
+
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            var model = new AuthViewModel
+            {
+                Login = new LoginViewModel(),
+                Register = new RegisterViewModel()
+            };
+            return View(model);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -72,7 +94,8 @@ namespace Worksy.Web.Controllers
             if (!ModelState.IsValid)
             {
                 _notyf.Error("Complete todos los campos");
-                return View(viewModel);
+                var model = new AuthViewModel { Login = viewModel, Register = new RegisterViewModel() };
+                return View(model);
             }
 
             var result = await _signInManager.PasswordSignInAsync(
@@ -94,8 +117,10 @@ namespace Worksy.Web.Controllers
             }
 
             _notyf.Error("Credenciales inválidas");
-            return View(viewModel);
+            var invalidModel = new AuthViewModel { Login = viewModel, Register = new RegisterViewModel() };
+            return View(invalidModel);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
