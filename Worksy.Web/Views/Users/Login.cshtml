@@ -3,36 +3,33 @@
 @{
     ViewBag.Title = "Login";
     Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
 }
 
+<head>
+    <link href="~/css/login.css" rel="stylesheet">
+</head>
 
-
-<fo class="cont">
-    <div class="form sign-in">
-        <form asp-action="Login" method="POST" class="row g-3">
+<main id="main">
+    <div class="cont">
+        <div class="form sign-in">
             <h2>Iniciar sesión</h2>
-
             <label>
-                <span asp-validation-for="Email" type="text"></span>
-
-                <input asp-for="Email" placeholder="Correo electrónico" />
-
-
+                <span asp-validation-for="Email" type="text">Correo</span>
+                <input asp-for="Email" placeholder="Correo electrónico"/>
             </label>
             <label>
-                <span asp-validation-for="Password" ></span>
-                <input asp-for="Password" type="password"  placeholder="Contraseña" />
-
-
+                <span asp-validation-for="Password">Contraseña</span>
+                <input asp-for="Password" type="password" placeholder="Contraseña"/>
                 <div class="input-group-append">
                     <button id="show_password" class="btn" type="button" onclick="mostrarPassword()">
                         <img src="~/assets/img/ojo.png">
                     </button>
                 </div>
             </label>
-            <div class="col-md-12">
-                <button type="submit" class="btn btn-success w-100">Iniciar sesión</button>
-                <p class="forgot-pass">¿Olvidaste tu contraseña?</p>
+            
+            <button type="submit" class="submit">Iniciar sesión</button>
+            <p class="forgot-pass">¿Olvidaste tu contraseña?</p>
 
             <div class="social-media">
                 <ul>
@@ -42,114 +39,116 @@
                     <li><i class="bi bi-instagram"></i></li>
                 </ul>
             </div>
-        </form>
-    </div>
+        </div>
 
-    <div class="sub-cont">
-        <div class="img">
-            <div class="img-text m-up">
-                <h2>¿Eres nuevo?</h2>
-                <p>¡Regístrate y descubre un mundo de oportunidades y servicios personalizados!</p>
+        <div class="sub-cont">
+            <div class="img">
+                <div class="img-text m-up">
+                    <h2>¿Eres nuevo?</h2>
+                    <p>¡Regístrate y descubre un mundo de oportunidades y servicios personalizados!</p>
+                </div>
+                <div class="img-text m-in">
+                    <h2>¿Ya haces parte de Worksy?</h2>
+                    <p>Si ya tienes una cuenta, inicia sesión ahora</p>
+                </div>
+                <div class="img-btn">
+                    <span class="m-up">Registrate</span>
+                    <span class="m-in">Inicia sesión</span>
+                </div>
             </div>
-            <div class="img-text m-in">
-                <h2>¿Ya haces parte de Worksy?</h2>
-                <p>Si ya tienes una cuenta, inicia sesión ahora</p>
-            </div>
-            <div class="img-btn">
-                <span class="m-up">Registrate</span>
-                <span class="m-in">Inicia sesión</span>
+            <div class="form sign-up" id="sign-up">
+
+                <h2>Registrate</h2>
+                <div class="input-container">
+                    <label>
+                        <span>Nombres</span>
+                        <input type="text" id="txtNombres">
+                    </label>
+                </div>
+
+                <div class="input-container">
+                    <label>
+                        <span>Apellidos</span>
+                        <input type="text" id="txtApellidos">
+                    </label>
+                </div>
+
+                <div class="input-container">
+                    <label>
+                        <span>Nombre de usuario</span>
+                        <input type="text" id="txtUsername">
+                    </label>
+                </div>
+
+                <div class="input-container">
+                    <label>
+                        <span>Correo electrónico</span>
+                        <input type="email" id="txtEmail" onkeyup="validateEmail()" required>
+                        <div class="validation-msg" id="email-validation-msg"></div>
+                    </label>
+                </div>
+
+                <div class="input-container">
+                    <label>
+                        <span>Contraseña</span>
+                        <input type="password" id="txtPassword" onkeyup="validatePassword()" required>
+                        <div class="validation-msg" id="password-validation-msg"></div>
+                    </label>
+                </div>
+
+                <div class="input-container">
+                    <label>
+                        <span>Confirmar contraseña</span>
+                        <input type="password" id="txtRepetirPassword" onkeyup="validatePassword()" required>
+                        <div class="validation-msg" id="confirm-password-validation-msg"></div>
+                    </label>
+                </div>
+
+                <button type="button" class="submit" onclick="registrarUsuario()" id="btnRegistrar"
+                        disabled>
+                    Regístrate ahora
+                </button>
             </div>
         </div>
-        <div class="form sign-up" id="sign-up">
-
-            <h2>Registrate</h2>
-            <div class="input-container">
-                <label>
-                    <span>Nombres</span>
-                    <input type="text" id="txtNombres">
-                </label>
-            </div>
-
-            <div class="input-container">
-                <label>
-                    <span>Apellidos</span>
-                    <input type="text" id="txtApellidos">
-                </label>
-            </div>
-
-            <div class="input-container">
-                <label>
-                    <span>Nombre de usuario</span>
-                    <input type="text" id="txtUsername">
-                </label>
-            </div>
-
-            <div class="input-container">
-                <label>
-                    <span>Correo electrónico</span>
-                    <input type="email" id="txtEmail" onkeyup="validateEmail()" required>
-                    <div class="validation-msg" id="email-validation-msg"></div>
-                </label>
-            </div>
-
-            <div class="input-container">
-                <label>
-                    <span>Contraseña</span>
-                    <input type="password" id="txtPassword" onkeyup="validatePassword()" required>
-                    <div class="validation-msg" id="password-validation-msg"></div>
-                </label>
-            </div>
-
-            <div class="input-container">
-                <label>
-                    <span>Confirmar contraseña</span>
-                    <input type="password" id="txtRepetirPassword" onkeyup="validatePassword()" required>
-                    <div class="validation-msg" id="confirm-password-validation-msg"></div>
-                </label>
-            </div>
-
-            <button type="button" class="submit" onclick="registrarUsuario()" id="btnRegistrar"
-                    disabled>
-                Regístrate ahora
-            </button>
-        </div>
     </div>
-</div>
+</main>
 
-    <!-- Vendor JS Files -->
-    <script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/assets/vendor/purecounter/purecounter_vanilla.js"></script>
-    <script src="~/assets/vendor/glightbox/js/glightbox.min.js"></script>
-    <script src="~/assets/vendor/swiper/swiper-bundle.min.js"></script>
-    <script src="~/assets/vendor/aos/aos.js"></script>
-    <script src="~/assets/vendor/php-email-form/validate.js"></script>
-    <script src="~/https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Template Main JS File -->
-    <script src="~/assets/js/main.js"></script>
-    <script src="~/assets/js/script.js"></script>
-    <script src="~/assets/js/registrar.js"></script>
-    <script src="~/assets/js/login.js"></script>
-    <script type="text/javascript">
-        function mostrarPassword(){
-            var cambio = document.getElementById("txtPasswordIniciar");
-            if(cambio.type == "password"){
-                cambio.type = "text";
-                $('.icon').removeClass('fa fa-eye-slash').addClass('fa fa-eye');
-            }else{
-                cambio.type = "password";
-                $('.icon').removeClass('fa fa-eye').addClass('fa fa-eye-slash');
-            }
+<!-- Vendor JS Files -->
+<script src="~/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="~/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+<script src="~/assets/vendor/glightbox/js/glightbox.min.js"></script>
+<script src="~/assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="~/assets/vendor/aos/aos.js"></script>
+<script src="~/assets/vendor/php-email-form/validate.js"></script>
+<script src="~/https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Template Main JS File -->
+<script src="~/assets/js/main.js"></script>
+<script src="~/assets/js/script.js"></script>
+<script src="~/assets/js/registrar.js"></script>
+<script src="~/assets/js/login.js"></script>
+<script type="text/javascript">
+    function mostrarPassword() {
+        var cambio = document.getElementById("txtPasswordIniciar");
+        if (cambio.type == "password") {
+            cambio.type = "text";
+            $('.icon').removeClass('fa fa-eye-slash').addClass('fa fa-eye');
+        } else {
+            cambio.type = "password";
+            $('.icon').removeClass('fa fa-eye').addClass('fa fa-eye-slash');
         }
+    }
 
-        $(document).ready(function () {
-            //CheckBox mostrar contraseña
-            $('#ShowPassword').click(function () {
-                $('#Password').attr('type', $(this).is(':checked') ? 'text' : 'password');
-            });
+    $(document).ready(function () {
+        //CheckBox mostrar contraseña
+        $('#ShowPassword').click(function () {
+            $('#Password').attr('type', $(this).is(':checked') ? 'text' : 'password');
         });
+    });
 
-    </script>
+</script>
+
 @section Scripts
 {
     @{

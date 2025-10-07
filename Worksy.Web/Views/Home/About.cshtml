@@ -3,4 +3,194 @@
     Layout = "_Layout";
 }
 
-@*TODO: Implementar vista*@
+<main id="main">
+
+  <!-- ======= Breadcrumbs ======= -->
+  <div class="breadcrumbs">
+    <div class="page-header d-flex align-items-center" style="background-image: url('img/page-header.jpg');">
+      <div class="container position-relative">
+        <div class="row d-flex justify-content-center">
+          <div class="col-lg-6 text-center">
+            <h2>Sobre Nosotros</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav>
+      <div class="container">
+        <ol>
+          <li><a asp-controller="" asp-action="Index">Inicio</a></li>
+          <li style="color: #005187">Sobre Nosotros</li>
+        </ol>
+      </div>
+    </nav>
+  </div><!-- End Breadcrumbs -->
+
+  <!-- ======= About Us Section ======= -->
+  <section id="about" class="about pt-0">
+    <div class="container" data-aos="fade-up">
+
+      <div class="row gy-4">
+        <div class="col-lg-6 position-relative align-self-start order-lg-last order-first">
+          <img src="/img/about.jpg" class="img-fluid" alt="">
+          <a href="https://www.youtube.com/watch?v=LXb3EKWsInQ" class="glightbox play-btn"></a>
+        </div>
+        <div class="col-lg-6 content order-last  order-lg-first">
+          <h3>Acerca de nosotros</h3>
+          <p>
+            Worksy tu la plataforma para encontrar trabajadores independientes.
+            Nosotros, tenemos todos los trabajadores independientes que necesitas para tu negocio. Somos la mejor manera de conectarte con profesionales de Colombia. Ofrecemos una plataforma fácil de usar para que puedas encontrar el trabajo que necesitas, cuando lo necesites.</p>
+          <ul>
+            <li data-aos="fade-up" data-aos-delay="100">
+              <i class="bi bi-diagram-3"></i>
+              <div>
+                <h5>Worksy es el mejor lugar para encontrar trabajadores independientes.</h5>
+                <p></p>
+              </div>
+            </li>
+            <li data-aos="fade-up" data-aos-delay="200">
+              <i class="bi bi-fullscreen-exit"></i>
+              <div>
+                <h5> Ofrecemos una plataforma fácil de usar para que puedas encontrar el trabajo que necesitas.</h5>
+              </div>
+            </li>
+            <li data-aos="fade-up" data-aos-delay="300">
+              <i class="bi bi-broadcast"></i>
+              <div>
+                <h5>Conectamos a trabajadores independientes de todo el mundo con empresas y clientes que necesitan sus servicios.</h5>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section><!-- End About Us Section -->
+
+  <!-- ======= Our Team Section ======= -->
+  <section id="team" class="team pt-0">
+    <div class="container" data-aos="fade-up">
+
+      <div class="section-header">
+        <h2>Equipo</h2>
+
+      </div>
+
+      <div class="row" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="col-lg-4 col-md-6 d-flex">
+          <div class="member">
+            <img src="/img/team/yo.jpg" class="img-fluid" alt="">
+            <div class="member-content">
+              <h4>Juan Cardona</h4>
+              <span>Web Development</span>
+              <div class="social">
+                <a href=""><i class="bi bi-twitter"></i></a>
+                <a href="https://www.facebook.com/juancamilo.cardonasanchez.50?mibextid=2JQ9oc"><i class="bi bi-facebook"></i></a>
+                <a href="https://www.instagram.com/juankafut/"><i class="bi bi-instagram"></i></a>
+                <a href=""><i class="bi bi-linkedin"></i></a>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Team Member -->
+
+      </div>
+
+    </div>
+  </section><!-- End Our Team Section -->
+
+  <!-- ======= Frequently Asked Questions Section ======= -->
+  <section id="faq" class="faq">
+    <div class="container" data-aos="fade-up">
+
+      <div class="section-header">
+        <span>Preguntas Frecuentes</span>
+        <h2>Preguntas Frecuentes</h2>
+
+      </div>
+
+      <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
+        <div class="col-lg-10">
+
+          <div class="accordion accordion-flush" id="faqlist">
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-1">
+                  <i class="bi bi-question-circle question-icon"></i>
+                  ¿Los precios son estáticos para todos los trabajadores de un área?
+                </button>
+              </h3>
+              <div id="faq-content-1" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                <div class="accordion-body">
+                  No, los precios de un servicio depende de la persona de quien los presta y sus capacidades.
+                </div>
+              </div>
+            </div><!-- # Faq item-->
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-2">
+                  <i class="bi bi-question-circle question-icon"></i>
+                  ¿Qué medidas de seguridad tenemos para el usuario?
+                </button>
+              </h3>
+              <div id="faq-content-2" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                <div class="accordion-body">
+                  Al momento de registrarse para poder prestar un servicio, el trabajador presenta evidencia que debe pasar por ciertos filtros que nos permiten verificar que sea algo verídico y seguro para los usuarios.
+                </div>
+              </div>
+            </div><!-- # Faq item-->
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-3">
+                  <i class="bi bi-question-circle question-icon"></i>
+                  ¿Cúal es el proceso de solicitud para un servicio?
+                </button>
+              </h3>
+              <div id="faq-content-3" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                <div class="accordion-body">
+                  Una vez ya se ha encontrado a la persona que se desea contratar, entre la información que se encuentra en su perfil estará su información de contacto, ahí, puedes encontrar su número celular o correo disponibles para que puedas hacer tu solicitud con el trabajador.
+                </div>
+              </div>
+            </div><!-- # Faq item-->
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-4">
+                  <i class="bi bi-question-circle question-icon"></i>
+                  ¿Qué debo hacer si se ha incumplido con algún término de un servicio?
+                </button>
+              </h3>
+              <div id="faq-content-4" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                <div class="accordion-body">
+                  <i class="bi bi-question-circle question-icon"></i>
+                  Worksy funciona como una forma de encontrar a un trabajador que necesites, los términos de contrato u otras cosas del servicio no son responsabilidad de nuestro equipo. Por lo tanto, si ocurre algún problema entre el trabajador y el usuario, debe solucionarse entre los implicados.
+                </div>
+              </div>
+            </div><!-- # Faq item-->
+
+            <div class="accordion-item">
+              <h3 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-content-5">
+                  <i class="bi bi-question-circle question-icon"></i>
+                  ¿Qué ocurre si deseo un reembolso?
+                </button>
+              </h3>
+              <div id="faq-content-5" class="accordion-collapse collapse" data-bs-parent="#faqlist">
+                <div class="accordion-body">
+                  Worksy no maneja el dinero del usuario, las formas de pago quedan entre usted como usuario y el trabajador que desea contratar, debe preguntar por las normas de reembolso de ese prestador de servicio. Si desea hacer un reporte de algún trabajador fraudulento, puede comunicarse al correo workyinem@gmail.com.
+                </div>
+              </div>
+            </div><!-- # Faq item-->
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section><!-- End Frequently Asked Questions Section -->
+
+</main><!-- End #main -->
