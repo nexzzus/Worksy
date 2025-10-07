@@ -26,7 +26,6 @@
 
     <!-- Template Main CSS File -->
     <link href="~/css/main.css" rel="stylesheet">
-    <link href="~/css/login.css" rel="stylesheet">
 
     <script src="~/js/authentication.js"></script>
 
@@ -95,8 +94,8 @@
             </nav>
         </div>
     </header><!-- End Header -->
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div>
+        <main role="main">
             @RenderBody()
         </main>
     </div>
@@ -122,7 +121,6 @@
                     <ul>
                         <li><a asp-controller="" asp-action="Index" class="active">Inicio</a></li>
                         <li><a asp-controller="" asp-action="About">Acerca de</a></li>
-                        <li><a asp-controller="" asp-action="Service">Servicios</a></li>
                         <li><a asp-controller="" asp-action="Contact">Contacto</a></li>
                     </ul>
                 </div>
