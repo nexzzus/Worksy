@@ -6,44 +6,35 @@
     ViewData["HeaderClass"] = "sticky-top";
 }
 
-<main>
+<main id="main">
     <div class="cont">
         <div class="form sign-in">
-            <form asp-action="Login" method="POST" class="row g-3">
-                <h2>Iniciar sesión</h2>
-
-                <label>
-                    <span asp-validation-for="Email" type="text"></span>
-
-                    <input asp-for="Email" placeholder="Correo electrónico"/>
-
-
-                </label>
-                <label>
-                    <span asp-validation-for="Password"></span>
-                    <input asp-for="Password" type="password" placeholder="Contraseña"/>
-
-
-                    <div class="input-group-append">
-                        <button id="show_password" class="btn" type="button" onclick="mostrarPassword()">
-                            <img src="~/assets/img/ojo.png">
-                        </button>
-                    </div>
-                </label>
-                <div class="col-md-12">
-                    <button type="submit" class="btn btn-success w-100">Iniciar sesión</button>
-                    <p class="forgot-pass">¿Olvidaste tu contraseña?</p>
+            <h2>Iniciar sesión</h2>
+            <label>
+                <span asp-validation-for="Email" type="text">Correo</span>
+                <input asp-for="Email" placeholder="Correo electrónico"/>
+            </label>
+            <label>
+                <span asp-validation-for="Password">Contraseña</span>
+                <input asp-for="Password" type="password" placeholder="Contraseña"/>
+                <div class="input-group-append">
+                    <button id="show_password" class="btn" type="button" onclick="mostrarPassword()">
+                        <img src="~/assets/img/ojo.png">
+                    </button>
                 </div>
+            </label>
+            
+            <button type="submit" class="submit">Iniciar sesión</button>
+            <p class="forgot-pass">¿Olvidaste tu contraseña?</p>
 
-                <div class="social-media">
-                    <ul>
-                        <li><i class="bi bi-facebook"></i></li>
-                        <li><i class="bi bi-twitter"></i></li>
-                        <li><i class="bi bi-linkedin"></i></li>
-                        <li><i class="bi bi-instagram"></i></li>
-                    </ul>
-                </div>
-            </form>
+            <div class="social-media">
+                <ul>
+                    <li><i class="bi bi-facebook"></i></li>
+                    <li><i class="bi bi-twitter"></i></li>
+                    <li><i class="bi bi-linkedin"></i></li>
+                    <li><i class="bi bi-instagram"></i></li>
+                </ul>
+            </div>
         </div>
 
         <div class="sub-cont">
