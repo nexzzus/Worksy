@@ -40,7 +40,7 @@
 </head>
 <body>
     <!-- ======= Header ======= -->
-    <header id="header" class="header d-flex align-items-center fixed-top">
+    <header id="header" class="header d-flex align-items-center @(ViewData["HeaderClass"] ?? "fixed-top")">
         <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
             <a asp-controller="" asp-action="Index" class="logo d-flex align-items-center">
@@ -95,7 +95,6 @@
             </nav>
         </div>
     </header><!-- End Header -->
-    @RenderSection("CustomHeader", required: false)
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
