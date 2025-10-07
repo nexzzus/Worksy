@@ -31,6 +31,8 @@ namespace Worksy.Web.Controllers
 
         [HttpGet]
         public IActionResult Register() => View();
+        [HttpGet]
+        public IActionResult UsersTable() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
