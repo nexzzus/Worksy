@@ -1,3 +1,10 @@
+<style>
+    .activate{
+        background-color: #2e3f5d;
+        color: #fff;
+    }
+</style>
+
 <!-- Sidebar -->
 <div class="col-md-5 col-xl-4">
     <div class="card">
@@ -9,16 +16,14 @@
         }
 
         <div class="list-group list-group-flush">
-            <a class="list-group-item list-group-item-action @(currentAction == "Profile" ? "active" : "")"
+            <a class="list-group-item list-group-item-action @(currentAction == "Profile" ? "activate" : "")"
                asp-controller="Users" asp-action="Profile">
                 Cuenta
             </a>
-            <a class="list-group-item list-group-item-action @(currentAction == "ChangePassword" ? "active" : "")"
+            <a class="list-group-item list-group-item-action @(currentAction == "ChangePassword" ? "activate" : "")"
                asp-controller="Users" asp-action="ChangePassword">
                 Contraseña
             </a>
         </div>
     </div>
-
-
 </div>
