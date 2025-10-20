@@ -1,14 +1,57 @@
-@model UpdateProfileDTO
+@model UpdateProfileDTO 
 
 @{
     ViewBag.Title = "Ajustes de perfil";
     Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = false;
 }
 
-<link href="~/css/stylesProfile.css" rel="stylesheet"/>
+<style>
 
-<div class="container p-0">
-    <div class="row">
+    .card {
+        background-color: #1b263b;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        border-radius: 10px;
+    }
+
+    .card-header {
+        background-color: #415a77 !important;
+        color: #fff !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .form-control {
+        background-color: #27364f;
+        border: 1px solid #415a77;
+        color: #f8f9fa;
+    }
+
+    .form-control:focus {
+        background-color: #2e3f5d;
+        border-color: #778da9;
+        color: #fff;
+        box-shadow: none;
+    }
+
+    label {
+        color: #e0e6ed;
+    }
+
+    .btn-primary {
+        background-color: #415a77;
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #778da9;
+    }
+</style>
+
+<div class="container p-4">
+    <div class="row justify-content-center">
         <!-- Sidebar -->
         @await Html.PartialAsync("_SlideBarProfile")
 
@@ -53,7 +96,7 @@
                             <input type="text" class="form-control" asp-for="PhoneNumber" placeholder="Teléfono">
                             <span class="text-danger" asp-validation-for="PhoneNumber"></span>
                         </div>
-                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
                     </form>
                 </div>
             </div>

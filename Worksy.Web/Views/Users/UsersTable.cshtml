@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "Users Table";
+    Layout = "_Layout";
+}
+if (!User.Identity.IsAuthenticated)
+{
+    <script>
+        window.location.href = '@Url.Action("AccessDenied", "Users")';
+    </script>
+}else{
+<main>
+    <section class="main-content">
+        <div class="container">
+            <div class="d-flex justify-content-between">
+                <h4>Tabla Usuarios</h4>
+                <button type="button" onclick="cargarUsuarios()" class="btn btn-link"><span class="bi bi-arrow-clockwise"></span></button>
+            </div>
+            <table class="table" id="usuarios">
+                <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="float-right">
+                        <span style="color: #D3D3D3">Página actual: <span id="currentPage">1</span></span>
+                        <button style="color: #0e1d34" type="button" class="btn btn-primary" id="btn-prev" onclick="paginaAnterior()" disabled>Anterior</button>
+                        <button style="color: #0e1d34" type="button" class="btn btn-primary" id="btn-next" onclick="paginaSiguiente()">Siguiente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+}

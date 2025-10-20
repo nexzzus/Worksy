@@ -535,7 +535,7 @@ section {
   opacity: 0.3;
 }
 .sidebar .sidebar-list li a:hover {
-  color: var(--primary-color);
+  color: var(--color-primary);
 }
 
 @media only screen and (max-width: 991px) {

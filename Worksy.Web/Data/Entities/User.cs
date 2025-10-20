@@ -18,8 +18,7 @@ public class User: IdentityUser<Guid>
 
     [Phone(ErrorMessage = "Número de teléfono inválido")]
     public override string? PhoneNumber { get; set; }
-
-
+    
     [MaxLength(256, ErrorMessage = "El campo '{0}' debe tener máximo {1} carácteres.")]
     [Required(ErrorMessage = "Este campo es requerido")]
     [Display(Name = "Dirección")]
