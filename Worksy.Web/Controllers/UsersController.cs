@@ -31,96 +31,114 @@ namespace Worksy.Web.Controllers
 
         [HttpGet]
         public IActionResult Register() => View();
+
         [HttpGet]
         public IActionResult UsersTable() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(UserDTO dto)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                _notyf.Error("Complete los campos requeridos");
-                var model = new AuthViewModel { Register = new RegisterViewModel
-                {
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    Email = dto.Email,
-                    PhoneNumber = dto.PhoneNumber,
-                    Address = dto.Address
-                }};
-                return View("Login", model);
+                _notyf.Error("Por favor completa los campos correctamente.");
+                return View("Register", model); // <-- antes devolvías "Login"
             }
 
-            var user = _mapper.Map<User>(dto);
-            user.UserName = dto.Email;
+            // (Opcional pero útil) Validación previa de email duplicado
+            var existing = await _userManager.FindByEmailAsync(model.Email);
+            if (existing != null)
+            {
+                ModelState.AddModelError(nameof(model.Email), "El correo ya está registrado.");
+                _notyf.Error("El correo ya está registrado.");
+                return View("Register", model);
+            }
 
-            var result = await _userManager.CreateAsync(user, dto.Password);
+            // Mapeo manual VM -> DTO (evitamos AutoMapper aquí)
+            var userDto = new UserDTO
+            {
+                FirstName = model.FirstName?.Trim() ?? string.Empty,
+                LastName = model.LastName?.Trim() ?? string.Empty,
+                Email = model.Email?.Trim() ?? string.Empty,
+                Password = model.Password, // Identity se encarga del hash
+                PhoneNumber = string.IsNullOrWhiteSpace(model.PhoneNumber) ? null : model.PhoneNumber.Trim(),
+                // Si tu UserDTO requiere Address, asegúrate de que no llegue null
+                Address = string.IsNullOrWhiteSpace(model.Address) ? string.Empty : model.Address.Trim(),
+                Biography = null
+            };
+
+            // DTO -> Entidad User (sin AutoMapper)
+            var user = new User
+            {
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+                Email = userDto.Email,
+                UserName = userDto.Email, // necesario para Identity
+                PhoneNumber = userDto.PhoneNumber,
+                Address = userDto.Address
+            };
+
+            var result = await _userManager.CreateAsync(user, userDto.Password);
+
             if (result.Succeeded)
             {
+                try
+                {
+                    await _emailSender.SendEmailAsync(
+                        user.Email,
+                        "Bienvenido a Worksy",
+                        $"Hola {user.FirstName}, tu cuenta ha sido creada exitosamente."
+                    );
+                }
+                catch (Exception ex)
+                {
+                    // No interrumpas el flujo por un correo fallido
+                    _notyf.Error("No se pudo enviar el correo de bienvenida. Verifica la configuración SMTP.");
+                    // (Opcional) log si tienes ILogger<HomeController> disponible en este controller
+                    // _logger.LogError(ex, "Fallo enviando email de bienvenida");
+                }
+
+                _notyf.Success("Cuenta creada correctamente. ¡Bienvenido!");
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                _notyf.Success("Registro exitoso. ¡Bienvenido!");
                 return RedirectToAction("Index", "Home");
             }
 
-            _notyf.Error("Error en el registro. Intente nuevamente.");
-            var errorModel = new AuthViewModel { Register = new RegisterViewModel
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Address = dto.Address
-            }};
-            return View("Login", errorModel);
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            _notyf.Error("No se pudo registrar el usuario");
+            return View("Register", model); // <-- antes devolvías "Login"
         }
 
 
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            var model = new AuthViewModel
-            {
-                Login = new LoginViewModel(),
-                Register = new RegisterViewModel()
-            };
-            return View(model);
-        }
-
+        public IActionResult Login() => View();
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel viewModel, string? returnUrl = null)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                _notyf.Error("Complete todos los campos");
-                var model = new AuthViewModel { Login = viewModel, Register = new RegisterViewModel() };
-                return View(model);
+                _notyf.Error("Por favor completa los campos correctamente.");
+                return View("Login", model);
             }
 
             var result = await _signInManager.PasswordSignInAsync(
-                viewModel.Email,
-                viewModel.Password,
-                viewModel.RememberMe,
-                lockoutOnFailure: false
-            );
+                model.Email,
+                model.Password,
+                isPersistent: false,
+                lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
-
-                _notyf.Success("Inicio de sesión exitoso.");
+                _notyf.Success("Inicio de sesión exitoso");
                 return RedirectToAction("Index", "Home");
             }
 
-            _notyf.Error("Credenciales inválidas");
-            var invalidModel = new AuthViewModel { Login = viewModel, Register = new RegisterViewModel() };
-            return View(invalidModel);
+            _notyf.Error("Correo o contraseña incorrectos");
+            return View("Login", model);
         }
 
 
@@ -234,10 +252,10 @@ namespace Worksy.Web.Controllers
             }
 
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null )
+            if (user == null)
             {
                 _notyf.Success("Se envió un correo de recuperación al correo indicado");
-                    return View();
+                return View();
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -246,7 +264,7 @@ namespace Worksy.Web.Controllers
                 token,
                 email = user.Email
             }, Request.Scheme);
-            
+
             await _emailSender.SendEmailAsync(user.Email, "Recuperar contraseña",
                 $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña");
 
