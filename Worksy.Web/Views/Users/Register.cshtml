@@ -74,7 +74,7 @@
                                             <label class="form-label" asp-for="Password">Contraseña</label>
                                             <input asp-for="Password" id="txtPasswordRegister" class="form-control" type="password" placeholder="Crea una contraseña segura" />
                                             <button id="toggle_password" class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="togglePassword()">
-                                                <img id="toggle_password_icon" src="~/img/ojo.png" style="width: 20px;" alt="Mostrar/Ocultar">
+                                                <img id="toggle_password_icon" src="~/img/ojo.png" style="width: 20px;">
                                             </button>
                                             <span asp-validation-for="Password" class="text-danger"></span>
                                         </div>
@@ -127,8 +127,7 @@
         var icon = document.getElementById("toggle_password_icon");
         if (input.type === "password") {
             input.type = "text";
-            // Nota: si usas jQuery, podrías cambiar el src con $('#toggle_password_icon').attr('src', '...').
-            icon.src = "/img/ojo-cerrado.png";
+            icon.src = "/img/ojo.png";
         } else {
             input.type = "password";
             icon.src = "/img/ojo.png";
