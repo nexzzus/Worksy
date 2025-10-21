@@ -1,0 +1,67 @@
+﻿@model Worksy.Web.Data.Entities.User
+@{
+    ViewBag.Title = "Crear usuario";
+    Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
+}
+
+<div class="container mb-5">
+    <h2 class="mb-4">Crear usuario</h2>
+
+    <form asp-action="CreateUser" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input class="form-control" asp-for="Email" placeholder="correo@ejemplo.com" />
+            <span class="text-danger small" asp-validation-for="Email"></span>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nombres</label>
+                <input class="form-control" asp-for="FirstName" />
+                <span class="text-danger small" asp-validation-for="FirstName"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Apellidos</label>
+                <input class="form-control" asp-for="LastName" />
+                <span class="text-danger small" asp-validation-for="LastName"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <input class="form-control" asp-for="PhoneNumber" />
+            <span class="text-danger small" asp-validation-for="PhoneNumber"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Dirección</label>
+            <input class="form-control" asp-for="Address" />
+            <span class="text-danger small" asp-validation-for="Address"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Biografía</label>
+            <textarea class="form-control" asp-for="Biography" rows="3"></textarea>
+            <span class="text-danger small" asp-validation-for="Biography"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input class="form-control" name="password" type="password" placeholder="Mínimo 6 caracteres" />
+            <span class="text-danger small">@Html.ValidationMessage("Password")</span>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Crear</button>
+            <a asp-action="UsersTable" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
