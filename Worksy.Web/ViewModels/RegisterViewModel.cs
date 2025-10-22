@@ -24,6 +24,12 @@ namespace Worksy.Web.ViewModels
         [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
         [Display(Name = "Contraseña")]
         public string Password { get; set; }
+        
+        [Required(ErrorMessage = "La confirmación de la contraseña es obligatoria.")]
+        [DataType(DataType.Password)]
+        [Compare("Password", ErrorMessage = "Las contraseñas no coinciden.")]
+        [Display(Name = "Confirmar contraseña")]
+        public string ConfirmPassword { get; set; }
 
         [Phone(ErrorMessage = "Ingrese un número de teléfono válido.")]
         [Display(Name = "Número de teléfono")]
