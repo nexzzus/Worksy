@@ -35,22 +35,50 @@ public class AccountController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(UserDTO dto)
+    public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
         {
             _notyf.Error("Complete los campos requeridos");
-            return View(dto);
+            return View(model);
         }
 
-        Response<IdentityResult> result = await _userService.AddUserAsync(dto, dto.Password);
+        Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
 
         if (!result.isSuccess)
         {
             _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
-            return View();
+
+            if (result.IErrors != null && result.IErrors.Any())
+            {
+                foreach (var error in result.IErrors)
+                {
+                    Console.WriteLine($"Error: {error.Code} - {error.Description}");
+                }
+            }
+            else if (result.Errors != null && result.Errors.Any())
+            {
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"Error genérico: {error}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("⚠️ No se devolvieron errores desde Identity ni errores genéricos.");
+            }
+
+            return View(model);
         }
 
+
+
+        await _emailSender.SendEmailAsync(
+            model.Email,
+            "Bienvenido a Worksy",
+            $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
+        );
+        
         _notyf.Success("Registro exitoso. ¡Bienvenido!");
         return RedirectToAction(nameof(Login));
     }

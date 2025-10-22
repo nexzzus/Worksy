@@ -7,7 +7,7 @@ namespace Worksy.Web.Services.Abstractions;
 
 public interface IUserService
 {
-    public Task<Response<IdentityResult>> AddUserAsync(UserDTO dto, string password);
+    public Task<Response<IdentityResult>> AddUserAsync(RegisterViewModel dto, string password);
     public Task<Response<SignInResult>> LoginAsync(LoginViewModel model);
     public Task LogoutAsync();
 

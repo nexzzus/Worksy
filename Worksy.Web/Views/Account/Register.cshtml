@@ -1,72 +1,153 @@
-@model UserDTO
+@model Worksy.Web.ViewModels.RegisterViewModel
 
 @{
     ViewBag.Title = "Registro";
     Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
 }
 
-<div class="card shadow-sm">
-    <div class="card-header bg-success text-white">
-        <h3 class="m-0">Crear cuenta</h3>
-    </div>
+<head>
+    <link href="~/css/login.css" rel="stylesheet">
+</head>
 
-    <div class="card-body">
-        <form asp-action="Register" method="POST" class="row g-3">
-            <!-- Resumen de validación -->
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<main id="main">
+    <section class="h-100">
+        <div class="container h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-xl-11">
+                    <div class="card rounded-3 text-black">
+                        <div class="row g-0">
+                            <!-- Lado izquierdo (ANTES era el derecho): panel informativo con gradiente -->
+                            <div class="col-lg-6 d-flex align-items-center"
+                                 style="background: #323d5c;background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);">
+                                <div class="text-white px-3 py-4 p-md-5 mx-md-4">
+                                    <img src="~/img/logos/1.png" style="width: 85px" alt="logo">
+                                    <h4 class="mt-3 mb-4">Crea tu cuenta en Worksy</h4>
+                                    <p class="small mb-4">
+                                        Regístrate para acceder a oportunidades y servicios personalizados.
+                                        Si ya tienes cuenta, inicia sesión para continuar disfrutando de nuestros beneficios.
+                                    </p>
+                                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light">
+                                        Ya tengo cuenta
+                                    </a>
+                                </div>
+                            </div>
 
-            <div class="col-md-6 form-floating">
-                <input asp-for="FirstName" class="form-control" placeholder="Nombres"/>
-                <label asp-for="FirstName"></label>
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            <!-- Lado derecho (ANTES era el izquierdo): formulario de registro -->
+                            <div class="col-lg-6" style="background-color: #ffffff">
+                                <div class="card-body p-md-5 mx-md-4">
+                                    <div class="text-center">
+                                        <h4 class="mt-1 mb-5 pb-1">Bienvenido a Worksy</h4>
+                                    </div>
+
+                                    <form asp-controller="Account" asp-action="Register" method="POST" id="registerForm">
+                                        @Html.AntiForgeryToken()
+
+                                        <h2 class="mb-4 text-center">Regístrate</h2>
+
+                                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                                        <!-- Nombres -->
+                                        <div class="form-outline mb-3">
+                                            <label class="form-label" asp-for="FirstName">Nombres</label>
+                                            <input asp-for="FirstName" class="form-control" type="text" placeholder="Tus nombres" />
+                                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Apellidos -->
+                                        <div class="form-outline mb-3">
+                                            <label class="form-label" asp-for="LastName">Apellidos</label>
+                                            <input asp-for="LastName" class="form-control" type="text" placeholder="Tus apellidos" />
+                                            <span asp-validation-for="LastName" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Correo -->
+                                        <div class="form-outline mb-3">
+                                            <label class="form-label" asp-for="Email">Correo electrónico</label>
+                                            <input asp-for="Email" class="form-control" type="email" placeholder="correo@ejemplo.com" />
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Contraseña -->
+                                        <div class="form-outline mb-3 position-relative">
+                                            <label class="form-label" asp-for="Password">Contraseña</label>
+                                            <input asp-for="Password" id="txtPasswordRegister" class="form-control" type="password" placeholder="Crea una contraseña segura" />
+                                            @*TODO: Corregir el ícono para este campo*@
+                                            <button id="toggle_password" class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="togglePassword()">
+                                                <img id="toggle_password_icon" src="~/img/ojo.png" style="width: 20px;">
+                                            </button>
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <!-- Confirmar contraseña -->
+                                        <div class="form-outline mb-3 position-relative">
+                                            <label class="form-label" asp-for="ConfirmPassword">Confirmar contraseña</label>
+                                            <input asp-for="ConfirmPassword" id="txtPasswordRegister" class="form-control" type="password" placeholder="Confirmar contraseña" />
+                                            @*TODO: Corregir el ícono para este campo*@
+                                            <button id="toggle_password" class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="togglePassword()">
+                                                <img id="toggle_password_icon" src="~/img/ojo.png" style="width: 20px;">
+                                            </button>
+                                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Número (teléfono) -->
+                                        <div class="form-outline mb-3">
+                                            <label class="form-label" asp-for="PhoneNumber">Teléfono</label>
+                                            <input asp-for="PhoneNumber" class="form-control" type="text" placeholder="Tu número de contacto" />
+                                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Dirección -->
+                                        <div class="form-outline mb-4">
+                                            <label class="form-label" asp-for="Address">Dirección</label>
+                                            <input asp-for="Address" class="form-control" type="text" placeholder="Tu dirección" />
+                                            <span asp-validation-for="Address" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="text-center pt-1 mb-4 pb-1">
+                                            <button type="submit" class="btn-outline-primary btn">
+                                                Crear cuenta
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <div class="social-media text-center mt-3">
+                                        <ul class="list-inline">
+                                            <li class="list-inline-item"><i class="bi bi-facebook"></i></li>
+                                            <li class="list-inline-item"><i class="bi bi-twitter"></i></li>
+                                            <li class="list-inline-item"><i class="bi bi-linkedin"></i></li>
+                                            <li class="list-inline-item"><i class="bi bi-instagram"></i></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- row -->
+                    </div> <!-- card -->
+                </div>
             </div>
+        </div>
+    </section>
+</main>
 
-            <div class="col-md-6 form-floating">
-                <input asp-for="LastName" class="form-control" placeholder="Apellidos"/>
-                <label asp-for="LastName"></label>
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
+<!-- Template Main JS File -->
+<script src="~/js/script.js"></script>
 
-            <div class="col-md-12 form-floating">
-                <input asp-for="Email" class="form-control" placeholder="Correo electrónico"/>
-                <label asp-for="Email"></label>
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+<script type="text/javascript">
+    function togglePassword() {
+        var input = document.getElementById("txtPasswordRegister");
+        var icon = document.getElementById("toggle_password_icon");
+        if (input.type === "password") {
+            input.type = "text";
+            icon.src = "/img/ojo.png";
+        } else {
+            input.type = "password";
+            icon.src = "/img/ojo.png";
+        }
+    }
+</script>
 
-            <div class="col-md-6 form-floating">
-                <input asp-for="Password" type="password" class="form-control" placeholder="Contraseña"/>
-                <label asp-for="Password"></label>
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div> 
-            
-            @*TODO: Corregir el asp-for para la confirmación de contraseña*@
-            <div class="col-md-6 form-floating">
-                <input asp-for="Password" type="password" class="form-control" placeholder="Confirmar contraseña"/>
-                <label asp-for="Password"></label>
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-6 form-floating">
-                <input asp-for="PhoneNumber" class="form-control" placeholder="Número de teléfono"/>
-                <label asp-for="PhoneNumber"></label>
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-12 form-floating">
-                <input asp-for="Address" class="form-control" placeholder="Dirección"/>
-                <label asp-for="Address"></label>
-                <span asp-validation-for="Address" class="text-danger"></span>
-            </div>
-
-            <div class="col-md-12">
-                <button type="submit" class="btn btn-success w-100">Registrarse</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-@section Scripts
-{
+@section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

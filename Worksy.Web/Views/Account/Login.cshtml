@@ -1,9 +1,10 @@
-@model Worksy.Web.ViewModels.AuthViewModel
+@model Worksy.Web.ViewModels.LoginViewModel
 
 @{
     ViewBag.Title = "Login";
     Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
 }
 
 <head>
@@ -11,112 +12,84 @@
 </head>
 
 <main id="main">
-    <div class="cont">
-        <div class="form sign-in">
-            <h2>Iniciar sesión</h2>
-            <form asp-action="Login" method="POST" id="loginForm">
-            <label>
-                <span asp-validation-for="Login.Email" type="text">Correo</span>
-                <input asp-for="Login.Email" placeholder="Correo electrónico"/>
-            </label>
-            <label>
-                <span asp-validation-for="Login.Password">Contraseña</span>
-                <input asp-for="Login.Password" id="txtPasswordIniciar" type="password" placeholder="Contraseña"/>
-                <div class="input-group-append">
-                    <button id="show_password" class="btn" type="button" onclick="mostrarPassword()">
-                        <img src="~/img/ojo.png" alt="mostrar/ocultar">
-                    </button>
-                </div>
-            </label>
-            
-            <button type="submit" class="submit">Iniciar sesión</button>
-            </form>
-            <p class="forgot-pass"><a asp-controller="Users" asp-action="ForgotPassword" class="forgot-pass"></a>¿Olvidaste tu contraseña?</p>
+    <section class="h-100">
+        <div class="container h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-xl-11">
+                    <div class="card rounded-3 text-black">
+                        <div class="row g-0">
+                            <!-- Lado izquierdo: formulario -->
+                            <div class="col-lg-6" style="background-color: #ffffff">
+                                <div class="card-body p-md-5 mx-md-4">
+                                    <div class="text-center">
+                                        <img src="~/img/logos/1.png" style="width: 85px" alt="logo">
+                                        <h4 class="mt-3 mb-5 pb-1">Bienvenido a Worksy</h4>
+                                    </div>
 
-            <div class="social-media">
-                <ul>
-                    <li><i class="bi bi-facebook"></i></li>
-                    <li><i class="bi bi-twitter"></i></li>
-                    <li><i class="bi bi-linkedin"></i></li>
-                    <li><i class="bi bi-instagram"></i></li>
-                </ul>
+                                    <!-- Formulario funcional -->
+                                    <form asp-controller="Account" asp-action="Login" method="POST" id="loginForm">
+                                        @Html.AntiForgeryToken()
+
+                                        <h2 class="mb-4 text-center">Iniciar sesión</h2>
+
+                                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                                        <!-- Email -->
+                                        <div class="form-outline mb-4">
+                                            <label class="form-label" asp-for="Email">Correo electrónico</label>
+                                            <input asp-for="Email" class="form-control" type="email" placeholder="Correo electrónico" />
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+
+                                        <!-- Contraseña -->
+                                        <div class="form-outline mb-4 position-relative">
+                                            <label class="form-label" asp-for="Password">Contraseña</label>
+                                            <input asp-for="Password" id="txtPasswordIniciar" class="form-control" type="password" placeholder="Contraseña" />
+                                            @*TODO: Corregir el ícono para este campo*@
+                                            <button id="show_password" class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="mostrarPassword()">
+                                                <img src="~/img/ojo.png" style="width: 20px;">
+                                            </button>
+                                            <span asp-validation-for="Password" class="text-danger"></span>
+                                        </div>
+                                        
+                                        @*TODO: Check remember me*@
+
+                                        <div class="text-center pt-1 mb-4 pb-1">
+                                            <button type="submit" class="btn btn-outline-primary">Iniciar sesión</button>
+                                            <p class="forgot-pass">
+                                                <a asp-controller="Account" asp-action="ForgotPassword" class="text-muted">¿Olvidaste tu contraseña?</a>
+                                            </p>
+                                        </div>
+                                    </form>
+
+                                    <div class="social-media text-center mt-3">
+                                        <ul class="list-inline">
+                                            <li class="list-inline-item"><i class="bi bi-facebook"></i></li>
+                                            <li class="list-inline-item"><i class="bi bi-twitter"></i></li>
+                                            <li class="list-inline-item"><i class="bi bi-linkedin"></i></li>
+                                            <li class="list-inline-item"><i class="bi bi-instagram"></i></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Lado derecho -->
+                            <div class="col-lg-6 d-flex align-items-center"style="background: #323d5c;background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);" >
+                                <div class="text-white px-3 py-4 p-md-5 mx-md-4">
+                                    <h4 class="mb-4">¿Eres nuevo en Worksy?</h4>
+                                    <p class="small mb-4">
+                                        ¡Regístrate y descubre un mundo de oportunidades y servicios personalizados!
+                                        Si ya haces parte de Worksy, inicia sesión y continúa aprovechando todos nuestros beneficios.
+                                    </p>
+                                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light">Regístrate</a>
+                                </div>
+                            </div>
+                        </div> <!-- row -->
+                    </div> <!-- card -->
+                </div>
             </div>
         </div>
-
-        <div class="sub-cont">
-            <div class="img">
-                <div class="img-text m-up">
-                    <h2>¿Eres nuevo?</h2>
-                    <p>¡Regístrate y descubre un mundo de oportunidades y servicios personalizados!</p>
-                </div>
-                <div class="img-text m-in">
-                    <h2>¿Ya haces parte de Worksy?</h2>
-                    <p>Si ya tienes una cuenta, inicia sesión ahora</p>
-                </div>
-                <div class="img-btn">
-                    <span class="m-up">Registrate</span>
-                    <span class="m-in">Inicia sesión</span>
-                </div>
-            </div>
-            <div class="form sign-up" id="sign-up">
-                <h2>Regístrate</h2>
-
-                <form asp-action="Register" method="POST" id="registerForm">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <div class="input-container">
-                        <label>
-                            <span>Nombres</span>
-                            <input asp-for="Register.FirstName" type="text" id="txtNombres" placeholder="Nombres" />
-                        </label>
-                        <span asp-validation-for="Register.FirstName" class="text-danger"></span>
-                    </div>
-
-                    <div class="input-container">
-                        <label>
-                            <span>Apellidos</span>
-                            <input asp-for="Register.LastName" type="text" id="txtApellidos" placeholder="Apellidos" />
-                        </label>
-                        <span asp-validation-for="Register.LastName" class="text-danger"></span>
-                    </div>
-
-                    <div class="input-container">
-                        <label>
-                            <span>Correo electrónico</span>
-                            <input asp-for="Register.Email" type="email" id="txtEmail" placeholder="Correo electrónico" required />
-                        </label>
-                        <span asp-validation-for="Register.Email" class="text-danger"></span>
-                    </div>
-
-                    <div class="input-container">
-                        <label>
-                            <span>Contraseña</span>
-                            <input asp-for="Register.Password" type="password" id="txtPassword" placeholder="Contraseña" required />
-                        </label>
-                        <span asp-validation-for="Register.Password" class="text-danger"></span>
-                    </div>
-
-                    <div class="input-container">
-                        <label>
-                            <span>Número de teléfono</span>
-                            <input asp-for="Register.PhoneNumber" type="text" id="txtTelefono" placeholder="Teléfono" />
-                        </label>
-                        <span asp-validation-for="Register.PhoneNumber" class="text-danger"></span>
-                    </div>
-
-                    <div class="input-container">
-                        <label>
-                            <span>Dirección</span>
-                            <input asp-for="Register.Address" type="text" id="txtDireccion" placeholder="Dirección" />
-                        </label>
-                        <span asp-validation-for="Register.Address" class="text-danger"></span>
-                    </div>
-
-                    <button type="submit" class="submit" id="btnRegistrar">Regístrate ahora</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    </section>
 </main>
 
 <!-- Template Main JS File -->
@@ -125,26 +98,17 @@
 <script type="text/javascript">
     function mostrarPassword() {
         var cambio = document.getElementById("txtPasswordIniciar");
-        if (cambio.type == "password") {
+        if (cambio.type === "password") {
             cambio.type = "text";
-            $('.icon').removeClass('fa fa-eye-slash').addClass('fa fa-eye');
+            $('#show_password img').attr('src', '~/img/ojo-cerrado.png');
         } else {
             cambio.type = "password";
-            $('.icon').removeClass('fa fa-eye').addClass('fa fa-eye-slash');
+            $('#show_password img').attr('src', '~/img/ojo.png');
         }
     }
-
-    $(document).ready(function () {
-        //CheckBox mostrar contraseña
-        $('#ShowPassword').click(function () {
-            $('#Password').attr('type', $(this).is(':checked') ? 'text' : 'password');
-        });
-    });
-
 </script>
 
-@section Scripts
-{
+@section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace Worksy.Web.Core;
 
 public class Response<T>
 {
     public bool isSuccess { get; set; }
     public string? Message { get; set; }
-    public List<string> Errors { get; set; } = new();
+    public IEnumerable<IdentityError>? IErrors { get; set; }
+    public List<string>? Errors { get; set; }
     public T? Result { get; set; }
 
     public static Response<T> Failure(Exception e, string message = "Ha ocurrido un error al general la solicitud")

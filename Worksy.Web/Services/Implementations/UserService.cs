@@ -16,7 +16,8 @@ public class UserService : IUserService
     private readonly SignInManager<User> _signInManager;
     private readonly IMapper _mapper;
 
-    public UserService(DataContext context, UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
+    public UserService(DataContext context, UserManager<User> userManager, SignInManager<User> signInManager,
+        IMapper mapper)
     {
         _context = context;
         _userManager = userManager;
@@ -24,21 +25,26 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<Response<IdentityResult>> AddUserAsync(UserDTO dto, string password)
+    public async Task<Response<IdentityResult>> AddUserAsync(RegisterViewModel model, string password)
     {
-        User user = _mapper.Map<User>(dto);
+        User user = _mapper.Map<User>(model);
+        user.UserName = model.Email;
+
         IdentityResult result = await _userManager.CreateAsync(user, password);
 
-        return new Response<IdentityResult>()
+        return new Response<IdentityResult>
         {
             Result = result,
-            isSuccess = result.Succeeded
+            isSuccess = result.Succeeded,
+            IErrors = result.Errors
         };
     }
 
+
     public async Task<Response<SignInResult>> LoginAsync(LoginViewModel model)
     {
-        SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+        SignInResult result =
+            await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
 
         return new Response<SignInResult>
         {
