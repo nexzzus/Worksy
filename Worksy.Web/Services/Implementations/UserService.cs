@@ -38,7 +38,7 @@ public class UserService : IUserService
 
     public async Task<Response<SignInResult>> LoginAsync(LoginViewModel model)
     {
-        SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+        SignInResult result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
 
         return new Response<SignInResult>
         {

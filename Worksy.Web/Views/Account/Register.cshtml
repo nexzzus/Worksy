@@ -37,6 +37,13 @@
                 <input asp-for="Password" type="password" class="form-control" placeholder="Contraseña"/>
                 <label asp-for="Password"></label>
                 <span asp-validation-for="Password" class="text-danger"></span>
+            </div> 
+            
+            @*TODO: Corregir el asp-for para la confirmación de contraseña*@
+            <div class="col-md-6 form-floating">
+                <input asp-for="Password" type="password" class="form-control" placeholder="Confirmar contraseña"/>
+                <label asp-for="Password"></label>
+                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
             <div class="col-md-6 form-floating">

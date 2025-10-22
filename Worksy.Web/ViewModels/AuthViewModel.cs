@@ -2,7 +2,7 @@
 {
     public class AuthViewModel
     {
-        public LoginViewModel Login { get; set; } = new LoginViewModel();
-        public RegisterViewModel Register { get; set; } = new RegisterViewModel();
+        public LoginViewModel Login { get; set; }
+        public RegisterViewModel Register { get; set; }
     }
 }

@@ -2,7 +2,6 @@ using AspNetCoreHero.ToastNotification.Abstractions;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
@@ -29,10 +28,10 @@ namespace Worksy.Web.Controllers
         }
 
 
-        [HttpGet]
-        public IActionResult Register() => View();
+        // [HttpGet]
+        // public IActionResult Register() => View();
 
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(UserDTO dto)
         {
@@ -71,22 +70,23 @@ namespace Worksy.Web.Controllers
                 Address = dto.Address
             }};
             return View("Login", errorModel);
-        }
+        }*/
 
 
-        [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
-        {
-            ViewData["ReturnUrl"] = returnUrl;
-            var model = new AuthViewModel
-            {
-                Login = new LoginViewModel(),
-                Register = new RegisterViewModel()
-            };
-            return View(model);
-        }
+        // [HttpGet]
+        // public IActionResult Login(string? returnUrl = null)
+        // {
+        //     ViewData["ReturnUrl"] = returnUrl;
+        //     var model = new AuthViewModel
+        //     {
+        //         Login = new LoginViewModel(),
+        //         Register = new RegisterViewModel()
+        //     };
+        //     return View(model);
+        // }
 
 
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel viewModel, string? returnUrl = null)
@@ -119,20 +119,20 @@ namespace Worksy.Web.Controllers
             _notyf.Error("Credenciales inválidas");
             var invalidModel = new AuthViewModel { Login = viewModel, Register = new RegisterViewModel() };
             return View(invalidModel);
-        }
+        }*/
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            _notyf.Success("Sesión cerrada correctamente.");
-            return RedirectToAction("Index", "Home");
-        }
+        // [HttpPost]
+        // [ValidateAntiForgeryToken]
+        // public async Task<IActionResult> Logout()
+        // {
+        //     await _signInManager.SignOutAsync();
+        //     _notyf.Success("Sesión cerrada correctamente.");
+        //     return RedirectToAction("Index", "Home");
+        // }
 
-        [HttpGet]
-        public IActionResult AccessDenied() => View();
+        // [HttpGet]
+        // public IActionResult AccessDenied() => View();
 
         [HttpGet]
         public async Task<IActionResult> Profile()
@@ -218,9 +218,10 @@ namespace Worksy.Web.Controllers
             return View(dto);
         }
 
-        [HttpGet]
-        public IActionResult ForgotPassword() => View();
+        // [HttpGet]
+        // public IActionResult ForgotPassword() => View();
 
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel dto)
@@ -244,26 +245,27 @@ namespace Worksy.Web.Controllers
                 token,
                 email = user.Email
             }, Request.Scheme);
-            
+
             await _emailSender.SendEmailAsync(user.Email, "Recuperar contraseña",
                 $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña");
 
             _notyf.Success("Se envió un correo de recuperación al correo indicado");
             return View();
-        }
+        }*/
 
-        [HttpGet]
-        public IActionResult ResetPassword(string token, string email)
-        {
-            if (token is null || email is null)
-            {
-                return RedirectToAction("Login");
-            }
+        // [HttpGet]
+        // public IActionResult ResetPassword(string token, string email)
+        // {
+        //     if (token is null || email is null)
+        //     {
+        //         return RedirectToAction("Login");
+        //     }
+        //
+        //     var model = new ResetPasswordViewModel { Token = token, Email = email };
+        //     return View(model);
+        // }
 
-            var model = new ResetPasswordViewModel { Token = token, Email = email };
-            return View(model);
-        }
-
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel dto)
@@ -296,6 +298,6 @@ namespace Worksy.Web.Controllers
             }
 
             return View(dto);
-        }
+        }*/
     }
 }
