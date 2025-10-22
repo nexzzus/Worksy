@@ -44,7 +44,7 @@ public static class CustomConfig
 
     private static void AddIAM(WebApplicationBuilder builder)
     {
-        builder.Services.AddIdentity<User, IdentityRole>(config =>
+        builder.Services.AddIdentity<User, IdentityRole<Guid>>(config =>
             {
                 config.User.RequireUniqueEmail = true;
                 config.Password.RequireDigit = false;

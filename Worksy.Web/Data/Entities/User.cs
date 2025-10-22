@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Worksy.Web.Data.Entities;
 
-public class User: IdentityUser
+public class User: IdentityUser<Guid>
 {
     [MaxLength(32, ErrorMessage = "El campo '{0}' debe tener máximo {1} carácteres.")]
     [Required(ErrorMessage = "Este campo es requerido")]
