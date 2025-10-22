@@ -22,13 +22,16 @@ public static class CustomConfig
         });
         // AutoMapper
         builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
-        
+
+        // Identity Access Managment
+        AddIAM(builder);
+
         // Services
         AddServices(builder);
-        
+
         // Cookies
         AddCookies(builder);
-        
+
         // Toast Notification
         builder.Services.AddNotyf(config =>
         {
@@ -39,22 +42,38 @@ public static class CustomConfig
         return builder;
     }
 
-    public static void AddServices(WebApplicationBuilder builder)
+    private static void AddIAM(WebApplicationBuilder builder)
     {
-        //builder.Services.AddScoped<UserService>();
-        builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+        builder.Services.AddIdentity<User, IdentityRole>(config =>
             {
-                options.SignIn.RequireConfirmedAccount = false;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireDigit = true;
-                options.Password.RequireUppercase = true;
+                config.User.RequireUniqueEmail = true;
+                config.Password.RequireDigit = false;
+                config.Password.RequiredUniqueChars = 0;
+                config.Password.RequireLowercase = false;
+                config.Password.RequireUppercase = false;
+                config.Password.RequireNonAlphanumeric = false;
+                config.Password.RequiredLength = 4;
+                //config.SignIn.RequireConfirmedAccount = false;
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
+
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.Name = "Auth";
+            options.ExpireTimeSpan = TimeSpan.FromDays(100);
+            options.LoginPath = "/Account/Login";
+            options.AccessDeniedPath = "/Error/AccessDenied";
+        });
+    }
+
+    public static void AddServices(WebApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<IUserService, UserService>();
+
         builder.Services.AddTransient<IEmailSender, EmailSender>();
 
         builder.Services.AddScoped<IServicesService, ServicesService>();
-
     }
 
     public static void AddCookies(WebApplicationBuilder builder)
@@ -69,7 +88,7 @@ public static class CustomConfig
     public static WebApplication AddCustomAppConfig(this WebApplication app)
     {
         app.UseNotyf();
-        
+
         return app;
     }
 }
