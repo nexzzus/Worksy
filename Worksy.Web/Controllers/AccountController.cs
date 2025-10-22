@@ -48,26 +48,6 @@ public class AccountController : Controller
         if (!result.isSuccess)
         {
             _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
-
-            if (result.IErrors != null && result.IErrors.Any())
-            {
-                foreach (var error in result.IErrors)
-                {
-                    Console.WriteLine($"Error: {error.Code} - {error.Description}");
-                }
-            }
-            else if (result.Errors != null && result.Errors.Any())
-            {
-                foreach (var error in result.Errors)
-                {
-                    Console.WriteLine($"Error genérico: {error}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("⚠️ No se devolvieron errores desde Identity ni errores genéricos.");
-            }
-
             return View(model);
         }
 
