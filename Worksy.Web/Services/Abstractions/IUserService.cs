@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
+using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.ViewModels;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Worksy.Web.Services.Abstractions;
 
@@ -17,5 +20,8 @@ public interface IUserService
     public Task<Response<object>> DeleteAsync(Guid id);
     public Task<Response<IdentityResult>> GetOneAsync(Guid id);
     public Task<Response<List<IdentityResult>>> GetAllAsync();
-    public Task<Response<IdentityResult>> UpdateAsync(UserDTO user);
+    public Task<Response<UpdateProfileDTO>> UpdateAsync(UpdateProfileDTO dto);
+    public Task<User?> GetByEmailAsync(string email);
+    public Task<Response<object>> ForgotPasswordAsync(string email, IUrlHelper url, string scheme);
+    public Task<Response<object>> ResetPasswordAsync(ResetPasswordViewModel model);
 }

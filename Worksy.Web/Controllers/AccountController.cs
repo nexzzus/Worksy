@@ -1,4 +1,5 @@
 using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
@@ -16,15 +17,14 @@ public class AccountController : Controller
     private readonly IUserService _userService;
     private readonly INotyfService _notyf;
     private readonly IEmailSender _emailSender;
-    private readonly UserManager<User> _userManager;
+    private readonly IMapper _mapper;
 
-    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf,
-        UserManager<User> userManager)
+    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf, IMapper mapper)
     {
         _userService = userService;
         _emailSender = emailSender;
         _notyf = notyf;
-        _userManager = userManager;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -49,30 +49,9 @@ public class AccountController : Controller
         {
             _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
 
-            if (result.IErrors != null && result.IErrors.Any())
-            {
-                foreach (var error in result.IErrors)
-                {
-                    Console.WriteLine($"Error: {error.Code} - {error.Description}");
-                }
-            }
-            else if (result.Errors != null && result.Errors.Any())
-            {
-                foreach (var error in result.Errors)
-                {
-                    Console.WriteLine($"Error genérico: {error}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("⚠️ No se devolvieron errores desde Identity ni errores genéricos.");
-            }
-
             return View(model);
         }
-
-
-
+        
         await _emailSender.SendEmailAsync(
             model.Email,
             "Bienvenido a Worksy",
@@ -123,7 +102,7 @@ public class AccountController : Controller
     {
         await _userService.LogoutAsync();
         _notyf.Success("Cierre de sesión exitoso.");
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction(nameof(Login));
     }
 
     [HttpGet]
@@ -148,18 +127,12 @@ public class AccountController : Controller
             return View(model);
         }
 
-        User? user = await _userManager.FindByEmailAsync(model.Email);
+        var result = await _userService.ForgotPasswordAsync(model.Email, Url, Request.Scheme);
 
-        if (user != null)
+        if (!result.isSuccess)
         {
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
-
-            await _emailSender.SendEmailAsync(
-                user.Email,
-                "Restablecer contraseña",
-                $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña"
-            );
+            _notyf.Error(result.Message);
+            return View();
         }
 
         _notyf.Error("Se envió un correo de recuperación al correo indicado");
@@ -187,22 +160,52 @@ public class AccountController : Controller
             _notyf.Error("Complete los campos requeridos");
             return View(model);
         }
+        
+        var result = await _userService.ResetPasswordAsync(model);
 
-        User? user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null)
+        if (!result.isSuccess)
         {
-            _notyf.Error("Ocurrió un error al restablecer la contraseña.");
+            _notyf.Error(result.Message);
             return RedirectToAction("Login");
         }
 
-        var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
-        if (!result.Succeeded)
+        _notyf.Success(result.Message);
+        return RedirectToAction(nameof(Login));
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> Profile()
+    {
+        User? user = await _userService.GetByEmailAsync(User.Identity.Name);
+        if (user is null)
         {
-            _notyf.Error("Ocurrió un error al restablecer la contraseña.");
-            return RedirectToAction("Login");
+            return NotFound();
         }
 
-        _notyf.Success("Contraseña restablecida exitosamente.");
-        return RedirectToAction("Login");
+        UpdateProfileDTO dto = _mapper.Map<UpdateProfileDTO>(user);
+        return View(dto);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
+    {
+        if (ModelState.IsValid)
+        {
+            Response<UpdateProfileDTO> result = await _userService.UpdateAsync(dto);
+            if (result.isSuccess)
+            {
+                _notyf.Success(result.Message);
+                return RedirectToAction("Profile");
+            }
+            else
+            {
+                Console.WriteLine("-------------------");
+                _notyf.Error(result.Message);
+            }
+            return RedirectToAction("Index", "Home");
+        }
+        _notyf.Error("Complete los campos requeridos");
+        return View("Profile", dto);
     }
 }

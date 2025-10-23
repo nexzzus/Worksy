@@ -134,7 +134,7 @@ namespace Worksy.Web.Controllers
         // [HttpGet]
         // public IActionResult AccessDenied() => View();
 
-        [HttpGet]
+        /*[HttpGet]
         public async Task<IActionResult> Profile()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -145,9 +145,9 @@ namespace Worksy.Web.Controllers
 
             var dto = _mapper.Map<UpdateProfileDTO>(user);
             return View(dto);
-        }
+        }*/
 
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
         {
@@ -169,7 +169,7 @@ namespace Worksy.Web.Controllers
 
             _notyf.Error("Error al actualizar el perfil. Intente nuevamente.");
             return View("Profile", dto);
-        }
+        }*/
 
 
         [HttpGet]

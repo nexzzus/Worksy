@@ -20,17 +20,22 @@
                 </div>
                 <div class="card-body">
                     <form method="post" asp-action="UpdateProfile">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id"/>
+                        <input type="hidden" asp-for="Email"/>
+
                         <div class="mb-3">
                             <label asp-for="Email"></label>
-                            <input type="text" class="form-control" asp-for="Email" placeholder="Email">
-                            <span class="text-danger" asp-validation-for="Email"></span>
+                            <input value="@Model.Email" class="form-control" readonly>
                         </div>
+
                         <div class="mb-3">
                             <label asp-for="Biography"></label>
                             <textarea asp-for="Biography" class="form-control" rows="2"
                                       placeholder="Cuéntanos sobre ti"></textarea>
                             <span class="text-danger" asp-validation-for="Biography"></span>
                         </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="FirstName"></label>
