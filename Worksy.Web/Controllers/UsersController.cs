@@ -32,10 +32,8 @@ namespace Worksy.Web.Controllers
             _notyf = notyf;
             _emailSender = emailSender;
         }
-
-        [HttpGet]
-        public IActionResult UsersTable() => View();
-
+        
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
@@ -120,9 +118,6 @@ namespace Worksy.Web.Controllers
             return View(dto);
         }
 
-        // ===================== USERS TABLE / CRUD =====================
-
-        // LISTA con búsqueda y paginación
         [HttpGet]
         public async Task<IActionResult> UsersTable(int page = 1, int pageSize = 10, string? q = null)
         {
