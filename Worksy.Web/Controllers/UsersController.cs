@@ -31,6 +31,10 @@ namespace Worksy.Web.Controllers
         // [HttpGet]
         // public IActionResult Register() => View();
 
+        [HttpGet]
+        public IActionResult UsersTable() => View();
+
+        [HttpPost]
         /*[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(UserDTO dto)
@@ -119,20 +123,20 @@ namespace Worksy.Web.Controllers
             _notyf.Error("Credenciales inválidas");
             var invalidModel = new AuthViewModel { Login = viewModel, Register = new RegisterViewModel() };
             return View(invalidModel);
-        }*/
+        }
 
 
-        // [HttpPost]
-        // [ValidateAntiForgeryToken]
-        // public async Task<IActionResult> Logout()
-        // {
-        //     await _signInManager.SignOutAsync();
-        //     _notyf.Success("Sesión cerrada correctamente.");
-        //     return RedirectToAction("Index", "Home");
-        // }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            _notyf.Success("Sesión cerrada correctamente.");
+            return RedirectToAction("Index", "Home");
+        }
 
-        // [HttpGet]
-        // public IActionResult AccessDenied() => View();
+        [HttpGet]
+        public IActionResult AccessDenied() => View();
 
         [HttpGet]
         public async Task<IActionResult> Profile()
@@ -298,6 +302,6 @@ namespace Worksy.Web.Controllers
             }
 
             return View(dto);
-        }*/
+        }
     }
 }

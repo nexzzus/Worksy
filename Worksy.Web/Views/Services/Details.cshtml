@@ -1,30 +1,39 @@
 @model ServiceDTO
 @{
-    ViewBag.Title = "Detalle de publicaci髇";
+    ViewBag.Title = "Detalle de publicaci贸n";
     Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = false;
 }
 
-<h2>Detalle de publicaci髇</h2>
+<div class="container">
+    <h2 class="mb-4 text-white">Detalle de publicaci贸n</h2>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <h4 class="card-title">@Model.Title</h4>
-        <p class="card-text"><strong>Descripci髇:</strong> @Model.Description</p>
-        <p class="card-text"><strong>Precio:</strong> @Model.Price.ToString("C")</p>
-        <p class="card-text"><strong>Categor韆s:</strong>
-            @if (Model.Categories != null && Model.Categories.Any())
-            {
-                @string.Join(", ", Model.Categories.Select(c => c.Name))
-            }
-            else
-            {
-                <span>Sin categor韆s</span>
-            }
-        </p>
-        <a asp-action="Index" class="btn btn-secondary">Volver</a>
-        <a asp-action="Edit" asp-route-id="@Model.ServiceId" class="btn btn-warning">Editar</a>
-        <form asp-action="Delete" asp-route-id="@Model.ServiceId" method="post" class="d-inline">
-            <button type="submit" class="btn btn-danger" onclick="return confirm('縎eguro que deseas eliminar esta publicaci髇?');">Eliminar</button>
-        </form>
+    <div class="card mb-3 bg-black">
+        <div class="card-body">
+            <h4 class="card-title text-white">@Model.Title</h4>
+            <p class="card-text text-white"><strong>Descripci贸n:</strong> @Model.Description</p>
+            <p class="card-text text-white"><strong>Precio:</strong> @Model.Price.ToString("C")</p>
+            <p class="card-text text-white">
+                <strong>Categor铆as:</strong>
+                @if (Model.Categories != null && Model.Categories.Any())
+                {
+                    @string.Join(", ", Model.Categories.Select(c => c.Name))
+                }
+                else
+                {
+                    <span class="text-white-50">Sin categor铆as</span>
+                }
+            </p>
+
+            <a asp-action="Index" class="btn btn-secondary">Volver</a>
+            <a asp-action="Edit" asp-route-id="@Model.ServiceId" class="btn btn-warning">Editar</a>
+            <form asp-action="Delete" asp-route-id="@Model.ServiceId" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('驴Seguro que deseas eliminar esta publicaci贸n?');">
+                    Eliminar
+                </button>
+            </form>
+        </div>
     </div>
 </div>
