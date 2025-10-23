@@ -52,15 +52,16 @@ public class AccountController : Controller
         }
 
 
-
+        /*
         await _emailSender.SendEmailAsync(
             model.Email,
             "Bienvenido a Worksy",
             $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
-        );
+        );*/
         
         _notyf.Success("Registro exitoso. ¡Bienvenido!");
-        return RedirectToAction(nameof(Login));
+        await _userService.LoginAsync(new LoginViewModel { Email = model.Email, Password = model.Password });
+        return RedirectToAction("Index", "Home");
     }
 
     [HttpGet]
