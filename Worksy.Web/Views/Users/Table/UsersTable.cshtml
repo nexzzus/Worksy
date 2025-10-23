@@ -1,0 +1,138 @@
+﻿@model IEnumerable<Worksy.Web.Data.Entities.User>
+@{
+    ViewBag.Title = "Usuarios";
+    Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
+    var page = (int)(ViewBag.Page ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 10);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var totalCount = (int)(ViewBag.TotalCount ?? 0);
+    string q = ViewBag.Q as string ?? "";
+}
+
+<div class="container">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0">Usuarios</h2>
+        <span class="ms-3 text-muted">Total: @totalCount</span>
+        <a asp-action="CreateUser" class="btn btn-primary ms-auto">Crear usuario</a>
+    </div>
+
+    <form class="row g-2 align-items-center mb-3" method="get" asp-action="UsersTable">
+        <div class="col-sm-6 col-md-4">
+            <input type="text" class="form-control" name="q" value="@q"
+                   placeholder="Buscar por nombre, correo, teléfono...">
+        </div>
+        <div class="col-sm-3 col-md-2">
+            <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                @if (pageSize == 5)
+                {
+                    <option value="5" selected>5</option>
+                }
+                else
+                {
+                    <option value="5">5</option>
+                }
+                @if (pageSize == 10)
+                {
+                    <option value="10" selected>10</option>
+                }
+                else
+                {
+                    <option value="10">10</option>
+                }
+                @if (pageSize == 20)
+                {
+                    <option value="20" selected>20</option>
+                }
+                else
+                {
+                    <option value="20">20</option>
+                }
+                @if (pageSize == 50)
+                {
+                    <option value="50" selected>50</option>
+                }
+                else
+                {
+                    <option value="50">50</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+            <a asp-action="UsersTable" class="btn btn-link">Limpiar</a>
+        </div>
+    </form>
+
+
+    <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover align-middle">
+            <thead class="table-responsive-xl">
+            <tr>
+                <th>Correo</th>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th style="width: 240px;">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@u.Email</td>
+                        <td>@(string.Join(" ", new[] { u.FirstName, u.LastName }.Where(x => !string.IsNullOrWhiteSpace(x))))</td>
+                        <td>@u.PhoneNumber</td>
+                        <td>@u.Address</td>
+                        <td>
+                            <a asp-action="UserDetails" asp-route-id="@u.Id" class="btn btn-sm btn-info me-1">Ver</a>
+                            <a asp-action="EditUser" asp-route-id="@u.Id" class="btn btn-sm btn-warning me-1">Editar</a>
+
+                            <form asp-action="DeleteUser" asp-route-id="@u.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('¿Eliminar este usuario?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Sin resultados</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Paginación">
+            <ul class="pagination">
+                <li class="page-item @(page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="UsersTable" asp-route-page="@(page - 1)"
+                       asp-route-pageSize="@pageSize"
+                       asp-route-q="@q">Anterior</a>
+                </li>
+                @for (var i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == page ? "active" : "")">
+                        <a class="page-link" asp-action="UsersTable" asp-route-page="@i" asp-route-pageSize="@pageSize"
+                           asp-route-q="@q">@i</a>
+                    </li>
+                }
+                <li class="page-item @(page == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="UsersTable" asp-route-page="@(page + 1)"
+                       asp-route-pageSize="@pageSize"
+                       asp-route-q="@q">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

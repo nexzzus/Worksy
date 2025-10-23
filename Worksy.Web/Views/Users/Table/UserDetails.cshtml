@@ -1,0 +1,37 @@
+﻿@model Worksy.Web.Data.Entities.User
+@{
+    ViewBag.Title = "Detalle de usuario";
+    Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
+}
+
+<div class="container">
+    <h2 class="mb-4">Detalle de usuario</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Correo</dt>
+                <dd class="col-sm-9">@Model.Email</dd>
+
+                <dt class="col-sm-3">Nombre</dt>
+                <dd class="col-sm-9">@($"{Model.FirstName} {Model.LastName}")</dd>
+
+                <dt class="col-sm-3">Teléfono</dt>
+                <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+                <dt class="col-sm-3">Dirección</dt>
+                <dd class="col-sm-9">@Model.Address</dd>
+
+                <dt class="col-sm-3">Biografía</dt>
+                <dd class="col-sm-9">@Model.Biography</dd>
+            </dl>
+
+            <div class="mt-3">
+                <a asp-action="UsersTable" class="btn btn-outline-secondary">Volver</a>
+                <a asp-action="EditUser" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+            </div>
+        </div>
+    </div>
+</div>
