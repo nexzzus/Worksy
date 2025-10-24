@@ -27,4 +27,10 @@ public class User: IdentityUser<Guid>
     [MaxLength(512, ErrorMessage = "El campo '{0}' debe tener máximo {1} carácteres.")]
     [Display(Name = "Biografía")]
     public string? Biography { get; set; }
+
+    public string FullName => $"{FirstName} {LastName}";
+    
+    public required Guid WorksyRoleId { get; set; }
+
+    public required WorksyRole? WorksyRole { get; set; }
 }
