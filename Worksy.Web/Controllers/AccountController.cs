@@ -200,7 +200,6 @@ public class AccountController : Controller
             }
             else
             {
-                Console.WriteLine("-------------------");
                 _notyf.Error(result.Message);
             }
             return RedirectToAction("Index", "Home");
