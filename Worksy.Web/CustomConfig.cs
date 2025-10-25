@@ -6,6 +6,7 @@ using Worksy.Web.Core;
 using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
+using Worksy.Web.Data.Seeders;
 using Worksy.Web.Services.Abstractions;
 using Worksy.Web.Services.Implementations;
 
@@ -41,7 +42,7 @@ public static class CustomConfig
 
     public static void AddServices(WebApplicationBuilder builder)
     {
-        //builder.Services.AddScoped<UserService>();
+        builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
@@ -53,6 +54,8 @@ public static class CustomConfig
             .AddDefaultTokenProviders();
         builder.Services.AddTransient<IEmailSender, EmailSender>();
 
+        builder.Services.AddTransient<SeedDB>();
+        
         builder.Services.AddScoped<IServicesService, ServicesService>();
 
     }
@@ -70,6 +73,17 @@ public static class CustomConfig
     {
         app.UseNotyf();
         
+        SeedData(app);
+        
         return app;
+    }
+
+    public static void SeedData(WebApplication app)
+    {
+        IServiceScopeFactory scopeFactory = app.Services.GetService<IServiceScopeFactory>();
+        
+        using IServiceScope scope = scopeFactory.CreateScope();
+        SeedDB service = scope.ServiceProvider.GetService<SeedDB>();
+        service.SeedAsync().Wait();
     }
 }
