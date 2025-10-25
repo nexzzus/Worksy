@@ -32,5 +32,5 @@ public class User: IdentityUser<Guid>
     
     public required Guid WorksyRoleId { get; set; }
 
-    public required WorksyRole? WorksyRole { get; set; }
+    public WorksyRole? WorksyRole { get; set; }
 }
