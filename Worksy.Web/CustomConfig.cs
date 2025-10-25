@@ -77,6 +77,7 @@ public static class CustomConfig
         builder.Services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.Name = "Auth";
+            
             options.ExpireTimeSpan = TimeSpan.FromDays(100);
             options.LoginPath = "/Account/Login";
             options.AccessDeniedPath = "/Error/AccessDenied";

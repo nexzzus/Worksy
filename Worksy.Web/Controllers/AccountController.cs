@@ -67,6 +67,7 @@ public class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
@@ -82,6 +83,7 @@ public class AccountController : Controller
         return View();
     }
 
+    
     [HttpGet]
     public IActionResult ForgotPassword()
     {
@@ -144,6 +146,7 @@ public class AccountController : Controller
         return RedirectToAction(nameof(Login));
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
@@ -157,6 +160,7 @@ public class AccountController : Controller
         return View(dto);
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
@@ -181,12 +185,14 @@ public class AccountController : Controller
         return View("Profile", dto);
     }
 
+    [Authorize]
     [HttpGet]
     public IActionResult ChangePassword()
     {
         return View(new ChangePasswordViewModel());
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
