@@ -59,14 +59,6 @@ public static class CustomConfig
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
-
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            options.Cookie.Name = "Auth";
-            options.ExpireTimeSpan = TimeSpan.FromDays(100);
-            options.LoginPath = "/Account/Login";
-            options.AccessDeniedPath = "/Error/AccessDenied";
-        });
     }
 
     public static void AddServices(WebApplicationBuilder builder)
@@ -84,8 +76,10 @@ public static class CustomConfig
     {
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            options.LoginPath = "/Users/Login";
-            options.AccessDeniedPath = "/Users/AccessDenied";
+            options.Cookie.Name = "Auth";
+            options.ExpireTimeSpan = TimeSpan.FromDays(100);
+            options.LoginPath = "/Account/Login";
+            options.AccessDeniedPath = "/Error/AccessDenied";
         });
     }
 

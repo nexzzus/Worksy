@@ -1,5 +1,6 @@
 using AspNetCoreHero.ToastNotification.Abstractions;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
@@ -21,7 +22,8 @@ public class AccountController : Controller
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
 
-    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf, IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager)
+    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf, IMapper mapper,
+        UserManager<User> userManager, SignInManager<User> signInManager)
     {
         _userService = userService;
         _emailSender = emailSender;
@@ -129,7 +131,7 @@ public class AccountController : Controller
             _notyf.Error("Complete los campos requeridos");
             return View(model);
         }
-        
+
         var result = await _userService.ResetPasswordAsync(model);
 
         if (!result.isSuccess)
@@ -141,7 +143,7 @@ public class AccountController : Controller
         _notyf.Success(result.Message);
         return RedirectToAction(nameof(Login));
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
@@ -171,20 +173,20 @@ public class AccountController : Controller
             {
                 _notyf.Error(result.Message);
             }
+
             return RedirectToAction("Index", "Home");
         }
+
         _notyf.Error("Complete los campos requeridos");
         return View("Profile", dto);
     }
-    
-    
+
     [HttpGet]
     public IActionResult ChangePassword()
     {
         return View(new ChangePasswordViewModel());
     }
 
-        
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
