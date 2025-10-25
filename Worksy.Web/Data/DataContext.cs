@@ -42,6 +42,12 @@ namespace Worksy.Web.Data
                 .HasOne(rp => rp.Permission)
                 .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId);
+            
+            builder.Entity<Service>()
+                .HasOne(s => s.User)
+                .WithMany() // o .WithMany(u => u.Services) si tienes la colección en User
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         private void ConfigureIndex(ModelBuilder builder)

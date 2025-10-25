@@ -243,7 +243,7 @@ namespace Worksy.Web.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime?>("PublicationDate")
                         .HasColumnType("datetime2");
@@ -461,7 +461,8 @@ namespace Worksy.Web.Migrations
                 {
                     b.HasOne("Worksy.Web.Data.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
                 });

@@ -88,12 +88,7 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public Task<Response<UpdateProfileDTO>> UpdateAsync(UpdateProfileDTO dto)
-    {
-        throw new NotImplementedException();
-    }
-
-    /*public async Task<Response<UpdateProfileDTO>> UpdateAsync(UpdateProfileDTO dto)
+    public async Task<Response<UpdateProfileDTO>> UpdateAsync(UpdateProfileDTO dto)
     {
         try
         {
@@ -103,17 +98,17 @@ public class UserService : IUserService
             user.LastName = dto.LastName;
             user.Address = dto.Address;
             user.Biography = dto.Biography;
-            
+
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
-            
+
             return Response<UpdateProfileDTO>.Success(dto, "Datos actualizados correctamente");
         }
         catch (Exception e)
         {
             return Response<UpdateProfileDTO>.Failure(e);
         }
-    }*/
+    }
 
     public async Task<User?> GetByEmailAsync(string email)
     {
@@ -127,6 +122,7 @@ public class UserService : IUserService
         {
             return Response<object>.Failure("Usuario no encontrado");
         }
+
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var resetLink = url.Action("ResetPassword", "Account", new { token, email = user.Email }, scheme);
         await _emailSender.SendEmailAsync(
@@ -134,7 +130,7 @@ public class UserService : IUserService
             "Restablecer contraseña",
             $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña"
         );
-        
+
         return Response<object>.Success(null, "Se envió un correo de recuperación al correo indicado");
     }
 
@@ -145,17 +141,18 @@ public class UserService : IUserService
         {
             return Response<object>.Failure("Ocurrió un error al restablecer la contraseña.");
         }
+
         var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
         if (!result.Succeeded)
         {
             return Response<object>.Failure("Ocurrió un error al restablecer la contraseña.");
         }
+
         return Response<object>.Success(null, "Contraseña restablecida exitosamente.");
     }
-    
+
     public async Task<User> GetUserAsync(Guid id)
     {
         return await _context.Users.FindAsync(id);
     }
-
 }

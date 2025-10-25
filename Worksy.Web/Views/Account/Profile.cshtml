@@ -1,0 +1,114 @@
+@model UpdateProfileDTO 
+
+@{
+    ViewBag.Title = "Ajustes de perfil";
+    Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = false;
+}
+
+<style>
+
+    .card {
+        background-color: #1b263b;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        border-radius: 10px;
+    }
+
+    .card-header {
+        background-color: #415a77 !important;
+        color: #fff !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .form-control {
+        background-color: #27364f;
+        border: 1px solid #415a77;
+        color: #f8f9fa;
+    }
+
+    .form-control:focus {
+        background-color: #2e3f5d;
+        border-color: #778da9;
+        color: #fff;
+        box-shadow: none;
+    }
+
+    label {
+        color: #e0e6ed;
+    }
+
+    .btn-primary {
+        background-color: #415a77;
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #778da9;
+    }
+</style>
+
+<div class="container p-4">
+    <div class="row justify-content-center">
+        <!-- Sidebar -->
+        @await Html.PartialAsync("_SlideBarProfile")
+
+        <!-- Content -->
+        <div class="col-md-7 col-xl-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Datos personales</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="UpdateProfile">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id"/>
+                        <input type="hidden" asp-for="Email"/>
+
+                        <div class="mb-3">
+                            <label asp-for="Email"></label>
+                            <input value="@Model.Email" class="form-control" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Biography"></label>
+                            <textarea asp-for="Biography" class="form-control" rows="2"
+                                      placeholder="Cuéntanos sobre ti"></textarea>
+                            <span class="text-danger" asp-validation-for="Biography"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="FirstName"></label>
+                                <input type="text" class="form-control" asp-for="FirstName" placeholder="Nombre">
+                                <span class="text-danger" asp-validation-for="FirstName"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="LastName"></label>
+                                <input type="text" class="form-control" asp-for="LastName" placeholder="Apellidos">
+                                <span class="text-danger" asp-validation-for="LastName"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Address"></label>
+                            <input type="text" class="form-control" asp-for="Address" placeholder="1234 Main St">
+                            <span class="text-danger" asp-validation-for="Address"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber"></label>
+                            <input type="text" class="form-control" asp-for="PhoneNumber" placeholder="Teléfono">
+                            <span class="text-danger" asp-validation-for="PhoneNumber"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

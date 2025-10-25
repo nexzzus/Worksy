@@ -15,4 +15,4 @@ namespace Worksy.Web.ViewModels
         [Display(Name = "Recordarme")]
         public bool RememberMe { get; set; }
     }
-}
+}       

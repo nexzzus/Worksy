@@ -1,11 +1,13 @@
 using AutoMapper;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
+using Worksy.Web.ViewModels;
 
 namespace Worksy.Web.Core
 {
     public class AutoMapperConfig : Profile
     {
+        // TODO: Completar mapeos según sea necesario
         public AutoMapperConfig()
         {
             // De entidad a DTO
@@ -26,6 +28,8 @@ namespace Worksy.Web.Core
                 ));
             
             CreateMap<User, UpdateProfileDTO>();
+
+            CreateMap<User, RegisterViewModel>().ReverseMap();
 
             // Mapeo inverso si necesitas actualizar desde DTO
             CreateMap<UpdateProfileDTO, User>();
