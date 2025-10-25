@@ -28,7 +28,7 @@
                                         Regístrate para acceder a oportunidades y servicios personalizados.
                                         Si ya tienes cuenta, inicia sesión para continuar disfrutando de nuestros beneficios.
                                     </p>
-                                    <a asp-controller="Users" asp-action="Login" class="btn btn-outline-light">
+                                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light">
                                         Ya tengo cuenta
                                     </a>
                                 </div>
@@ -41,7 +41,7 @@
                                         <h4 class="mt-1 mb-5 pb-1">Bienvenido a Worksy</h4>
                                     </div>
 
-                                    <form asp-controller="Users" asp-action="Register" method="POST" id="registerForm">
+                                    <form asp-controller="Account" asp-action="Register" method="POST" id="registerForm">
                                         @Html.AntiForgeryToken()
 
                                         <h2 class="mb-4 text-center">Regístrate</h2>

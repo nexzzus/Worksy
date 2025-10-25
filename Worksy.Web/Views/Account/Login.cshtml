@@ -45,14 +45,11 @@
                                         <div class="form-outline mb-4 position-relative">
                                             <label class="form-label" asp-for="Password">Contraseña</label>
                                             <input asp-for="Password" id="txtPasswordIniciar" class="form-control" type="password" placeholder="Contraseña" />
-                                            @*TODO: Corregir el ícono para este campo*@
                                             <button id="show_password" class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="mostrarPassword()">
                                                 <img src="~/img/ojo.png" style="width: 20px;">
                                             </button>
                                             <span asp-validation-for="Password" class="text-danger"></span>
                                         </div>
-                                        
-                                        @*TODO: Check remember me*@
 
                                         <div class="text-center pt-1 mb-4 pb-1">
                                             <button type="submit" class="btn btn-outline-primary">Iniciar sesión</button>

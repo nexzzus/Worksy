@@ -18,48 +18,17 @@ public class AccountController : Controller
     private readonly INotyfService _notyf;
     private readonly IEmailSender _emailSender;
     private readonly IMapper _mapper;
+    private readonly UserManager<User> _userManager;
+    private readonly SignInManager<User> _signInManager;
 
-    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf, IMapper mapper)
+    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf, IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager)
     {
         _userService = userService;
         _emailSender = emailSender;
         _notyf = notyf;
         _mapper = mapper;
-    }
-
-    [HttpGet]
-    public IActionResult Register()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            _notyf.Error("Complete los campos requeridos");
-            return View(model);
-        }
-
-        Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
-
-        if (!result.isSuccess)
-        {
-            _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
-
-            return View(model);
-        }
-        
-        await _emailSender.SendEmailAsync(
-            model.Email,
-            "Bienvenido a Worksy",
-            $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
-        );
-        
-        _notyf.Success("Registro exitoso. ¡Bienvenido!");
-        return RedirectToAction(nameof(Login));
+        _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     [HttpGet]
@@ -206,5 +175,53 @@ public class AccountController : Controller
         }
         _notyf.Error("Complete los campos requeridos");
         return View("Profile", dto);
+    }
+    
+    
+    [HttpGet]
+    public IActionResult ChangePassword()
+    {
+        return View(new ChangePasswordViewModel());
+    }
+
+        
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            _notyf.Error("Complete los campos requeridos");
+            return View(dto);
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return RedirectToAction("Login");
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+        if (result.Succeeded)
+        {
+            await _signInManager.RefreshSignInAsync(user);
+            _notyf.Success("Contraseña actualizada exitosamente.");
+            return RedirectToAction("Profile");
+        }
+
+        foreach (var error in result.Errors)
+        {
+            if (error.Code.Equals("PasswordMismatch"))
+            {
+                ModelState.AddModelError(nameof(dto.OldPassword), "La contraseña actual es incorrecta.");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+                _notyf.Error("" + error.Description);
+            }
+        }
+
+        return View(dto);
     }
 }

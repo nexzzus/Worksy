@@ -69,7 +69,7 @@ public class RolesSeeder
         var collabPermissions = permissions.Where(p =>
             p.Module == "Services" ||
             p.Name== "valoration.show" ||
-            p.Name == "categories.show"
+            p.Name == "category.show"
         );
         foreach (var permission in collabPermissions)
             await AddRolePermissionIfNotExists(collabRole.Id, permission.Id);
@@ -77,7 +77,7 @@ public class RolesSeeder
         // User
         WorksyRole userRole = roles.First(r => r.Name == Env.ROLE_USER);
         var userPermissions = permissions.Where(p =>
-            p.Name == "user..update" ||
+            p.Name == "user.update" ||
             p.Name == "service.show" ||
             p.Name != "valoration.delete"
         );
@@ -126,6 +126,7 @@ public class RolesSeeder
                 FirstName = "Mateo",
                 LastName = "Muñoz",
                 Email = adminEmail,
+                UserName = adminEmail,
                 Address = "Medellín",
                 EmailConfirmed = true,
                 WorksyRoleId = adminRole.Id
@@ -146,6 +147,7 @@ public class RolesSeeder
                 FirstName = "Salomé",
                 LastName = "Quiceno",
                 Email = collabEmail,
+                UserName = collabEmail,
                 Address = "Medellín",
                 EmailConfirmed = true,
                 WorksyRoleId = collabRole.Id

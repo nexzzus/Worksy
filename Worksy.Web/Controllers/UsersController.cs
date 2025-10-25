@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Worksy.Web.Core;
 using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
+using Worksy.Web.Services.Abstractions;
 using Worksy.Web.ViewModels;
 
 namespace Worksy.Web.Controllers
@@ -19,6 +21,7 @@ namespace Worksy.Web.Controllers
         private readonly IMapper _mapper;
         private readonly INotyfService _notyf;
         private readonly IEmailSender _emailSender;
+        private readonly IUserService _userService;
 
         public UsersController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper,
             INotyfService notyf, IEmailSender emailSender)
@@ -28,6 +31,41 @@ namespace Worksy.Web.Controllers
             _mapper = mapper;
             _notyf = notyf;
             _emailSender = emailSender;
+        }
+        
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete los campos requeridos");
+                return View(model);
+            }
+
+            Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
+
+            if (!result.isSuccess)
+            {
+                _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
+
+                return View(model);
+            }
+        
+            await _emailSender.SendEmailAsync(
+                model.Email,
+                "Bienvenido a Worksy",
+                $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
+            );
+        
+            _notyf.Success("Registro exitoso. ¡Bienvenido!");
+            return RedirectToAction("Login", "Account");
         }
 
         // ===================== AUTH / PROFILE EXISTENTES =====================
@@ -193,6 +231,7 @@ namespace Worksy.Web.Controllers
         }*/
 
 
+         /*
          [HttpGet]
          public IActionResult ChangePassword()
          {
@@ -238,7 +277,7 @@ namespace Worksy.Web.Controllers
             }
 
             return View(dto);
-        }
+        }*/
         
 
         // [HttpGet]
