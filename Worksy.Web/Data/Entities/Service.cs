@@ -12,7 +12,7 @@ namespace Worksy.Web.Data.Entities
         [Required(ErrorMessage = "El campo '{0}' es obligatorio.")]
         public required string Title { get; set; }
 
-        [MaxLength(32, ErrorMessage = "El campo '{0}' debe tener maximo {1} caracteres.")]
+        [MaxLength(264, ErrorMessage = "El campo '{0}' debe tener maximo {1} caracteres.")]
         [Required(ErrorMessage = "El campo '{0}' es obligatorio.")]
         public string Description { get; set; }
         
