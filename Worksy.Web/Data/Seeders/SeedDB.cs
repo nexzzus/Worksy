@@ -7,19 +7,20 @@ namespace Worksy.Web.Data.Seeders;
 public class SeedDB
 {
     private readonly DataContext _context;
-    private readonly IUserService _userService;
+    private readonly IUserService  _userService;
     private readonly UserManager<User> _userManager;
-
-    public SeedDB(DataContext context, IUserService userService, UserManager<User> userManager)
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+    public SeedDB(DataContext context, RoleManager<IdentityRole<Guid>> roleManager, UserManager<User> userManager, IUserService userService)
     {
         _context = context;
-        _userService = userService;
+        _roleManager = roleManager;
         _userManager = userManager;
+        _userService = userService;
     }
 
     public async Task SeedAsync()
     {
         await new PermissionSeeder(_context).SeedAsync();
-        await new RolesSeeder(_userService, _context, _userManager).SeedAsync();
+        await  new RolesSeeder(_userService, _context, _userManager, _roleManager).SeedAsync();
     }
 }

@@ -7,6 +7,8 @@ using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.Data.Seeders;
+using Worksy.Web.Herpers.Abstractions;
+using Worksy.Web.Herpers.Implementations;
 using Worksy.Web.Services.Abstractions;
 using Worksy.Web.Services.Implementations;
 
@@ -24,11 +26,11 @@ public static class CustomConfig
         // AutoMapper
         builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
-        // Identity Access Managment
-        AddIAM(builder);
-
         // Services
         AddServices(builder);
+        
+        // Identity Access Managment
+        AddIAM(builder);
 
         // Cookies
         AddCookies(builder);
@@ -45,7 +47,6 @@ public static class CustomConfig
 
     private static void AddIAM(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddIdentity<User, IdentityRole<Guid>>(config =>
             {
                 config.User.RequireUniqueEmail = true;
@@ -64,12 +65,12 @@ public static class CustomConfig
     public static void AddServices(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IUserService, UserService>();
-
-        builder.Services.AddTransient<IEmailSender, EmailSender>();
-
-        builder.Services.AddTransient<SeedDB>();
-        
         builder.Services.AddScoped<IServicesService, ServicesService>();
+        
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
+        builder.Services.AddTransient<SeedDB>();
+        builder.Services.AddTransient<ICombosHelper, CombosHelper>();
+        
     }
 
     public static void AddCookies(WebApplicationBuilder builder)
@@ -80,7 +81,7 @@ public static class CustomConfig
             
             options.ExpireTimeSpan = TimeSpan.FromDays(100);
             options.LoginPath = "/Account/Login";
-            options.AccessDeniedPath = "/Error/AccessDenied";
+            options.AccessDeniedPath = "/Account/AccessDenied";
         });
     }
 

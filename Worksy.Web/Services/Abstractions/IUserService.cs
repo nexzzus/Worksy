@@ -24,4 +24,5 @@ public interface IUserService
     public Task<User?> GetByEmailAsync(string email);
     public Task<Response<object>> ForgotPasswordAsync(string email, IUrlHelper url, string scheme);
     public Task<Response<object>> ResetPasswordAsync(ResetPasswordViewModel model);
+    public Task<WorksyRole?> GetDefaultUserRoleIdAsync();
 }

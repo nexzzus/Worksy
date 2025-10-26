@@ -1,4 +1,4 @@
-@model Worksy.Web.ViewModels.RegisterViewModel
+@model RegisterViewModel
 
 @{
     ViewBag.Title = "Registro";
@@ -41,7 +41,7 @@
                                         <h4 class="mt-1 mb-5 pb-1">Bienvenido a Worksy</h4>
                                     </div>
 
-                                    <form asp-controller="Account" asp-action="Register" method="POST" id="registerForm">
+                                    <form asp-controller="Users" asp-action="Register" method="POST" id="registerForm">
                                         @Html.AntiForgeryToken()
 
                                         <h2 class="mb-4 text-center">Regístrate</h2>
@@ -72,12 +72,23 @@
                                         <!-- Contraseña -->
                                         <div class="form-outline mb-3 position-relative">
                                             <label class="form-label" asp-for="Password">Contraseña</label>
-                                            <input asp-for="Password" id="txtPasswordRegister" class="form-control" type="password" placeholder="Crea una contraseña segura" />
-                                            <button id="toggle_password" class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="togglePassword()">
-                                                <img id="toggle_password_icon" src="~/img/ojo.png" style="width: 20px;">
+                                            <input asp-for="Password" id="passwordField" class="form-control" type="password" placeholder="Crea una contraseña segura" />
+                                            <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword('passwordField', 'iconPassword')">
+                                                <img id="iconPassword" src="~/img/ojo.png" style="width: 20px; margin-top: 35px">
                                             </button>
                                             <span asp-validation-for="Password" class="text-danger"></span>
                                         </div>
+
+                                        <!-- Confirmar contraseña -->
+                                        <div class="form-outline mb-3 position-relative">
+                                            <label class="form-label" asp-for="ConfirmPassword">Confirmar contraseña</label>
+                                            <input asp-for="ConfirmPassword" id="confirmPasswordField" class="form-control" type="password" placeholder="Confirmar contraseña" />
+                                            <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-2" onclick="togglePassword('confirmPasswordField', 'iconConfirmPassword')">
+                                                <img id="iconConfirmPassword" src="~/img/ojo.png" style="width: 20px; padding-top: 35px">
+                                            </button>
+                                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                        </div>
+
 
                                         <!-- Número (teléfono) -->
                                         <div class="form-outline mb-3">
@@ -121,19 +132,7 @@
 <!-- Template Main JS File -->
 <script src="~/js/script.js"></script>
 
-<script type="text/javascript">
-    function togglePassword() {
-        var input = document.getElementById("txtPasswordRegister");
-        var icon = document.getElementById("toggle_password_icon");
-        if (input.type === "password") {
-            input.type = "text";
-            icon.src = "/img/ojo.png";
-        } else {
-            input.type = "password";
-            icon.src = "/img/ojo.png";
-        }
-    }
-</script>
+<script src="~/js/viewpassword.js"></script>
 
 @section Scripts {
     @{

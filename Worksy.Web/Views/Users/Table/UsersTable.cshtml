@@ -74,6 +74,7 @@
                 <th>Nombre</th>
                 <th>Teléfono</th>
                 <th>Dirección</th>
+                <th>Rol</th>
                 <th style="width: 240px;">Acciones</th>
             </tr>
             </thead>
@@ -87,6 +88,7 @@
                         <td>@(string.Join(" ", new[] { u.FirstName, u.LastName }.Where(x => !string.IsNullOrWhiteSpace(x))))</td>
                         <td>@u.PhoneNumber</td>
                         <td>@u.Address</td>
+                        <td>@u.WorksyRole?.Name</td>
                         <td>
                             <a asp-action="UserDetails" asp-route-id="@u.Id" class="btn btn-sm btn-info me-1">Ver</a>
                             <a asp-action="EditUser" asp-route-id="@u.Id" class="btn btn-sm btn-warning me-1">Editar</a>

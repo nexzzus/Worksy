@@ -33,11 +33,39 @@ public class UserService : IUserService
 
     public async Task<Response<IdentityResult>> AddUserAsync(RegisterViewModel model, string password)
     {
+        User? exist = await _userManager.FindByEmailAsync(model.Email);
+        if (exist != null)
+        {
+            return Response<IdentityResult>.Failure("El correo ya está en uso");
+        }
+
         User user = _mapper.Map<User>(model);
+
         user.UserName = model.Email;
 
+        string roleName;
+        Guid roleId;
+        if (model.RoleId != Guid.Empty)
+        {
+            WorksyRole? role = await _context.WorksyRoles.FindAsync(model.RoleId);
+            roleName = role.Name;
+            roleId = role.Id;
+        }
+        else
+        {
+            WorksyRole? role = await _context.WorksyRoles.FirstOrDefaultAsync(r => r.Name == Env.ROLE_USER);
+            if (role is null)
+            {
+                return Response<IdentityResult>.Failure("El rol por defecto 'User' no existe en la base de datos");
+            }
+            roleName = role.Name;
+            roleId = role.Id;
+        }
+        user.WorksyRoleId = roleId;
+        
         IdentityResult result = await _userManager.CreateAsync(user, password);
-
+        await _userManager.AddToRoleAsync(user, roleName);
+        
         return new Response<IdentityResult>
         {
             Result = result,
@@ -48,8 +76,13 @@ public class UserService : IUserService
 
     public async Task<Response<SignInResult>> LoginAsync(LoginViewModel model)
     {
+        User? user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return Response<SignInResult>.Failure("Usuario no encontrado");
+        }
         SignInResult result =
-            await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+            await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, false);
 
         return new Response<SignInResult>
         {
@@ -154,5 +187,11 @@ public class UserService : IUserService
     public async Task<User> GetUserAsync(Guid id)
     {
         return await _context.Users.FindAsync(id);
+    }
+
+    public async Task<WorksyRole?> GetDefaultUserRoleIdAsync()
+    {
+        return await _context.WorksyRoles
+            .FirstOrDefaultAsync(r => r.Name == Env.ROLE_USER);
     }
 }
