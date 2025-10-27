@@ -16,19 +16,119 @@ public class CategoriesService : ICategoriesService
         _context = context;
     }
     
-    public Task<Response<CategoryDTO>> CreateAsync(CategoryDTO dto)
+    public async Task<Response<CategoryDTO>> CreateAsync(CategoryDTO dto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            Category category = new Category
+            {
+                CategoryId = Guid.NewGuid(),
+                Name = dto.Name,
+                Description = dto.Description
+            };
+            await _context.Categories.AddAsync(category);
+            await _context.SaveChangesAsync();
+            dto.CategoryId = category.CategoryId;
+
+            return new Response<CategoryDTO>
+            {
+                isSuccess = true,
+                Message = "Categoría creada exitosamente.",
+                Errors = null,
+                Result = dto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<CategoryDTO>
+            {
+                isSuccess = false,
+                Message = ex.Message,
+                Errors = new List<string> { ex.Message },
+                Result = null
+            };
+        }
     }
 
-    public Task<Response<object>> DeleteAsync(Guid id)
+    public async Task<Response<object>> DeleteAsync(Guid id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            Category? category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+
+            if (category == null)
+            {
+                return new Response<object>
+                {
+                    isSuccess = false,
+                    Message = "Categoría no encontrada.",
+                    Errors = new List<string> { "Categoría no encontrada." },
+                    Result = null
+                };
+            }
+
+            _context.Categories.Remove(category);
+            await _context.SaveChangesAsync();
+
+            return new Response<object>
+            {
+                isSuccess = true,
+                Message = "Categoría eliminada exitosamente.",
+                Errors = null,
+                Result = null
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<object>
+            {
+                isSuccess = false,
+                Message = ex.Message,
+                Errors = new List<string> { ex.Message },
+                Result = null
+            };
+        }
     }
 
-    public Task<Response<CategoryDTO>> GetOneAsync(Guid id)
+    public async Task<Response<CategoryDTO>> GetOneAsync(Guid id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            Category? category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
+            if (category == null)
+            {
+                return new Response<CategoryDTO>
+                {
+                    isSuccess = false,
+                    Message = "Categoría no encontrada.",
+
+                };
+            }
+            CategoryDTO dto = new CategoryDTO
+            {
+                CategoryId = category.CategoryId,
+                Name = category.Name,
+                Description = category.Description
+            };
+            
+            return new Response<CategoryDTO>
+            {
+                isSuccess = true,
+                Message = "Categoría obtenida exitosamente.",
+                Errors = null,
+                Result = dto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<CategoryDTO>
+            {
+                isSuccess = false,
+                Message = ex.Message,
+                Errors = new List<string> { ex.Message },
+                Result = null
+            };
+        }
     }
 
     public async Task<Response<List<CategoryDTO>>> GetAllAsync()
@@ -74,8 +174,43 @@ public class CategoriesService : ICategoriesService
         }
     }
 
-    public Task<Response<CategoryDTO>> UpdateAsync(CategoryDTO dto)
+    public async Task<Response<CategoryDTO>> UpdateAsync(CategoryDTO dto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            Category? category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == dto.CategoryId);
+            if (category == null)
+            {
+                return new Response<CategoryDTO>
+                {
+                    isSuccess = false,
+                    Message = "Categoría no encontrada.",
+                };
+            }
+
+            category.Name = dto.Name;
+            category.Description = dto.Description;
+
+            _context.Categories.Update(category);
+            await _context.SaveChangesAsync();
+
+            return new Response<CategoryDTO>
+            {
+                isSuccess = true,
+                Message = "Categoría actualizada exitosamente.",
+                Errors = null,
+                Result = dto
+            };
+        }
+        catch (Exception ex)
+        {
+            return new Response<CategoryDTO>
+            {
+                isSuccess = false,
+                Message = ex.Message,
+                Errors = new List<string> { ex.Message },
+                Result = null
+            };
+        }
     }
 }
