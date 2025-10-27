@@ -74,6 +74,8 @@ public static class CustomConfig
         builder.Services.AddTransient<IEmailSender, EmailSender>();
 
         builder.Services.AddScoped<IServicesService, ServicesService>();
+        
+        builder.Services.AddScoped<ICategoriesService, CategoriesService>();
     }
 
     public static void AddCookies(WebApplicationBuilder builder)
