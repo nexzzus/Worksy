@@ -1,0 +1,18 @@
+﻿@model List<CategoryDTO>
+@{
+    ViewBag.Title = "Categorias";
+    Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = false;
+
+    int page = ViewBag.Page ?? 1;
+    int pageSize = ViewBag.PageSize ?? 10;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalCount = ViewBag.TotalCount ?? 0;
+    string q = ViewBag.Q as string ?? "";
+
+    var sel5 = pageSize == 5 ? "selected" : "";
+    var sel10 = pageSize == 10 ? "selected" : "";
+    var sel20 = pageSize == 20 ? "selected" : "";
+    var sel50 = pageSize == 50 ? "selected" : "";
+}
