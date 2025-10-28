@@ -1,0 +1,53 @@
+﻿@model CategoryDTO
+@{
+    ViewBag.Title = "Detalle de categoría";
+    Layout = "_Layout";
+}
+
+<div style="height:90px;"></div>
+
+<div class="container-fluid text-light min-vh-100 py-5">
+    <div class="container">
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="mb-0 fw-semibold text-white">Detalle de categoría</h2>
+            <a asp-action="Index" class="btn btn-link text-light ms-auto">Volver</a>
+        </div>
+
+        <div class="card bg-dark border-0 shadow-sm">
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Nombre</dt>
+                    <dd class="col-sm-9">@Model.Name</dd>
+
+                    <dt class="col-sm-3">Descripción</dt>
+                    <dd class="col-sm-9">@Model.Description</dd>
+
+                    <dt class="col-sm-3">Publicaciones</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Services != null && Model.Services.Any())
+                        {
+                            <ul>
+                                @foreach (var s in Model.Services)
+                                {
+                                    <li>@s.Title @if(!string.IsNullOrWhiteSpace(s.Price.ToString())){<span class="text-muted"> - @s.Price.ToString("C")</span>}</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin publicaciones</span>
+                        }
+                    </dd>
+                </dl>
+
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.CategoryId" class="btn btn-warning me-2">Editar</a>
+                    <form asp-action="Delete" asp-route-id="@Model.CategoryId" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar categoría?');">Eliminar</button>
+                    </form>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">Volver</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

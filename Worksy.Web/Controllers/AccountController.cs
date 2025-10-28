@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
-using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
@@ -17,20 +16,55 @@ public class AccountController : Controller
 {
     private readonly IUserService _userService;
     private readonly INotyfService _notyf;
-    private readonly IEmailSender _emailSender;
-    private readonly IMapper _mapper;
     private readonly UserManager<User> _userManager;
+    private readonly IMapper _mapper;
     private readonly SignInManager<User> _signInManager;
 
-    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf, IMapper mapper,
-        UserManager<User> userManager, SignInManager<User> signInManager)
+    public AccountController(IUserService userService, INotyfService notyf,
+        UserManager<User> userManager, IMapper mapper, SignInManager<User> signInManager)
     {
         _userService = userService;
-        _emailSender = emailSender;
         _notyf = notyf;
-        _mapper = mapper;
         _userManager = userManager;
+        _mapper = mapper;
         _signInManager = signInManager;
+    }
+
+    [HttpGet]
+    public IActionResult Register()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(RegisterViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            _notyf.Error("Complete los campos requeridos");
+            return View(model);
+        }
+
+        Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
+
+        if (!result.isSuccess)
+        {
+            _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
+            return View(model);
+        }
+
+
+        /*
+        await _emailSender.SendEmailAsync(
+            model.Email,
+            "Bienvenido a Worksy",
+            $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
+        );*/
+        
+        _notyf.Success("Registro exitoso. ¡Bienvenido!");
+        await _userService.LoginAsync(new LoginViewModel { Email = model.Email, Password = model.Password });
+        return RedirectToAction("Index", "Home");
     }
 
     [HttpGet]
@@ -67,14 +101,13 @@ public class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         await _userService.LogoutAsync();
         _notyf.Success("Cierre de sesión exitoso.");
-        return RedirectToAction(nameof(Login));
+        return RedirectToAction("Index", "Home");
     }
 
     [HttpGet]
@@ -83,7 +116,6 @@ public class AccountController : Controller
         return View();
     }
 
-    
     [HttpGet]
     public IActionResult ForgotPassword()
     {
@@ -146,7 +178,6 @@ public class AccountController : Controller
         return RedirectToAction(nameof(Login));
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
@@ -160,7 +191,6 @@ public class AccountController : Controller
         return View(dto);
     }
 
-    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
@@ -185,7 +215,6 @@ public class AccountController : Controller
         return View("Profile", dto);
     }
 
-    [Authorize]
     [HttpGet]
     public IActionResult ChangePassword()
     {

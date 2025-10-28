@@ -1,12 +1,13 @@
+using System.Linq;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
 using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data.Entities;
+using Worksy.Web.DTOs;
 using Worksy.Web.Herpers.Abstractions;
 using Worksy.Web.Services.Abstractions;
 using Worksy.Web.ViewModels;
@@ -16,12 +17,14 @@ namespace Worksy.Web.Controllers
     public class UsersController : Controller
     {
         private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        private readonly IMapper _mapper;
         private readonly INotyfService _notyf;
         private readonly IEmailSender _emailSender;
         private readonly IUserService _userService;
         private readonly ICombosHelper _combosHelper;
 
-        public UsersController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper,
+        public UsersController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper _mapper,
             INotyfService notyf, IEmailSender emailSender, IUserService userService, ICombosHelper combosHelper)
         {
             _userManager = userManager;
@@ -226,62 +229,57 @@ namespace Worksy.Web.Controllers
 
             _notyf.Error("Error al actualizar el perfil. Intente nuevamente.");
             return View("Profile", dto);
-        }*/
+        }
 
-
-        /*
         [HttpGet]
         public IActionResult ChangePassword()
         {
             return View(new ChangePasswordViewModel());
-       }
+        }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete los campos requeridos");
+                return View(dto);
+            }
 
-       [HttpPost]
-       [ValidateAntiForgeryToken]
-       public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
-       {
-           if (!ModelState.IsValid)
-           {
-               _notyf.Error("Complete los campos requeridos");
-               return View(dto);
-           }
+            var user = await _userManager.GetUserAsync(User);
+            if (user is null)
+            {
+                return RedirectToAction("Login");
+            }
 
-           var user = await _userManager.GetUserAsync(User);
-           if (user is null)
-           {
-               return RedirectToAction("Login");
-           }
+            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+            if (result.Succeeded)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                _notyf.Success("Contraseña actualizada exitosamente.");
+                return RedirectToAction("Profile");
+            }
 
-           var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
-           if (result.Succeeded)
-           {
-               await _signInManager.RefreshSignInAsync(user);
-               _notyf.Success("Contraseña actualizada exitosamente.");
-               return RedirectToAction("Profile");
-           }
+            foreach (var error in result.Errors)
+            {
+                if (error.Code.Equals("PasswordMismatch"))
+                {
+                    ModelState.AddModelError(nameof(dto.OldPassword), "La contraseña actual es incorrecta.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                    _notyf.Error("" + error.Description);
+                }
+            }
 
-           foreach (var error in result.Errors)
-           {
-               if (error.Code.Equals("PasswordMismatch"))
-               {
-                   ModelState.AddModelError(nameof(dto.OldPassword), "La contraseña actual es incorrecta.");
-               }
-               else
-               {
-                   ModelState.AddModelError(string.Empty, error.Description);
-                   _notyf.Error("" + error.Description);
-               }
-           }
+            return View(dto);
+        }
 
-           return View(dto);
-       }*/
+        [HttpGet]
+        public IActionResult ForgotPassword() => View();
 
-
-        // [HttpGet]
-        // public IActionResult ForgotPassword() => View();
-
-        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel dto)
@@ -312,21 +310,19 @@ namespace Worksy.Web.Controllers
             _notyf.Success("Se envió un correo de recuperación al correo indicado");
             return View();
         }
-        */
 
-        // [HttpGet]
-        // public IActionResult ResetPassword(string token, string email)
-        // {
-        //     if (token is null || email is null)
-        //     {
-        //         return RedirectToAction("Login");
-        //     }
-        //
-        //     var model = new ResetPasswordViewModel { Token = token, Email = email };
-        //     return View(model);
-        // }
+        [HttpGet]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            if (token is null || email is null)
+            {
+                return RedirectToAction("Login");
+            }
 
-        /*
+            var model = new ResetPasswordViewModel { Token = token, Email = email };
+            return View(model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel dto)
@@ -351,8 +347,6 @@ namespace Worksy.Web.Controllers
                 return RedirectToAction("Login");
             }
 
-
-
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -360,12 +354,11 @@ namespace Worksy.Web.Controllers
             }
 
             return View(dto);
-        }
-        */
+        }*/
+
         // ===================== USERS TABLE / CRUD =====================
 
         // LISTA con búsqueda y paginación
-        [Authorize(Roles = Env.ROLE_ADMIN)]
         [HttpGet]
         public async Task<IActionResult> UsersTable(int page = 1, int pageSize = 10, string? q = null)
         {
@@ -412,7 +405,6 @@ namespace Worksy.Web.Controllers
 
 
         // DETALLE
-        [Authorize(Roles = Env.ROLE_ADMIN)]
         [HttpGet]
         public async Task<IActionResult> UserDetails(Guid id)
         {
@@ -422,7 +414,6 @@ namespace Worksy.Web.Controllers
         }
 
         // CREATE
-        [Authorize(Roles = Env.ROLE_ADMIN)]
         [HttpGet]
         public async Task<IActionResult> CreateUser()
         {
@@ -432,7 +423,6 @@ namespace Worksy.Web.Controllers
             });
         }
 
-        [Authorize(Roles = Env.ROLE_ADMIN)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(RegisterViewModel model)
@@ -461,7 +451,6 @@ namespace Worksy.Web.Controllers
         }
 
         // EDIT
-        [Authorize(Roles = Env.ROLE_ADMIN)]
         [HttpGet]
         public async Task<IActionResult> EditUser(Guid id)
         {
@@ -470,11 +459,9 @@ namespace Worksy.Web.Controllers
             return View("Table/EditUser", user);
         }
 
-        [Authorize(Roles = Env.ROLE_ADMIN)]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUser(Guid id,
-            [Bind("Id,FirstName,LastName,Email,PhoneNumber,Address,Biography")] User model)
+        public async Task<IActionResult> EditUser(Guid id, [Bind("Id,FirstName,LastName,Email,PhoneNumber,Address,Biography")] User model)
         {
             if (id != model.Id) return BadRequest();
 
@@ -516,7 +503,6 @@ namespace Worksy.Web.Controllers
         }
 
         // DELETE
-        [Authorize(Roles = Env.ROLE_ADMIN)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(Guid id)
