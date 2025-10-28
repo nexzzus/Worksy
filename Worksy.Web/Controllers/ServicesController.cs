@@ -19,7 +19,7 @@ namespace Worksy.Web.Controllers
         
         
         [HttpGet("/Services")]
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? q = null)
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 12, string? q = null)
         {
             Response<List<ServiceDTO>> response = await _servicesService.GetAllAsync();
 
@@ -42,7 +42,7 @@ namespace Worksy.Web.Controllers
             }
 
             if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 10;
+            if (pageSize < 1) pageSize = 12;
 
             var totalCount = data.Count;
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -64,7 +64,6 @@ namespace Worksy.Web.Controllers
             return View(paged);
         }
 
-
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -76,18 +75,22 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            // Cargar categorías para el formulario
+            var catsResp = await _servicesService.GetAllCategoriesAsync();
+            ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
-
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -96,6 +99,8 @@ namespace Worksy.Web.Controllers
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -114,6 +119,9 @@ namespace Worksy.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var catsResp = await _servicesService.GetAllCategoriesAsync();
+            ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
+
             return View(response.Result);
         }
 
@@ -123,6 +131,8 @@ namespace Worksy.Web.Controllers
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -131,6 +141,8 @@ namespace Worksy.Web.Controllers
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -138,10 +150,7 @@ namespace Worksy.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-
         [HttpPost]
-
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _servicesService.DeleteAsync(id);
@@ -150,7 +159,6 @@ namespace Worksy.Web.Controllers
             {
                 _notifyService.Error(response.Message);
             }
-
             else
             {
                 _notifyService.Success(response.Message);

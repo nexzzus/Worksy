@@ -11,10 +11,10 @@
     int totalCount = ViewBag.TotalCount ?? 0;
     string q = ViewBag.Q as string ?? "";
 
-    var sel5 = pageSize == 5 ? "selected" : "";
-    var sel10 = pageSize == 10 ? "selected" : "";
-    var sel20 = pageSize == 20 ? "selected" : "";
-    var sel50 = pageSize == 50 ? "selected" : "";
+    var sel5 = pageSize == 6 ? "selected" : "";
+    var sel10 = pageSize == 12 ? "selected" : "";
+    var sel20 = pageSize == 18 ? "selected" : "";
+    var sel50 = pageSize == 24 ? "selected" : "";
 }
 
 <div class="container-fluid text-light min-vh-100 py-5">
@@ -34,37 +34,37 @@
 
             <div class="col-sm-3 col-md-2">
                 <select name="pageSize" class="form-select" onchange="this.form.submit()">
-                    @if (pageSize == 5)
+                    @if (pageSize == 6)
                     {
-                        <option value="5" selected>5</option>
+                        <option value="6" selected>6</option>
                     }
                     else
                     {
-                        <option value="5">5</option>
+                        <option value="6">6</option>
                     }
-                    @if (pageSize == 10)
+                    @if (pageSize == 12)
                     {
-                        <option value="10" selected>10</option>
-                    }
-                    else
-                    {
-                        <option value="10">10</option>
-                    }
-                    @if (pageSize == 20)
-                    {
-                        <option value="20" selected>20</option>
+                        <option value="12" selected>12</option>
                     }
                     else
                     {
-                        <option value="20">20</option>
+                        <option value="12">12</option>
                     }
-                    @if (pageSize == 50)
+                    @if (pageSize == 18)
                     {
-                        <option value="50" selected>50</option>
+                        <option value="18" selected>18</option>
                     }
                     else
                     {
-                        <option value="50">50</option>
+                        <option value="18">18</option>
+                    }
+                    @if (pageSize == 24)
+                    {
+                        <option value="24" selected>24</option>
+                    }
+                    else
+                    {
+                        <option value="24">24</option>
                     }
                 </select>
             </div>
