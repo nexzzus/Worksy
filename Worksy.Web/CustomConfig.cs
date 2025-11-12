@@ -28,6 +28,7 @@ public static class CustomConfig
 
         // Services
         AddServices(builder);
+        builder.Services.AddHttpContextAccessor();
         
         // Identity Access Managment
         AddIAM(builder);
@@ -65,15 +66,13 @@ public static class CustomConfig
     public static void AddServices(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IUserService, UserService>();
-        
-        builder.Services.AddTransient<IEmailSender, EmailSender>();
-
         builder.Services.AddScoped<IServicesService, ServicesService>();
-        
         builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+        builder.Services.AddScoped<IRolesService, RolesService>();
+
+        builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddTransient<SeedDB>();
         builder.Services.AddTransient<ICombosHelper, CombosHelper>();
-
     }
 
     public static void AddCookies(WebApplicationBuilder builder)

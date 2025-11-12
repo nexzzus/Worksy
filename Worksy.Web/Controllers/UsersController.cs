@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
 using Worksy.Web.Core.Abstractions;
+using Worksy.Web.Core.Attributes;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.Herpers.Abstractions;
@@ -360,6 +361,7 @@ namespace Worksy.Web.Controllers
 
         // LISTA con búsqueda y paginación
         [HttpGet]
+        [CustomAuthorize(permission: "user.showAll", module: "Users")]
         public async Task<IActionResult> UsersTable(int page = 1, int pageSize = 10, string? q = null)
         {
             if (page < 1) page = 1;
@@ -405,6 +407,7 @@ namespace Worksy.Web.Controllers
 
 
         // DETALLE
+        [CustomAuthorize("user.show", "Users")]
         [HttpGet]
         public async Task<IActionResult> UserDetails(Guid id)
         {
@@ -414,6 +417,7 @@ namespace Worksy.Web.Controllers
         }
 
         // CREATE
+        [CustomAuthorize("user.create", "Users")]
         [HttpGet]
         public async Task<IActionResult> CreateUser()
         {
@@ -423,6 +427,7 @@ namespace Worksy.Web.Controllers
             });
         }
 
+        [CustomAuthorize("user.create", "Users")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateUser(RegisterViewModel model)
@@ -451,6 +456,7 @@ namespace Worksy.Web.Controllers
         }
 
         // EDIT
+        [CustomAuthorize("user.update", "Users")]
         [HttpGet]
         public async Task<IActionResult> EditUser(Guid id)
         {
@@ -459,6 +465,7 @@ namespace Worksy.Web.Controllers
             return View("Table/EditUser", user);
         }
 
+        [CustomAuthorize("user.update", "Users")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(Guid id, [Bind("Id,FirstName,LastName,Email,PhoneNumber,Address,Biography")] User model)
@@ -503,6 +510,7 @@ namespace Worksy.Web.Controllers
         }
 
         // DELETE
+        [CustomAuthorize("user.delete", "Users")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteUser(Guid id)

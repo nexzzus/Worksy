@@ -1,6 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
+using Worksy.Web.Core.Attributes;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
 
@@ -18,6 +19,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpGet("/Categories")]
+        [CustomAuthorize("category.show", "Categories")]
         public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? q = null)
         {
             Response<List<CategoryDTO>> response = await _categoriesService.GetAllAsync();
@@ -36,7 +38,8 @@ namespace Worksy.Web.Controllers
                 data = data.Where(c =>
                     (!string.IsNullOrWhiteSpace(c.Name) && c.Name.ToLower().Contains(term)) ||
                     (!string.IsNullOrWhiteSpace(c.Description) && c.Description.ToLower().Contains(term)) ||
-                    (c.Services != null && c.Services.Any(s => !string.IsNullOrWhiteSpace(s.Title) && s.Title.ToLower().Contains(term)))
+                    (c.Services != null && c.Services.Any(s =>
+                        !string.IsNullOrWhiteSpace(s.Title) && s.Title.ToLower().Contains(term)))
                 ).ToList();
             }
 
@@ -63,6 +66,7 @@ namespace Worksy.Web.Controllers
             return View(paged);
         }
 
+        [CustomAuthorize("category.show", "Categories")]
         public async Task<IActionResult> Details(Guid id)
         {
             Response<CategoryDTO> response = await _categoriesService.GetOneAsync(id);
@@ -70,16 +74,19 @@ namespace Worksy.Web.Controllers
             {
                 return NotFound();
             }
+
             return View(response.Result);
         }
 
         [HttpGet]
+        [CustomAuthorize("category.create", "Categories")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [CustomAuthorize("category.create", "Categories")]
         public async Task<IActionResult> Create(CategoryDTO dto)
         {
             if (!ModelState.IsValid)
@@ -101,6 +108,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("category.update", "Categories")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<CategoryDTO> response = await _categoriesService.GetOneAsync(id);
@@ -115,7 +123,9 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(CategoryDTO dto)
+        [CustomAuthorize("category.update","Categories")]
+
+    public async Task<IActionResult> Edit(CategoryDTO dto)
         {
             if (!ModelState.IsValid)
             {
@@ -136,6 +146,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("category.delete","Categories")]
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _categoriesService.DeleteAsync(id);

@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
+using Worksy.Web.Core.Pagination;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Abstractions;
 
@@ -8,8 +9,8 @@ namespace Worksy.Web.Services;
 
 public class CustomQueryableOperationService
 {
-    private readonly DataContext _context;
-    private readonly IMapper _mapper;
+    protected readonly DataContext _context;
+    protected readonly IMapper _mapper;
 
     public CustomQueryableOperationService(DataContext context, IMapper mapper)
     {
@@ -116,6 +117,37 @@ public class CustomQueryableOperationService
         catch (Exception e)
         {
             return Response<List<TDTO>>.Failure(e);
+        }
+    }
+    
+    public async Task<Response<PaginationResponse<TDTO>>> GetPaginationAsync<TEntity, TDTO>(PaginationRequest request,
+        IQueryable<TEntity> query = null) where TEntity: class
+        where TDTO: class
+    {
+        try
+        {
+            if (query is null)
+            {
+                query = _context.Set<TEntity>();
+            }
+
+            PagedList<TEntity> list = await PagedList<TEntity>.ToPagedListAsync(query, request);
+
+            PaginationResponse<TDTO> response = new PaginationResponse<TDTO>
+            {
+                List = _mapper.Map<PagedList<TDTO>>(list),
+                TotalCount = list.TotalCount,
+                CurrentPage = list.CurrentPage,
+                TotalPages = list.TotalPages,
+                RecordsPerPage = list.RecordsPerPage,
+                Filter = request.Filter
+            };
+            
+            return Response<PaginationResponse<TDTO>>.Success(response);
+        }
+        catch (Exception e)
+        {
+            return Response<PaginationResponse<TDTO>>.Failure(e);
         }
     }
 }

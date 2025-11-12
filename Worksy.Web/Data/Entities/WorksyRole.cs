@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Worksy.Web.Data.Abstractions;
 
 namespace Worksy.Web.Data.Entities;
 
-public class WorksyRole
+public class WorksyRole: IId
 {
     [Key]
     public Guid Id { get; set; }

@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<Worksy.Web.Data.Entities.User>
+@inject IUserService _userService
 @{
     ViewBag.Title = "Usuarios";
     Layout = "_Layout";
@@ -90,14 +91,25 @@
                         <td>@u.Address</td>
                         <td>@u.WorksyRole?.Name</td>
                         <td>
-                            <a asp-action="UserDetails" asp-route-id="@u.Id" class="btn btn-sm btn-info me-1">Ver</a>
-                            <a asp-action="EditUser" asp-route-id="@u.Id" class="btn btn-sm btn-warning me-1">Editar</a>
 
-                            <form asp-action="DeleteUser" asp-route-id="@u.Id" method="post" class="d-inline"
-                                  onsubmit="return confirm('¿Eliminar este usuario?');">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                            </form>
+                            @if (await _userService.CurrentUserIsAuthorizedAsync("user.show", "Users"))
+                            {
+                                <a asp-action="UserDetails" asp-route-id="@u.Id"
+                                   class="btn btn-sm btn-info me-1">Ver</a>
+                            }
+                            @if (await _userService.CurrentUserIsAuthorizedAsync("user.update", "Users"))
+                            {
+                                <a asp-action="EditUser" asp-route-id="@u.Id"
+                                   class="btn btn-sm btn-warning me-1">Editar</a>
+                            }
+                    @if (await _userService.CurrentUserIsAuthorizedAsync("user.delete", "Users"))
+                            {
+                                <form asp-action="DeleteUser" asp-route-id="@u.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('¿Eliminar este usuario?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }

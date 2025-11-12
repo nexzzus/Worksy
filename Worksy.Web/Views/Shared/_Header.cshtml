@@ -1,5 +1,4 @@
 @using Worksy.Web.Data.Entities
-@using Worksy.Web.Services.Abstractions
 @inject IUserService _userService
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -60,16 +59,37 @@
                 }
                 else
                 {
-                    <li>
-                        <a class="@(currentAction == "UsersTable" ? "active" : "")"
-                           asp-controller="Users" asp-action="UsersTable">Usuarios</a>
-                    </li>
+                    if (await _userService.CurrentUserIsAuthorizedAsync("user.showAll", "Users"))
+                    {
+                        <li>
+                            <a class="@(currentAction == "UsersTable" ? "active" : "")"
+                               asp-controller="Users" asp-action="UsersTable">Usuarios</a>
+                        </li>
+                    }
+
+                    if (await _userService.CurrentUserIsAuthorizedAsync("rol.show", "Roles"))
+                    {
+                        <li>
+                            <a class="@(currentAction == "Index" ? "active" : "")"
+                               asp-controller="Roles" asp-action="Index">Roles</a>
+                        </li> 
+                    }
 
                     <div class="dropdown ms-3">
-                        <button class="btn dropdown-toggle text-light" type="button" id="userMenuButton"
-                                data-bs-toggle="dropdown" aria-expanded="false" style="color: #83a5e1;">
-                            @user.FirstName.Substring(0,1). @user.LastName
-                        </button>
+                        @if (user != null)
+                        {
+                            <button class="btn dropdown-toggle text-light" type="button" id="userMenuButton"
+                                    data-bs-toggle="dropdown" aria-expanded="false" style="color: #83a5e1;">
+                                @user.FirstName.Substring(0, 1). @user.LastName
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn dropdown-toggle text-light" type="button" id="userMenuButton"
+                                    data-bs-toggle="dropdown" aria-expanded="false" style="color: #83a5e1;">
+                                Usuario
+                            </button>
+                        }
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
                             <li>
                                 <a class="dropdown-item @(currentAction == "Profile" ? "active" : "")"

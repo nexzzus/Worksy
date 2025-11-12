@@ -1,6 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
+using Worksy.Web.Core.Attributes;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
 
@@ -19,6 +20,7 @@ namespace Worksy.Web.Controllers
         
         
         [HttpGet("/Services")]
+        [CustomAuthorize("service.show","Services")]
         public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? q = null)
         {
             Response<List<ServiceDTO>> response = await _servicesService.GetAllAsync();
@@ -65,6 +67,7 @@ namespace Worksy.Web.Controllers
         }
 
 
+        [CustomAuthorize("service.show","Sevices")]
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -76,12 +79,14 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("service.create","Services")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [CustomAuthorize("service.create","Services")]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
 
@@ -104,6 +109,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("service.update","Services")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<ServiceDTO> response = await _servicesService.GetOneAsync(id);
@@ -118,6 +124,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("service.update","Services")]
         public async Task<IActionResult> Edit(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -141,7 +148,7 @@ namespace Worksy.Web.Controllers
 
 
         [HttpPost]
-
+        [CustomAuthorize("service.delete","Services")]
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _servicesService.DeleteAsync(id);

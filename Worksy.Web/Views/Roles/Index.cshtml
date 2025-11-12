@@ -1,0 +1,134 @@
+@using Worksy.Web.Core
+@model PaginationResponse<WorksyRoleDTO>
+
+@inject IUserService _usersService
+
+@{
+    ViewBag.Title = "Roles";
+    Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
+}
+
+<div class="container">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0">Roles</h2>
+        @if (await _usersService.CurrentUserIsAuthorizedAsync("roles.create", "Roles"))
+        {
+            <a asp-action="Create" class="btn btn-primary ms-auto">Crear Rol</a>
+        }
+    </div>
+
+    <form asp-action="Index" class="row g-2 align-items-center mb-3" method="GET">
+
+        <input type="hidden" name="Page" value="@Model.CurrentPage"/>
+
+        <div class="col-sm-6 col-md-4">
+            <input type="text"
+                   class="form-control"
+                   placeholder="Buscar..."
+                   aria-label="search"
+                   asp-for="Filter">
+        </div>
+
+
+        <div class="col-sm-3 col-md-2">
+
+            <select name="RecordsPerPage" class="form-select"
+                    asp-for="RecordsPerPage">
+                <option value="2" selected="@(Model.RecordsPerPage == 2)">2</option>
+                <option value="10" selected="@(Model.RecordsPerPage == 10)">10</option>
+                <option value="15" selected="@(Model.RecordsPerPage == 15)">15</option>
+                <option value="30" selected="@(Model.RecordsPerPage == 30)">30</option>
+                <option value="50" selected="@(Model.RecordsPerPage == 50)">50</option>
+            </select>
+
+        </div>
+
+
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary">Buscar</button>
+            <a asp-action="Index" class="btn btn-link">Limpiar</a>
+        </div>
+
+
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-dark table-striped table-hover align-middle">
+            <thead class="table-responsive-sm">
+            <tr>
+                <th> Rol</th>
+                <th style="width: 240px;">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.List)
+            {
+                <tr>
+                    <td> @Html.DisplayFor(modelItem => item.Name) </td>
+
+                    <td>
+
+                        @if (item.Name != Env.ROLE_ADMIN)
+                        {
+                            @if (await _usersService.CurrentUserIsAuthorizedAsync("roles.update", "Roles"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1">
+                                    Editar
+                                </a>
+                            }
+
+                            @if (await _usersService.CurrentUserIsAuthorizedAsync("roles.delete", "Roles"))
+                            {
+                                <form asp-action="Delete" asp-route-id="@item.Id" class="d-inline" method="post"
+                                      onsubmit="return confirm('¿Eliminar este usuario?');">
+                                    <button class="btn btn-sm btn-danger">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            }
+                        }
+                    </td>
+
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        @await Html.PartialAsync("_PaginationComponent", Model)
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        $(document).ready(function () {
+
+            $('.btnDelete').click(function (event) {
+
+                event.preventDefault();
+
+                Swal.fire({
+                    title: "¿Desea eliminar el Rol?",
+                    text: "No prodrá revertirlo",
+                    icon: "question",
+                    showCancelButton: true,
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+
+                        const form = $(this).closest('form');
+
+                        form.submit();
+                    }
+
+                });
+
+            });
+
+        });
+
+    </script>
+}

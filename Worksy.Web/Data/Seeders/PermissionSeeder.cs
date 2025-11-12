@@ -15,7 +15,7 @@ public class PermissionSeeder
     public async Task SeedAsync()
     {
         List<Permission> permissions = [
-            ..RolesPermissions(),
+            ..Roles(),
             ..Users(),
             ..Services(),
             ..Categories(),
@@ -34,14 +34,14 @@ public class PermissionSeeder
         await _context.SaveChangesAsync();
     }
 
-    private List<Permission> RolesPermissions()
+    private List<Permission> Roles()
     {
         return new()
         {
-            new Permission { Name = "rolesPermissions.create", Description = "Crear roles y permisos", Module = "RolesPermissions" },
-            new Permission { Name = "rolesPermissions.update", Description = "Actualizar roles y permisos", Module = "RolesPermissions" },
-            new Permission { Name = "rolesPermissions.delete", Description = "Eliminar roles y permisos", Module = "RolesPermissions" },
-            new Permission { Name = "rolesPermissions.show", Description = "Ver roles y permisos", Module = "RolesPermissions" }
+            new Permission { Name = "rol.create", Description = "Crear roles", Module = "Roles" },
+            new Permission { Name = "rol.update", Description = "Actualizar roles", Module = "Roles" },
+            new Permission { Name = "rol.delete", Description = "Eliminar roles", Module = "Roles" },
+            new Permission { Name = "rol.show", Description = "Ver roles", Module = "Roles" }
         };
     }
 
@@ -73,6 +73,7 @@ public class PermissionSeeder
         return new()
         {
             new Permission { Name = "user.showAll", Description = "Ver usuarios", Module = "Users" },
+            new Permission { Name = "user.show", Description = "Ver usuario", Module = "Users" },
             new Permission { Name = "user.create", Description = "Crear usuarios", Module = "Users" },
             new Permission { Name = "user.update", Description = "Actualizar usuarios", Module = "Users" },
             new Permission { Name = "user.delete", Description = "Eliminar usuarios", Module = "Users" }

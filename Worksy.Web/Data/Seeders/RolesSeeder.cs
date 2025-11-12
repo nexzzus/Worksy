@@ -11,14 +11,12 @@ public class RolesSeeder
     private readonly DataContext _context;
     private readonly IUserService _userService;
     private readonly UserManager<User> _userManager;
-    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-    public RolesSeeder(IUserService userService, DataContext context, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager)
+    public RolesSeeder(IUserService userService, DataContext context, UserManager<User> userManager)
     {
         _userService = userService;
         _context = context;
         _userManager = userManager;
-        _roleManager = roleManager;
     }
 
     public async Task SeedAsync()
@@ -51,15 +49,9 @@ public class RolesSeeder
 
                 await _context.WorksyRoles.AddAsync(role);
             }
-
-            await _context.SaveChangesAsync();
-    
-
-            if (!await _roleManager.RoleExistsAsync(roleName))
-            {
-                await _roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
-            }
         }
+
+        await _context.SaveChangesAsync();
     }
 
     private async Task PermissionsAssignedAsync()
@@ -86,8 +78,7 @@ public class RolesSeeder
         WorksyRole userRole = roles.First(r => r.Name == Env.ROLE_USER);
         var userPermissions = permissions.Where(p =>
             p.Name == "user.update" ||
-            p.Name == "service.show" ||
-            p.Name != "valoration.delete"
+            p.Name == "service.show"
         );
         foreach (var permission in userPermissions)
             await AddRolePermissionIfNotExists(userRole.Id, permission.Id);
@@ -141,7 +132,6 @@ public class RolesSeeder
             };
 
             await _userManager.CreateAsync(admin, "admin");
-            await _userManager.AddToRoleAsync(admin, Env.ROLE_ADMIN);
         }
 
         // COLLAB
@@ -159,25 +149,10 @@ public class RolesSeeder
                 UserName = collabEmail,
                 Address = "Medellín",
                 EmailConfirmed = true,
-                WorksyRoleId = collabRole.Id
+                WorksyRoleId = collabRole.Id,
             };
 
             await _userManager.CreateAsync(collab, "collab");
-            await _userManager.AddToRoleAsync(collab, Env.ROLE_COLLAB);
         }
-        
-        // Asegurar que los usuarios tienen su rol Identity asignado correctamente
-        var adminU = await _userManager.FindByEmailAsync("admin@worksy.com");
-        if (adminU != null && !await _userManager.IsInRoleAsync(adminU, Env.ROLE_ADMIN))
-        {
-            await _userManager.AddToRoleAsync(adminU, Env.ROLE_ADMIN);
-        }
-
-        var collabU = await _userManager.FindByEmailAsync("collab@worksy.com");
-        if (collabU != null && !await _userManager.IsInRoleAsync(collabU, Env.ROLE_COLLAB))
-        {
-            await _userManager.AddToRoleAsync(collabU, Env.ROLE_COLLAB);
-        }
-
     }
 }

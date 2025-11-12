@@ -25,4 +25,6 @@ public interface IUserService
     public Task<Response<object>> ForgotPasswordAsync(string email, IUrlHelper url, string scheme);
     public Task<Response<object>> ResetPasswordAsync(ResetPasswordViewModel model);
     public Task<WorksyRole?> GetDefaultUserRoleIdAsync();
+    public bool CurrentUserIsAuthenticateded();
+    public Task<bool> CurrentUserIsAuthorizedAsync(string permission, string module);
 }
