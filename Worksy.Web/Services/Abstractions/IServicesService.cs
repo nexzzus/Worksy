@@ -10,5 +10,7 @@ namespace Worksy.Web.Services.Abstractions
         public Task<Response<ServiceDTO>> GetOneAsync(Guid id);
         public Task<Response<List<ServiceDTO>>> GetAllAsync();
         public Task<Response<ServiceDTO>> UpdateAsync(ServiceDTO dto);
+
+        public Task<Response<List<CategoryDTO>>> GetAllCategoriesAsync();
     }
 }

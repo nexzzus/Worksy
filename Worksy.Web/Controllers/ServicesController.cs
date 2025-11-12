@@ -44,7 +44,7 @@ namespace Worksy.Web.Controllers
             }
 
             if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 10;
+            if (pageSize < 1) pageSize = 12;
 
             var totalCount = data.Count;
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -80,8 +80,11 @@ namespace Worksy.Web.Controllers
 
         [HttpGet]
         [CustomAuthorize("service.create","Services")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            // Cargar categorías para el formulario
+            var catsResp = await _servicesService.GetAllCategoriesAsync();
+            ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
             return View();
         }
 
@@ -93,6 +96,8 @@ namespace Worksy.Web.Controllers
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -101,6 +106,8 @@ namespace Worksy.Web.Controllers
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -120,6 +127,9 @@ namespace Worksy.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var catsResp = await _servicesService.GetAllCategoriesAsync();
+            ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
+
             return View(response.Result);
         }
 
@@ -130,6 +140,8 @@ namespace Worksy.Web.Controllers
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -138,14 +150,14 @@ namespace Worksy.Web.Controllers
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
             _notifyService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
-
-
 
         [HttpPost]
         [CustomAuthorize("service.delete","Services")]
@@ -157,7 +169,6 @@ namespace Worksy.Web.Controllers
             {
                 _notifyService.Error(response.Message);
             }
-
             else
             {
                 _notifyService.Success(response.Message);
