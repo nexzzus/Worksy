@@ -70,7 +70,7 @@
                     if (await _userService.CurrentUserIsAuthorizedAsync("rol.show", "Roles"))
                     {
                         <li>
-                            <a class="@(currentAction == "Index" ? "active" : "")"
+                            <a class="@(currentAction == "Roles" ? "active" : "")"
                                asp-controller="Roles" asp-action="Index">Roles</a>
                         </li> 
                     }

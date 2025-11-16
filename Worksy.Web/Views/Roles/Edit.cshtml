@@ -1,12 +1,47 @@
+@model Worksy.Web.DTOs.WorksyRoleDTO
 @{
-    ViewData["Title"] = "Editar Rol";
+    ViewBag.Title = "Editar Rol";
+    Layout = "_Layout";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
 }
-<div class="pagetitle">
-    <h1>Dashboard</h1>
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
-            <li class="breadcrumb-item active">Roles</li>
-        </ol>
-    </nav>
+
+<div class="container mb-5 py-4">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0">Editar Rol</h2>
+        <a asp-action="Index" class="btn btn-link ms-auto">Volver</a>
+    </div>
+
+    <form asp-action="Edit" method="post" id="frmEdit" class="row g-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        @await Html.PartialAsync("_Role", Model)
+
+        <!-- Campo oculto que enviará el CSV de permisos -->
+        <input type="hidden" asp-for="PermissionsIds" id="PermissionsIds_Edit" />
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary" id="btnEdit">Guardar cambios</button>
+        </div>
+    </form>
+
+    @await Html.PartialAsync("_Permissions", Model)
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (() => {
+            const form = document.getElementById('frmEdit');
+            const hiddenCsv = document.getElementById('PermissionsIds_Edit');
+
+            form.addEventListener('submit', function () {
+                const ids = Array.from(document.querySelectorAll('.permission:checked'))
+                    .map(cb => cb.dataset.permissionId);
+                hiddenCsv.value = ids.join(',');
+            });
+        })();
+    </script>
+}

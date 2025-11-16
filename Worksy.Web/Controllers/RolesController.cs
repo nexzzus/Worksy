@@ -140,4 +140,23 @@ public class RolesController : Controller
         dto.Permissions = permissionsResponse2.Result;
         return View(dto);
     }
+    
+    [HttpPost]
+    [CustomAuthorize("rol.delete", "Roles")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        Response<object> response = await _rolesService.DeleteAsync(id);
+
+        if (response.isSuccess)
+        {
+            _notyfService.Success(response.Message);
+        }
+        else
+        {
+            _notyfService.Error(response.Message);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+    
 }

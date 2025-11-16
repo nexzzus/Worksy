@@ -1,33 +1,43 @@
-@model WorksyRoleDTO
+@model Worksy.Web.DTOs.WorksyRoleDTO
 
-<div class="container">
-
-    <h3 class="card-title">Permisos</h3>
+<div class="mt-3">
+    <h4 class="mb-2">Permisos</h4>
 
     <div class="row">
-
-        @foreach (var module in Model.Permissions.GroupBy(p => p.Module))
+        @if (Model?.Permissions != null && Model.Permissions.Any())
         {
-            <div class="col-md-3 mt-3">
-
-                <h5>@module.Key</h5>
-                @foreach (PermissionsForRoleDTO permission in module)
-                {
-                    <div class="form-check form-switch">
-
-                        <input class="form-check-input permission"
-                               type="checkbox"
-                               data-permission-id="@permission.Id"
-                               id="permission_@permission.Id"
-                               @(permission.Selected ? "checked" : "")/>
-
-                        <label class="form-check-label" for="permission_@permission.Id">@permission.Description</label>
+            @foreach (var module in Model.Permissions.GroupBy(p => p.Module))
+            {
+                <div class="col-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card bg-dark text-white h-100 border-0">
+                        <div class="card-header py-2">
+                            <strong>@module.Key</strong>
+                        </div>
+                        <div class="card-body py-2">
+                            @foreach (var permission in module)
+                            {
+                                var inputId = $"permission_{permission.Id}";
+                                <div class="form-check form-switch mb-1">
+                                    <input class="form-check-input permission"
+                                           type="checkbox"
+                                           data-permission-id="@permission.Id"
+                                           id="@inputId"
+                                           @(permission.Selected ? "checked" : "") />
+                                    <label class="form-check-label small" for="@inputId">
+                                        @permission.Description
+                                    </label>
+                                </div>
+                            }
+                        </div>
                     </div>
-                }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-secondary">No hay permisos para mostrar.</div>
             </div>
         }
-
     </div>
-
 </div>
-
