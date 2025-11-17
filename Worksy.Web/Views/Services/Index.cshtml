@@ -1,9 +1,11 @@
 @model List<ServiceDTO>
 @{
     ViewBag.Title = "Publicaciones";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+
+    ViewData["BreadcrumbParent"] = "Servicios";
+    ViewData["BreadcrumbChild"] = "";
 
     int page = ViewBag.Page ?? 1;
     int pageSize = ViewBag.PageSize ?? 10;
@@ -17,147 +19,153 @@
     var sel50 = pageSize == 24 ? "selected" : "";
 }
 
-<div class="container-fluid text-light min-vh-100 py-5">
-    <div class="container">
-        <div class="d-flex align-items-center mb-3">
-            <h2 class="mb-0 fw-semibold text-white">Publicaciones</h2>
-            <span class="ms-3 text-muted">Total: @totalCount</span>
-            <a asp-action="Create" class="btn btn-primary ms-auto">Crear publicación</a>
+<div class="container-lg">
+    
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0 fw-semibold text-white">Publicaciones</h2>
+        <span class="ms-3 text-muted">Total: @totalCount</span>
+        <a asp-action="Create" class="btn btn-primary ms-auto">Crear publicación</a>
+    </div>
+
+    <!-- Filtros -->
+    <form class="row g-2 align-items-center mb-3" method="get" asp-action="Index">
+        <div class="col-sm-6 col-md-4">
+            <input type="text" class="form-control" name="q" value="@q"
+                   placeholder="Buscar por título, descripción o categoría...">
         </div>
 
-        <!-- Filtros -->
-        <form class="row g-2 align-items-center mb-3" method="get" asp-action="Index">
-            <div class="col-sm-6 col-md-4">
-                <input type="text" class="form-control" name="q" value="@q"
-                       placeholder="Buscar por título, descripción o categoría...">
-            </div>
-
-            <div class="col-sm-3 col-md-2">
-                <select name="pageSize" class="form-select" onchange="this.form.submit()">
-                    @if (pageSize == 6)
-                    {
-                        <option value="6" selected>6</option>
-                    }
-                    else
-                    {
-                        <option value="6">6</option>
-                    }
-                    @if (pageSize == 12)
-                    {
-                        <option value="12" selected>12</option>
-                    }
-                    else
-                    {
-                        <option value="12">12</option>
-                    }
-                    @if (pageSize == 18)
-                    {
-                        <option value="18" selected>18</option>
-                    }
-                    else
-                    {
-                        <option value="18">18</option>
-                    }
-                    @if (pageSize == 24)
-                    {
-                        <option value="24" selected>24</option>
-                    }
-                    else
-                    {
-                        <option value="24">24</option>
-                    }
-                </select>
-            </div>
-
-            <div class="col-auto">
-                <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-                <a asp-action="Index" class="btn btn-link text-light">Limpiar</a>
-            </div>
-        </form>
-
-        <!-- Grid de fichas -->
-        @if (Model != null && Model.Any())
-        {
-            <div class="row g-4">
-                @foreach (var item in Model)
+        <div class="col-sm-3 col-md-2">
+            <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                @if (pageSize == 6)
                 {
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card h-100 bg-dark text-white border-0 shadow">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">@item.Title</h5>
-                                <p class="card-text text-white-50 mb-2" style="flex: 1 0 auto; overflow: hidden;">
-                                    @if (!string.IsNullOrWhiteSpace(item.Description))
-                                    {
-                                        @Html.Raw(item.Description.Length > 160 ? item.Description.Substring(0, 160) + "…" : item.Description)
-                                    }
-                                </p>
+                    <option value="6" selected>6</option>
+                }
+                else
+                {
+                    <option value="6">6</option>
+                }
+                @if (pageSize == 12)
+                {
+                    <option value="12" selected>12</option>
+                }
+                else
+                {
+                    <option value="12">12</option>
+                }
+                @if (pageSize == 18)
+                {
+                    <option value="18" selected>18</option>
+                }
+                else
+                {
+                    <option value="18">18</option>
+                }
+                @if (pageSize == 24)
+                {
+                    <option value="24" selected>24</option>
+                }
+                else
+                {
+                    <option value="24">24</option>
+                }
+            </select>
+        </div>
 
-                                <div class="mb-2">
-                                    <strong>Precio:</strong>
-                                    <span class="ms-1">@item.Price.ToString("C")</span>
-                                </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+            <a asp-action="Index" class="btn btn-link text-light">Limpiar</a>
+        </div>
+    </form>
 
-                                <div class="mb-3">
-                                    @if (item.Categories != null && item.Categories.Any())
-                                    {
-                                        foreach (var c in item.Categories)
-                                        {
-                                            <span class="badge bg-secondary me-1">@c.Name</span>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Sin categorías</span>
-                                    }
-                                </div>
+    <!-- Grid de fichas -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card h-100 bg-dark text-white border-0 shadow">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@item.Title</h5>
+                            <p class="card-text text-white-50 mb-2" style="flex: 1 0 auto; overflow: hidden;">
+                                @if (!string.IsNullOrWhiteSpace(item.Description))
+                                {
+                                    @Html.Raw(item.Description.Length > 160 ? item.Description.Substring(0, 160) + "…" : item.Description)
+                                }
+                            </p>
 
-                                <div class="mt-auto">
-                                    <div class="d-flex gap-2">
-                                        <a asp-action="Details" asp-route-id="@item.ServiceId" class="btn btn-sm btn-info flex-grow-1">Ver</a>
-                                        <a asp-action="Edit" asp-route-id="@item.ServiceId" class="btn btn-sm btn-warning">Editar</a>
-                                        <form asp-action="Delete" asp-route-id="@item.ServiceId" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?');">
-                                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                                        </form>
-                                    </div>
-                                </div>
+                            <div class="mb-2">
+                                <strong>Precio:</strong>
+                                <span class="ms-1">@item.Price.ToString("C")</span>
                             </div>
-                            <div class="card-footer bg-transparent border-0 text-muted small">
-                                Publicado por: <span class="text-white">@item.ServiceId.ToString().Substring(0, 8)</span>
+
+                            <div class="mb-3">
+                                @if (item.Categories != null && item.Categories.Any())
+                                {
+                                    foreach (var c in item.Categories)
+                                    {
+                                        <span class="badge bg-secondary me-1">@c.Name</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sin categorías</span>
+                                }
+                            </div>
+
+                            <div class="mt-auto">
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@item.ServiceId"
+                                       class="btn btn-sm btn-info flex-grow-1">Ver</a>
+                                    <a asp-action="Edit" asp-route-id="@item.ServiceId"
+                                       class="btn btn-sm btn-warning">Editar</a>
+                                    <form asp-action="Delete" asp-route-id="@item.ServiceId" method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                        <div class="card-footer bg-transparent border-0 text-muted small">
+                            Publicado por:
+                            <span
+                                class="text-white">@item.ServiceId.ToString().Substring(0, 8)</span>
+                        </div>
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="text-center text-muted py-4">
-                No hay publicaciones disponibles.
-            </div>
-        }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-muted py-4">
+            No hay publicaciones disponibles.
+        </div>
+    }
 
-        <!-- Paginación -->
-        @if (totalPages > 1)
-        {
-            <nav class="mt-4" aria-label="Paginación de servicios">
-                <ul class="pagination">
-                    <li class="page-item @(page == 1 ? "disabled" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@(page - 1)"
-                           asp-route-pageSize="@pageSize" asp-route-q="@q">Anterior</a>
+    <!-- Paginación -->
+    @if (totalPages > 1)
+    {
+        <nav class="mt-4" aria-label="Paginación de servicios">
+            <ul class="pagination">
+                <li class="page-item @(page == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(page - 1)"
+                       asp-route-pageSize="@pageSize" asp-route-q="@q">Anterior</a>
+                </li>
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i"
+                           asp-route-pageSize="@pageSize"
+                           asp-route-q="@q">@i</a>
                     </li>
-                    @for (int i = 1; i <= totalPages; i++)
-                    {
-                        <li class="page-item @(i == page ? "active" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-pageSize="@pageSize"
-                               asp-route-q="@q">@i</a>
-                        </li>
-                    }
-                    <li class="page-item @(page == totalPages ? "disabled" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@(page + 1)"
-                           asp-route-pageSize="@pageSize" asp-route-q="@q">Siguiente</a>
-                    </li>
-                </ul>
-            </nav>
-        }
-    </div>
+                }
+                <li class="page-item @(page == totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(page + 1)"
+                       asp-route-pageSize="@pageSize" asp-route-q="@q">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>

@@ -1,12 +1,14 @@
 @model ServiceDTO
 @{
     ViewBag.Title = "Detalle de publicación";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+    
+    ViewData["BreadcrumbParent"] = "Servicios";
+    ViewData["BreadcrumbChild"] = "Detalle de Servicio";
 }
 
-<div class="container">
+<div class="container-lg">
     <h2 class="mb-4 text-white">Detalle de publicación</h2>
 
     <div class="card mb-3 bg-black">

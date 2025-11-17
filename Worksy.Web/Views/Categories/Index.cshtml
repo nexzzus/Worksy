@@ -1,9 +1,10 @@
 ﻿@model List<CategoryDTO>
 @{
     ViewBag.Title = "Categorías";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+    ViewData["BreadcrumbParent"] = "Categorías";
+    ViewData["BreadcrumbChild"] = "";
 
     int page = ViewBag.Page ?? 1;
     int pageSize = ViewBag.PageSize ?? 10;
@@ -17,8 +18,7 @@
     var sel50 = pageSize == 50 ? "selected" : "";
 }
 
-<div class="container-fluid text-light min-vh-100 py-5">
-    <div class="container">
+<div class="container-lg">
         <div class="d-flex align-items-center mb-3">
             <h2 class="mb-0 fw-semibold text-white">Categorías</h2>
             <span class="ms-3 text-muted">Total: @totalCount</span>
@@ -141,4 +141,3 @@
             </nav>
         }
     </div>
-</div>

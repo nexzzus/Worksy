@@ -5,12 +5,14 @@
 
 @{
     ViewBag.Title = "Roles";
-    Layout = "_Layout";
+    Layout = "Dashboard/_Dashboard";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = true;
+    ViewData["BreadcrumbParent"] = "Roles";
+    ViewData["BreadcrumbChild"] = "";
 }
 
-<div class="container">
+<div class="container-lg">
     <div class="d-flex align-items-center mb-3">
         <h2 class="mb-0">Roles</h2>
         @if (await _usersService.CurrentUserIsAuthorizedAsync("roles.create", "Roles"))

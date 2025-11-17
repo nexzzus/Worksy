@@ -82,17 +82,7 @@ public class RolesSeeder
         );
         foreach (var permission in userPermissions)
             await AddRolePermissionIfNotExists(userRole.Id, permission.Id);
-
-        // Anonymoues
-        WorksyRole anonymousRole = roles.First(r => r.Name == Env.ROLE_ANONYMOUS);
-        var anonymousPermissions = permissions.Where(p =>
-            p.Name == "user.create" ||
-            p.Name == "service.show" ||
-            p.Name == "valoration.show"
-        );
-        foreach (var permission in anonymousPermissions)
-            await AddRolePermissionIfNotExists(anonymousRole.Id, permission.Id);
-
+        
         await _context.SaveChangesAsync();
     }
 

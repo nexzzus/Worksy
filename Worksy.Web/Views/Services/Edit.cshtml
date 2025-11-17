@@ -1,12 +1,14 @@
 @model ServiceDTO 
 @{
     ViewBag.Title = "Editar publicación";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+    
+    ViewData["BreadcrumbParent"] = "Servicios";
+    ViewData["BreadcrumbChild"] = "Editar Servicio";
 }
 
-<div class="container">
+<div class="container-lg">
     <h2 class="mb-4 text-white">Editar publicación</h2>
 
     <form asp-action="Edit" method="post" class="text-white">

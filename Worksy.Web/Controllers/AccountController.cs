@@ -31,43 +31,6 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Register()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            _notyf.Error("Complete los campos requeridos");
-            return View(model);
-        }
-
-        Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
-
-        if (!result.isSuccess)
-        {
-            _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
-            return View(model);
-        }
-
-
-        /*
-        await _emailSender.SendEmailAsync(
-            model.Email,
-            "Bienvenido a Worksy",
-            $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
-        );*/
-        
-        _notyf.Success("Registro exitoso. ¡Bienvenido!");
-        await _userService.LoginAsync(new LoginViewModel { Email = model.Email, Password = model.Password });
-        return RedirectToAction("Index", "Home");
-    }
-
-    [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -96,8 +59,15 @@ public class AccountController : Controller
         {
             return Redirect(returnUrl);
         }
-
+        
         _notyf.Success("Inicio de sesión exitoso. ¡Bienvenido de nuevo!");
+        
+        bool isAdmin = await _userService.CurrentUserIsAuthorizedAsync("all.access", "Todos");
+        if (isAdmin)
+        {
+            return RedirectToAction("Index", "Admin");
+        }
+        
         return RedirectToAction("Index", "Home");
     }
 

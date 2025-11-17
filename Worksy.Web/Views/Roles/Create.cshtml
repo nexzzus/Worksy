@@ -1,35 +1,40 @@
 @model Worksy.Web.DTOs.WorksyRoleDTO
 @{
     ViewBag.Title = "Nuevo Rol";
-    Layout = "_Layout";
+    Layout = "Dashboard/_Dashboard";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = true;
+    ViewData["BreadcrumbParent"] = "Roles";
+    ViewData["BreadcrumbChild"] = "Nuevo Rol";
 }
 
-<div class="container mb-5 py-4">
-    <div class="d-flex align-items-center mb-3">
-        <h2 class="mb-0">Crear Rol</h2>
-        <a asp-action="Index" class="btn btn-link ms-auto">Volver</a>
-    </div>
-
-    <form asp-action="Create" method="post" id="frmCreate" class="row g-3">
-        @Html.AntiForgeryToken()
-
-        @await Html.PartialAsync("_Role", Model)
-
-        <!-- Campo oculto que enviará el CSV de permisos -->
-        <input type="hidden" asp-for="PermissionsIds" id="PermissionsIds_Create" />
-
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary" id="btnCreate">Guardar</button>
+<div class="container-lg">
+        <div class="d-flex align-items-center mb-3">
+            <h2 class="mb-0">Crear Rol</h2>
         </div>
-    </form>
 
-    @await Html.PartialAsync("_Permissions", Model)
+        <form asp-action="Create" method="post" id="frmCreate" class="row g-3">
+            @Html.AntiForgeryToken()
+
+            @await Html.PartialAsync("_Role", Model)
+
+            <!-- Campo oculto que enviará el CSV de permisos -->
+            <input type="hidden" asp-for="PermissionsIds" id="PermissionsIds_Create"/>
+
+            
+        </form>
+        @await Html.PartialAsync("_Permissions", Model)
+        
+        <div class="col-12 mb-3">
+            <button type="submit" class="btn btn-primary" id="btnCreate" form="frmCreate">Guardar</button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+        
+
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
 
     <script>
         (() => {
