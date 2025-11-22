@@ -19,6 +19,10 @@ namespace Worksy.Web.Data
         public DbSet<RolePermission> RolePermissions { get; set; }
 
         public DbSet<Permission> Permissions { get; set; }
+        
+        public DbSet<Conversation> Conversations { get; set; }
+        
+        public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

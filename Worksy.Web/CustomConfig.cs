@@ -70,6 +70,8 @@ public static class CustomConfig
         builder.Services.AddScoped<IServicesService, ServicesService>();
         builder.Services.AddScoped<ICategoriesService, CategoriesService>();
         builder.Services.AddScoped<IRolesService, RolesService>();
+        builder.Services.AddScoped<IConversationService, ConversationService>();
+        builder.Services.AddScoped<IMessageService, MessageService>();
 
         builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddTransient<SeedDB>();
