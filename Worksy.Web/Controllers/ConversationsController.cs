@@ -31,6 +31,6 @@ public class ConversationsController : Controller
         var conversation = await _conversationService
             .CreateConversationAsync(userId, prestadorId, serviceId);
         
-        return RedirectToAction("Chat", "Mesagge", new{ conversationId = existing.Result.Id});
+        return RedirectToAction("Chat", "Message", new{ conversationId = existing.Result.Id});
     }
 }
