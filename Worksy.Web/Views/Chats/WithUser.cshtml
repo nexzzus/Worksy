@@ -1,0 +1,47 @@
+@{
+    ViewBag.Title = "Caht";
+    Layout = "_Layout";
+}
+
+<div class="container mt-3">
+    <h3>Chat con el prestador</h3>
+
+    <div id="messagesList"
+         style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+    </div>
+
+    <div class="input-group mt-2">
+        <input id="messageInput" class="form-control" />
+        <button id="sendButton" class="btn btn-primary">Enviar</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    const prestadorId = "@ViewBag.PrestadorId";
+
+    connection.on("ReceiveMessage", function (fromUser, message) {
+        const msg = document.createElement("div");
+        msg.textContent = fromUser + ": " + message;
+        document.getElementById("messagesList").appendChild(msg);
+    });
+
+    connection.start();
+
+    document.getElementById("sendButton").addEventListener("click", () => {
+
+        const message = document.getElementById("messageInput").value;
+
+        connection.invoke("SendMessage",
+            "@User.FindFirst("sub")?.Value",
+            prestadorId,
+            message);
+
+        document.getElementById("messageInput").value = "";
+    });
+</script>
