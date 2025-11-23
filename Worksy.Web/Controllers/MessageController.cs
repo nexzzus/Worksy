@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -14,12 +15,13 @@ public class MessageController : Controller
     private readonly IMessageService _messageService;
     private readonly IConversationService _conversationService;
     private readonly IHubContext<ChatHub> _hubContext;
-
     private readonly INotyfService _notyfService;
 
-    // GET
-    public MessageController(IMessageService messageService, IConversationService conversationService,
-        INotyfService notyfService, IHubContext<ChatHub> hubContext)
+    public MessageController(
+        IMessageService messageService,
+        IConversationService conversationService,
+        INotyfService notyfService,
+        IHubContext<ChatHub> hubContext)
     {
         _messageService = messageService;
         _conversationService = conversationService;
@@ -27,30 +29,37 @@ public class MessageController : Controller
         _hubContext = hubContext;
     }
 
+
     public async Task<IActionResult> Chat(Guid conversationId)
     {
-        Response<Conversation?> conversation = await _conversationService.GetConversationAsync(conversationId);
+        var conversation = await _conversationService.GetConversationAsync(conversationId);
+
         if (!conversation.isSuccess || conversation.Result == null)
         {
             _notyfService.Error("La conversación no existe.");
             return NotFound();
         }
 
-        Response<List<Message>> messages = await _messageService.GetMessagesAsync(conversationId);
+        var messages = await _messageService.GetMessagesAsync(conversationId);
+
         if (!messages.isSuccess)
         {
-            _notyfService.Error(messages.Message);
-            return View();
+            _notyfService.Success(messages.Message);
+            ViewBag.ConversationId = conversationId;
+
+            return View(new List<Message>());
         }
 
         ViewBag.ConversationId = conversationId;
+
         return View(messages.Result);
     }
+
 
     [HttpPost]
     public async Task<IActionResult> Send(Guid conversationId, string content)
     {
-        Guid userId = Guid.Parse(User.FindFirst("UserId")!.Value);
+        Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
         if (string.IsNullOrWhiteSpace(content))
         {
@@ -65,16 +74,16 @@ public class MessageController : Controller
             _notyfService.Error(response.Message);
             return RedirectToAction("Chat", new { conversationId });
         }
-
-        // Enviar mensaje por SignalR a TODOS menos al emisor
+        
         await _hubContext.Clients.Group(conversationId.ToString())
-            .SendAsync("ReceiveMessage",
-                userId.ToString(),
-                content,
-                response.Result.SentAt,
-                conversationId);
-
+            .SendAsync("ReceiveMessage", new
+            {
+                conversationId,
+                userId = userId.ToString(),
+                message = content,
+                sentAt = response.Result.SentAt
+            });
+        
         return RedirectToAction("Chat", new { conversationId });
     }
-
 }

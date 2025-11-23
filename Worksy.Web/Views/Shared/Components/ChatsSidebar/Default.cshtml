@@ -1,0 +1,48 @@
+@using System.Security.Claims
+@model IEnumerable<Conversation>
+
+<li class="nav-group">
+    <a class="nav-link nav-group-toggle" href="#">
+        <svg class="nav-icon">
+            <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-chat-bubble")"></use>
+        </svg>
+        Chats
+    </a>
+
+    <ul class="nav-group-items compact">
+
+        @if (Model != null && Model.Any())
+        {
+            foreach (var c in Model)
+            {
+                var currentUserId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+                var otherUser = c.CustomerId == currentUserId ? c.Provider : c.Customer;
+
+                <li class="nav-item">
+                    <a asp-controller="Message"
+                       asp-action="Chat"
+                       asp-route-conversationId="@c.Id"
+                       class="list-group-item list-group-item-action bg-dark text-white mb-2">
+
+                        @*<strong>Chat con cliente:</strong> @c.CustomerId.ToString().Substring(0, 6)
+                        <div class="small text-muted">Iniciado @c.CreatedAt.ToString("g")</div>*@
+                        
+                        <div class="fw-bold">
+                            @otherUser?.FirstName
+                        </div>
+                        <small class="text-muted">
+                            Último mensaje: @c.CreatedAt.ToString("g")
+                        </small>
+                    </a>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="nav-item">
+                <span class="text-white-50">No tienes chats aún.</span>
+            </li>
+        }
+
+    </ul>
+</li>

@@ -32,8 +32,7 @@ public class RolesSeeder
         {
             Env.ROLE_ADMIN,
             Env.ROLE_USER,
-            Env.ROLE_COLLAB,
-            Env.ROLE_ANONYMOUS
+            Env.ROLE_COLLAB
         };
 
         foreach (var roleName in roles)
@@ -67,7 +66,7 @@ public class RolesSeeder
         // Collab
         WorksyRole collabRole = roles.First(r => r.Name == Env.ROLE_COLLAB);
         var collabPermissions = permissions.Where(p =>
-            p.Module == "Services" ||
+            (p.Module == "Servicios" && p.Name != "service.showAll") ||
             p.Name == "valoration.show" ||
             p.Name == "category.show"
         );

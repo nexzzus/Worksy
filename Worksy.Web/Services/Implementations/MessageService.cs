@@ -32,6 +32,25 @@ public class MessageService : IMessageService
 
     public async Task<Response<Message>> AddMessageAsync(Guid conversationId, Guid senderId, string content)
     {
+        // 1. Validar senderId vacío
+        if (senderId == Guid.Empty)
+            return Response<Message>.Failure("El remitente es inválido.");
+
+        // 2. Verificar que la conversación exista
+        var conversation = await _context.Conversations
+            .FirstOrDefaultAsync(c => c.Id == conversationId);
+
+        if (conversation == null)
+            return Response<Message>.Failure("La conversación no existe.");
+
+        // 3. Validar que el usuario pertenezca a la conversación
+        if (conversation.CustomerId != senderId &&
+            conversation.ProviderId != senderId)
+        {
+            return Response<Message>.Failure("No puedes enviar mensajes en una conversación que no es tuya.");
+        }
+
+        // 4. Crear mensaje
         Message message = new Message
         {
             ConversationId = conversationId,
@@ -42,6 +61,7 @@ public class MessageService : IMessageService
         _context.Messages.Add(message);
         await _context.SaveChangesAsync();
 
-        return Response<Message>.Success(message, "Mensaje agregado con éxito.");
+        return Response<Message>.Success(message, "Mensaje enviado correctamente.");
     }
+
 }

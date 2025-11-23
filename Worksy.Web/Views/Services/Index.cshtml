@@ -20,7 +20,7 @@
 }
 
 <div class="container-lg">
-    
+
     <div class="d-flex align-items-center mb-3">
         <h2 class="mb-0 fw-semibold text-white">Publicaciones</h2>
         <span class="ms-3 text-muted">Total: @totalCount</span>
@@ -124,6 +124,13 @@
                                           onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?');">
                                         <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
                                     </form>
+                                    <a asp-controller="Conversations"
+                                       asp-action="Open"
+                                       asp-route-prestadorId="@item.User.Id"
+                                       asp-route-serviceId="@item.ServiceId"
+                                       class="btn btn-sm btn-success flex-grow-1">
+                                        Contactar
+                                    </a>
                                 </div>
                             </div>
                         </div>

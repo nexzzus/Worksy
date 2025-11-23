@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
@@ -10,10 +12,14 @@ namespace Worksy.Web.Services.Implementations
     public class ServicesService : IServicesService
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ServicesService(DataContext context)
+        public ServicesService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Response<List<ServiceDTO>>> GetAllAsync()
@@ -22,31 +28,13 @@ namespace Worksy.Web.Services.Implementations
             {
                 // Incluir categorías para mapearlas en DTO
                 List<Service> services = await _context.Services
+                    .Include(s=> s.User)
                     .Include(s => s.Categories)
                     .ToListAsync();
 
-                List<ServiceDTO> dtos = services.Select(service => new ServiceDTO
-                {
-                    ServiceId = service.ServiceId,
-                    Title = service.Title,
-                    Description = service.Description,
-                    Price = service.Price,
-                    Categories = service.Categories?.Select(c => new CategoryDTO
-                    {
-                        CategoryId = c.CategoryId,
-                        Name = c.Name,
-                        Description = c.Description
-                    }).ToList(),
-                    CategoryIds = service.Categories?.Select(c => c.CategoryId).ToList()
-                }).ToList();
+                List<ServiceDTO> dtos = _mapper.Map<List<ServiceDTO>>(services);
 
-                return new Response<List<ServiceDTO>>
-                {
-                    isSuccess = true,
-                    Message = "Servicios obtenidos exitosamente.",
-                    Errors = null,
-                    Result = dtos
-                };
+                return Response<List<ServiceDTO>>.Success(dtos, "Servicios obtenidos exitosamente.");
             }
             catch (Exception ex)
             {
@@ -111,18 +99,35 @@ namespace Worksy.Web.Services.Implementations
                 };
             }
         }
+        
+        public Guid GetCurrentUserId()
+        {
+            string? id = _httpContextAccessor.HttpContext?
+                .User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        public async Task<Response<ServiceDTO>> CreateAsync(ServiceDTO dto)
+            return id != null ? Guid.Parse(id) : Guid.Empty;
+        }
+
+        public async Task<Response<ServiceDTO>> CreateAsync(ServiceDTO dto, Guid providerId)
         {
             try
             {
-                Service service = new Service
-                {
-                    ServiceId = Guid.NewGuid(),
-                    Title = dto.Title,
-                    Description = dto.Description,
-                    Price = dto.Price
-                };
+                
+                Service service = _mapper.Map<Service>(dto);
+                // Guid userId = GetCurrentUserId();
+                // if (userId == Guid.Empty)
+                // {
+                //     return Response<ServiceDTO>.Failure("No se pudo obtener el ID del usuario actual.");
+                // }
+                service.UserId = providerId;
+                // Service service = new Service
+                // {
+                //     ServiceId = Guid.NewGuid(),
+                //     Title = dto.Title,
+                //     Description = dto.Description,
+                //     Price = dto.Price,
+                //     
+                // };
 
                 // Asignar categorías si vienen IDs
                 if (dto.CategoryIds != null && dto.CategoryIds.Any())
@@ -146,23 +151,11 @@ namespace Worksy.Web.Services.Implementations
                     Description = c.Description
                 }).ToList();
 
-                return new Response<ServiceDTO>
-                {
-                    isSuccess = true,
-                    Message = "Servicio creado exitosamente.",
-                    Errors = null,
-                    Result = dto
-                };
+                return Response<ServiceDTO>.Success(dto, "Servicio creado exitosamente.");
             }
             catch (Exception ex)
             {
-                return new Response<ServiceDTO>
-                {
-                    isSuccess = false,
-                    Message = ex.Message,
-                    Errors = new List<string> { ex.Message },
-                    Result = null
-                };
+                return Response<ServiceDTO>.Failure(ex);
             }
         }
 
@@ -300,6 +293,29 @@ namespace Worksy.Web.Services.Implementations
                     Result = null
                 };
             }
+        }
+
+        public async Task<Response<IEnumerable<ServiceDTO>>> GetServicesByProviderAsync(Guid providerId)
+        {
+            var services = await _context.Services
+                .Where(s => s.UserId == providerId)
+                .Select(s => new ServiceDTO
+                {
+                    ServiceId = s.ServiceId,
+                    Title = s.Title,
+                    Description = s.Description,
+                    Price = s.Price,
+                    CategoryIds = s.Categories.Select(c => c.CategoryId).ToList()
+                })
+                .ToListAsync();
+
+            if (!services.Any())
+            {
+                return Response<IEnumerable<ServiceDTO>>.Failure(
+                    "No se encontraron servicios para el proveedor especificado.");
+            }
+
+            return Response<IEnumerable<ServiceDTO>>.Success(services, "Servicios obtenidos con éxito.");
         }
     }
 }

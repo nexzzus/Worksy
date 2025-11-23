@@ -22,7 +22,6 @@ namespace Worksy.Web.Data.Entities
         public string? Location { get; set; }
         
         public Guid? UserId { get; set; }
-        
         public User? User { get; set; }
         
         public DateTime? PublicationDate { get; set; }

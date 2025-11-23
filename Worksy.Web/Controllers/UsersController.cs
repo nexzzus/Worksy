@@ -36,23 +36,32 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
+        public IActionResult Register(string? type)
         {
+            ViewBag.Type = type;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model, string? type)
         {
             if (!ModelState.IsValid)
             {
                 _notyf.Error("Complete los campos requeridos");
                 return View(model);
             }
-            
-            
-            Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
+
+            Response<IdentityResult> result;
+            if (type == "collab")
+            {
+                result = await _userService.AddCollabAsync(model, model.Password);
+            }
+            else
+            {
+                result = await _userService.AddUserAsync(model, model.Password);
+            }
+
 
             if (!result.isSuccess)
             {
@@ -446,7 +455,7 @@ namespace Worksy.Web.Controllers
                     ModelState.AddModelError(string.Empty, e);
 
                 _notyf.Error("No se pudo crear el usuario.");
-                
+
                 return View("Table/UsersTable", model);
             }
 
@@ -468,7 +477,8 @@ namespace Worksy.Web.Controllers
         [CustomAuthorize("user.update", "Users")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUser(Guid id, [Bind("Id,FirstName,LastName,Email,PhoneNumber,Address,Biography")] User model)
+        public async Task<IActionResult> EditUser(Guid id,
+            [Bind("Id,FirstName,LastName,Email,PhoneNumber,Address,Biography")] User model)
         {
             if (id != model.Id) return BadRequest();
 

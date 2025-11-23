@@ -10,17 +10,19 @@ namespace Worksy.Web.Controllers
     public class ServicesController : Controller
     {
         private readonly IServicesService _servicesService;
-        public INotyfService _notifyService { get; }
+        private readonly INotyfService _notifyService;
+        private readonly IUserService _userService;
 
-        public ServicesController(IServicesService servicesService, INotyfService notifyService)
+        public ServicesController(IServicesService servicesService, INotyfService notify, IUserService userService)
         {
             _servicesService = servicesService;
-            _notifyService = notifyService;
+            _notifyService = notify;
+            _userService = userService;
         }
-        
-        
+
+
         [HttpGet("/Services")]
-        [CustomAuthorize("service.show","Services")]
+        [CustomAuthorize("service.showAll", "Servicios")]
         public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? q = null)
         {
             Response<List<ServiceDTO>> response = await _servicesService.GetAllAsync();
@@ -37,9 +39,10 @@ namespace Worksy.Web.Controllers
             {
                 var term = q.Trim().ToLower();
                 data = data.Where(s =>
-                    (!string.IsNullOrWhiteSpace(s.Title)       && s.Title.ToLower().Contains(term)) ||
+                    (!string.IsNullOrWhiteSpace(s.Title) && s.Title.ToLower().Contains(term)) ||
                     (!string.IsNullOrWhiteSpace(s.Description) && s.Description.ToLower().Contains(term)) ||
-                    (s.Categories != null && s.Categories.Any(c => !string.IsNullOrWhiteSpace(c.Name) && c.Name.ToLower().Contains(term)))
+                    (s.Categories != null && s.Categories.Any(c =>
+                        !string.IsNullOrWhiteSpace(c.Name) && c.Name.ToLower().Contains(term)))
                 ).ToList();
             }
 
@@ -67,7 +70,7 @@ namespace Worksy.Web.Controllers
         }
 
 
-        [CustomAuthorize("service.show","Sevices")]
+        [CustomAuthorize("service.show", "Servicios")]
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -75,11 +78,12 @@ namespace Worksy.Web.Controllers
             {
                 return NotFound();
             }
+
             return View(response.Result);
         }
 
         [HttpGet]
-        [CustomAuthorize("service.create","Services")]
+        [CustomAuthorize("service.create", "Servicios")]
         public async Task<IActionResult> Create()
         {
             // Cargar categorías para el formulario
@@ -89,10 +93,9 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.create","Services")]
+        [CustomAuthorize("service.create", "Servicios")]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
-
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
@@ -101,7 +104,8 @@ namespace Worksy.Web.Controllers
                 return View(dto);
             }
 
-            Response<ServiceDTO> response = await _servicesService.CreateAsync(dto);
+            var userId = _servicesService.GetCurrentUserId();
+            Response<ServiceDTO> response = await _servicesService.CreateAsync(dto, userId);
 
             if (!response.isSuccess)
             {
@@ -112,11 +116,18 @@ namespace Worksy.Web.Controllers
             }
 
             _notifyService.Success(response.Message);
+
+            var isAdmin = await _userService.CurrentUserIsAuthorizedAsync("service.showAll", "Servicios");
+            if (isAdmin is false)
+            {
+                return RedirectToAction("Index", "Provider");
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
-        [CustomAuthorize("service.update","Services")]
+        [CustomAuthorize("service.update", "Servicios")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<ServiceDTO> response = await _servicesService.GetOneAsync(id);
@@ -134,7 +145,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.update","Services")]
+        [CustomAuthorize("service.update", "Servicios")]
         public async Task<IActionResult> Edit(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -160,7 +171,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.delete","Services")]
+        [CustomAuthorize("service.delete", "Servicios")]
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _servicesService.DeleteAsync(id);

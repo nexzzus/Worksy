@@ -1,3 +1,6 @@
+@inject IUserService _userService
+
+
 <div class="sidebar-header border-bottom">
     <div class="sidebar-brand">
         <svg class="sidebar-brand-full" width="88" height="32" alt="CoreUI Logo">
@@ -26,41 +29,67 @@
 
     <li class="nav-title">Acciones</li>
 
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Services" asp-action="Index">
-            <svg class="nav-icon">
-                <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-drop")"></use>
-            </svg>
-            Servicios
-        </a>
-    </li>
+    @if (await _userService.CurrentUserIsAuthorizedAsync("service.showAll", "Servicios") &&
+         await _userService.CurrentUserIsAuthorizedAsync("all.access", "Todos"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Services" asp-action="Index">
+                <svg class="nav-icon">
+                    <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-drop")"></use>
+                </svg>
+                Servicios
+            </a>
+        </li>
+    }
+    else if (await _userService.CurrentUserIsAuthorizedAsync("service.show", "Servicios"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Provider" asp-action="Index">
+                <svg class="nav-icon">
+                    <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-tags")"></use>
+                </svg>
+                Servicios
+            </a>
+        </li>
+    }
 
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Categories" asp-action="Index">
-            <svg class="nav-icon">
-                <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-pencil")"></use>
-            </svg>
-            Categorías
-        </a>
-    </li>
-    
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Users" asp-action="UsersTable">
-            <svg class="nav-icon">
-                <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-pencil")"></use>
-            </svg>
-            Usuarios
-        </a>
-    </li>
+    @if (await _userService.CurrentUserIsAuthorizedAsync("categories.show", "Categorias"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Categories" asp-action="Index">
+                <svg class="nav-icon">
+                    <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-playlist-add")"></use>
+                </svg>
+                Categorías
+            </a>
+        </li>
+    }
 
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Roles" asp-action="Index">
-            <svg class="nav-icon">
-                <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-pencil")"></use>
-            </svg>
-            Roles
-        </a>
-    </li>
+    @if (await _userService.CurrentUserIsAuthorizedAsync("users.showAll", "Usuarios"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Users" asp-action="UsersTable">
+                <svg class="nav-icon">
+                    <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-user")"></use>
+                </svg>
+                Usuarios
+            </a>
+        </li>
+    }
+
+    @if (await _userService.CurrentUserIsAuthorizedAsync("roles.show", "Roles"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Roles" asp-action="Index">
+                <svg class="nav-icon">
+                    <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-https")"></use>
+                </svg>
+                Roles
+            </a>
+        </li>
+    }
+    @await Component.InvokeAsync("ChatsSidebar")
+    @*@await Html.PartialAsync("Dashboard/_ChatsSidebar", ViewBag.Conversations as IEnumerable<Conversation>)*@
 </ul>
 
 <div class="sidebar-footer border-top d-none d-md-flex">

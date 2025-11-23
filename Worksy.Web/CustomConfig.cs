@@ -66,6 +66,9 @@ public static class CustomConfig
 
     public static void AddServices(WebApplicationBuilder builder)
     {
+        builder.Services.AddSignalR();
+        builder.Services.AddHttpContextAccessor();
+        
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IServicesService, ServicesService>();
         builder.Services.AddScoped<ICategoriesService, CategoriesService>();
@@ -76,6 +79,7 @@ public static class CustomConfig
         builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddTransient<SeedDB>();
         builder.Services.AddTransient<ICombosHelper, CombosHelper>();
+
     }
 
     public static void AddCookies(WebApplicationBuilder builder)

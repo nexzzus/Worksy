@@ -1,19 +1,31 @@
 using Microsoft.AspNetCore.SignalR;
 
-namespace Worksy.Web.Hubs;
-
-public class ChatHub: Hub
+namespace Worksy.Web.Hubs
 {
-    public override Task OnConnectedAsync()
+    public class ChatHub : Hub
     {
-        var http = Context.GetHttpContext();
-        var conversationId = http?.Request.Query["conversationId"];
-
-        if (!string.IsNullOrEmpty(conversationId))
+        public override async Task OnConnectedAsync()
         {
-            Groups.AddToGroupAsync(Context.ConnectionId, conversationId!);
+            var http = Context.GetHttpContext();
+            var conversationId = http?.Request.Query["conversationId"].ToString();
+
+            if (!string.IsNullOrEmpty(conversationId))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);
+            }
+
+            await base.OnConnectedAsync();
         }
 
-        return base.OnConnectedAsync();
+        public async Task SendMessage(string conversationId, string userId, string message)
+        {
+            await Clients.Group(conversationId).SendAsync("ReceiveMessage", new
+            {
+                conversationId,
+                userId,
+                message,
+                sentAt = DateTime.UtcNow
+            });
+        }
     }
 }
