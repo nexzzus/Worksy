@@ -1,7 +1,10 @@
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Worksy.Web.Core;
 using Worksy.Web.Data.Entities;
+using Worksy.Web.DTOs;
+using Worksy.Web.Hubs;
 using Worksy.Web.Services.Abstractions;
 
 namespace Worksy.Web.Controllers;
@@ -10,22 +13,24 @@ public class MessageController : Controller
 {
     private readonly IMessageService _messageService;
     private readonly IConversationService _conversationService;
+    private readonly IHubContext<ChatHub> _hubContext;
 
     private readonly INotyfService _notyfService;
 
     // GET
     public MessageController(IMessageService messageService, IConversationService conversationService,
-        INotyfService notyfService)
+        INotyfService notyfService, IHubContext<ChatHub> hubContext)
     {
         _messageService = messageService;
         _conversationService = conversationService;
         _notyfService = notyfService;
+        _hubContext = hubContext;
     }
 
     public async Task<IActionResult> Chat(Guid conversationId)
     {
         Response<Conversation?> conversation = await _conversationService.GetConversationAsync(conversationId);
-        if (conversation is null)
+        if (!conversation.isSuccess || conversation.Result == null)
         {
             _notyfService.Error("La conversación no existe.");
             return NotFound();
@@ -45,14 +50,15 @@ public class MessageController : Controller
     [HttpPost]
     public async Task<IActionResult> Send(Guid conversationId, string content)
     {
-        Guid useId = Guid.Parse(User.FindFirst("UserId")?.Value!);
-        if (useId == Guid.Empty)
+        Guid userId = Guid.Parse(User.FindFirst("UserId")!.Value);
+
+        if (string.IsNullOrWhiteSpace(content))
         {
-            _notyfService.Error("Usuario no autenticado.");
+            _notyfService.Error("El mensaje no puede estar vacío.");
             return RedirectToAction("Chat", new { conversationId });
         }
 
-        Response<Message> response = await _messageService.AddMessageAsync(conversationId, useId, content);
+        var response = await _messageService.AddMessageAsync(conversationId, userId, content);
 
         if (!response.isSuccess)
         {
@@ -60,7 +66,15 @@ public class MessageController : Controller
             return RedirectToAction("Chat", new { conversationId });
         }
 
-        _notyfService.Success("Mensaje enviado con éxito.");
-        return Ok(response.Result);
+        // Enviar mensaje por SignalR a TODOS menos al emisor
+        await _hubContext.Clients.Group(conversationId.ToString())
+            .SendAsync("ReceiveMessage",
+                userId.ToString(),
+                content,
+                response.Result.SentAt,
+                conversationId);
+
+        return RedirectToAction("Chat", new { conversationId });
     }
+
 }

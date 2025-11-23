@@ -163,6 +163,7 @@
       <_ContentIncludedByDefault Remove="wwwroot\assets\vendor\swiper\swiper-bundle.min.js" />
       <_ContentIncludedByDefault Remove="wwwroot\assets\vendor\swiper\swiper-bundle.min.js.map" />
       <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />
+      <_ContentIncludedByDefault Remove="Views\Chats\WithUser.cshtml" />
     </ItemGroup>
 
     <ItemGroup>

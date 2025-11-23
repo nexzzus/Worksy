@@ -4,8 +4,16 @@ namespace Worksy.Web.Hubs;
 
 public class ChatHub: Hub
 {
-    public async Task SendMessage(Guid fromUser, Guid toUser, string message)
+    public override Task OnConnectedAsync()
     {
-        await Clients.User(toUser.ToString()).SendAsync("ReceiveMessage", fromUser, message);
+        var http = Context.GetHttpContext();
+        var conversationId = http?.Request.Query["conversationId"];
+
+        if (!string.IsNullOrEmpty(conversationId))
+        {
+            Groups.AddToGroupAsync(Context.ConnectionId, conversationId!);
+        }
+
+        return base.OnConnectedAsync();
     }
 }

@@ -19,6 +19,8 @@ public class ConversationService : IConversationService
     {
         Conversation? conversation = await _context.Conversations
             .Include(c => c.Messages)
+            .Include(c=> c.Customer)
+            .Include(c=> c.Provider)
             .FirstOrDefaultAsync(c => c.Id == id);
 
         if (conversation == null)
@@ -33,8 +35,8 @@ public class ConversationService : IConversationService
     {
         Conversation? conversation = await _context.Conversations
             .FirstOrDefaultAsync(c =>
-                c.UserId == userId &&
-                c.User2Id == user2Id &&
+                c.CustomerId == userId &&
+                c.ProviderId == user2Id &&
                 c.ServiceId == serviceId
             );
 
@@ -50,8 +52,8 @@ public class ConversationService : IConversationService
     {
         Conversation conversation = new Conversation
         {
-            UserId = userId,
-            User2Id = user2Id,
+            CustomerId = userId,
+            ProviderId = user2Id,
             ServiceId = serviceId
         };
 

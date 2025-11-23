@@ -1,0 +1,88 @@
+@model List<Message>
+
+@{
+    ViewBag.Title = "Chat";
+    Layout = "_Layout";
+    Guid conversationId = ViewBag.ConversationId;
+    var userId = User.FindFirst("UserId")?.Value!;
+}
+
+<div class="container py-4" style="max-width: 700px;">
+    <h3 class="mb-3">Chat</h3>
+
+    <!-- CHAT BOX -->
+    <div id="messagesList"
+         class="border rounded p-3 mb-3 bg-light"
+         style="height: 400px; overflow-y: auto;">
+
+        @foreach (var msg in Model)
+        {
+            bool isMine = msg.SenderId == Guid.Parse(userId);
+
+            <div class="d-flex mb-2 @(isMine ? "justify-content-end" : "justify-content-start")">
+                <div class="p-2 rounded"
+                     style="max-width: 70%;
+                            background: @(isMine ? "#cde5ff" : "#ffffff");
+                            border: 1px solid #ccc;">
+                    @msg.Content
+                    <div class="small text-muted text-end">@msg.SentAt.ToLocalTime()</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- FORM POST NORMAL -->
+    <form method="post" asp-action="Send" asp-controller="Message">
+        <input type="hidden" name="conversationId" value="@conversationId" />
+
+        <div class="input-group">
+            <input name="content" id="messageInput" class="form-control" placeholder="Escribe un mensaje...">
+            <button class="btn btn-primary">Enviar</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+<script>
+    const userId = "@userId";
+    const conversationId = "@conversationId";
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    // Cuando otro usuario envía un mensaje
+    connection.on("ReceiveMessage", function (fromUser, message, sentAt, convId) {
+
+        if (convId !== conversationId) return;
+
+        const isMine = fromUser === userId;
+
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add(
+            "d-flex", "mb-2",
+            isMine ? "justify-content-end" : "justify-content-start"
+        );
+
+        msgDiv.innerHTML = `
+            <div class="p-2 rounded"
+                 style="max-width:70%; background:${isMine ? "#cde5ff" : "#ffffff"}; border:1px solid #ccc;">
+                ${message}
+                <div class="small text-muted text-end">${new Date(sentAt).toLocaleString()}</div>
+            </div>
+        `;
+
+        document.getElementById("messagesList").appendChild(msgDiv);
+        scrollToBottom();
+    });
+
+    connection.start();
+
+    function scrollToBottom() {
+        const messagesDiv = document.getElementById("messagesList");
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    scrollToBottom();
+</script>

@@ -22,7 +22,7 @@ public class MessageService : IMessageService
             .OrderBy(m => m.SentAt)
             .ToListAsync();
 
-        if (message == null)
+        if (!message.Result.Any())
         {
             return Response<List<Message>>.Failure("No se encontraron mensajes para esta conversación.");
         }

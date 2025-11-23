@@ -24,7 +24,7 @@ public class ConversationsController : Controller
 
         if (existing.isSuccess)
         {
-            return RedirectToAction("Chat", "Message", new {conversationId = existing.Result.Id});
+            return RedirectToAction("Chat", "Message", new {conversationId = existing.Result!.Id});
         }
         
         // Crear conversación nueva
