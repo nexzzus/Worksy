@@ -6,20 +6,20 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Admin</title>
 
-  @await Html.PartialAsync("Dashboard/_DashboardStyles")
+  @await Html.PartialAsync("_DashboardStyles")
 
 </head>
 <body>
 <!-- Sidebar-->
 <div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
-  @await Html.PartialAsync("Dashboard/_DashboardSidebar")
+  @await Html.PartialAsync("_DashboardSidebar")
 </div>
 
 <!-- Wrapper-->
 <div class="wrapper d-flex flex-column min-vh-100">
   
   <!-- Header-->
-  @await Html.PartialAsync("Dashboard/_DashboardHeader")
+  @await Html.PartialAsync("_DashboardHeader")
 
   <div class="body flex-grow-1 px-3">
     <div class="container-lg">
@@ -29,7 +29,7 @@
 
 </div>
 
-@await Html.PartialAsync("Dashboard/_DashboardScripts")
+@await Html.PartialAsync("_Scripts")
 @await RenderSectionAsync("Scripts", required: false)
 
 @await Component.InvokeAsync("Notyf")

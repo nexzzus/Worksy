@@ -136,7 +136,7 @@
   @if (ViewData["HideBreadcrumb"] == null || !(bool)ViewData["HideBreadcrumb"])
   {
     <div class="container-fluid">
-      @await Html.PartialAsync("Dashboard/_DashboardBreadcrumb", (ViewData["BreadcrumbParent"] as string ?? "", ViewData["BreadcrumbChild"] as string))
+      @await Html.PartialAsync("_DashboardBreadcrumb", (ViewData["BreadcrumbParent"] as string ?? "", ViewData["BreadcrumbChild"] as string))
 
     </div>
   } 

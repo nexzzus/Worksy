@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.Services.Abstractions;
 
-namespace Worksy.Web.Views.Shared.Dashboard;
+namespace Worksy.Web.Views.Shared;
 
 public class ChatsSidebarViewComponent: ViewComponent
 {

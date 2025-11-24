@@ -42,9 +42,9 @@ public class RolesService : CustomQueryableOperationService, IRolesService
 
                 foreach (Guid permissionId in permissionsIds)
                 {
-                    RolePermission rolePermission = new RolePermission()
+                    RolePermission rolePermission = new RolePermission
                     {
-                        WorksyRoleId = newRoleId,
+                        WorksyRoleId = role.Id,
                         PermissionId = permissionId
                     };
                     await _context.RolePermissions.AddAsync(rolePermission);

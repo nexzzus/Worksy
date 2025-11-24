@@ -16,9 +16,8 @@ namespace Worksy.Web.Data
 
         public DbSet<WorksyRole> WorksyRoles { get; set; }
 
-        public DbSet<RolePermission> RolePermissions { get; set; }
-
         public DbSet<Permission> Permissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
 
         public DbSet<Conversation> Conversations { get; set; }
 

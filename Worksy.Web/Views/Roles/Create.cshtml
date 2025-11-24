@@ -1,7 +1,6 @@
 @model Worksy.Web.DTOs.WorksyRoleDTO
 @{
     ViewBag.Title = "Nuevo Rol";
-    Layout = "Dashboard/_Dashboard";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = true;
     ViewData["BreadcrumbParent"] = "Roles";
@@ -9,43 +8,44 @@
 }
 
 <div class="container-lg">
-        <div class="d-flex align-items-center mb-3">
-            <h2 class="mb-0">Crear Rol</h2>
-        </div>
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0">Crear Rol</h2>
+    </div>
 
-        <form asp-action="Create" method="post" id="frmCreate" class="row g-3">
-            @Html.AntiForgeryToken()
+    <form class="row g-3" asp-action="Create" method="post" id="frmCreate">
 
-            @await Html.PartialAsync("_Role", Model)
+        @await Html.PartialAsync("_Role", Model)
 
-            <!-- Campo oculto que enviará el CSV de permisos -->
-            <input type="hidden" asp-for="PermissionsIds" id="PermissionsIds_Create"/>
+    </form>
+    @await Html.PartialAsync("_Permissions", Model)
 
-            
-        </form>
-        @await Html.PartialAsync("_Permissions", Model)
-        
-        <div class="col-12 mb-3">
-            <button type="submit" class="btn btn-primary" id="btnCreate" form="frmCreate">Guardar</button>
-            <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
-        </div>
-        
+
+    <div class="col-12 mb-3">
+        <button type="submit" class="btn btn-primary" form="frmCreate" id="btnCreate">Guardar</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
+    </div>
+
 
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial"/>
-
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_Validationscriptspartial");
+    }
     <script>
-        (() => {
-            const form = document.getElementById('frmCreate');
-            const hiddenCsv = document.getElementById('PermissionsIds_Create');
+        $(document).ready(function () {
+            $('#btnCreate').click(function (event) {
+                const permissions = $('.permission:checked');
 
-            form.addEventListener('submit', function () {
-                const ids = Array.from(document.querySelectorAll('.permission:checked'))
-                    .map(cb => cb.dataset.permissionId);
-                hiddenCsv.value = ids.join(',');
+                let permissionIds = [];
+
+                permissions.each(function () {
+                    const permissionId = $(this).data('permission-id');
+                    permissionIds.push(permissionId);
+                });
+                $('#permissionIds').val(JSON.stringify(permissionIds));
+
             });
-        })();
+        });
     </script>
 }

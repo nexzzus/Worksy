@@ -7,6 +7,7 @@ using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
 
 namespace Worksy.Web.Controllers;
+
 public class RolesController : Controller
 {
     private readonly IRolesService _rolesService;
@@ -17,9 +18,9 @@ public class RolesController : Controller
         _rolesService = rolesService;
         _notyfService = notyfService;
     }
-    
+
     [HttpGet]
-    [CustomAuthorize(permission:"rol.show",module: "Roles")]
+    [CustomAuthorize(permission: "rol.show", module: "Roles")]
     public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
     {
         Response<PaginationResponse<WorksyRoleDTO>> response = await _rolesService.GetPaginatedListAsync(request);
@@ -29,7 +30,7 @@ public class RolesController : Controller
             _notyfService.Error(response.Message);
             return View(response);
         }
-        
+
         return View(response.Result);
     }
 
@@ -45,7 +46,7 @@ public class RolesController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        WorksyRoleDTO dto = new WorksyRoleDTO()
+        WorksyRoleDTO dto = new WorksyRoleDTO
         {
             Permissions = PermissionResponse.Result
         };
@@ -59,13 +60,14 @@ public class RolesController : Controller
         if (!ModelState.IsValid)
         {
             _notyfService.Error("Complete los campos requeridos");
-            
+
             Response<List<PermissionsForRoleDTO>> permissionsResponse = await _rolesService.GetPermissionsAsync();
             if (!permissionsResponse.isSuccess)
             {
                 _notyfService.Error(permissionsResponse.Message);
                 return RedirectToAction(nameof(Index));
             }
+
             dto.Permissions = permissionsResponse.Result;
             return View(dto);
         }
@@ -76,15 +78,16 @@ public class RolesController : Controller
             _notyfService.Success(result.Message);
             return RedirectToAction(nameof(Index));
         }
-        
+
         _notyfService.Error(result.Message);
-        
+
         Response<List<PermissionsForRoleDTO>> permissionsResponse2 = await _rolesService.GetPermissionsAsync();
         if (!permissionsResponse2.isSuccess)
         {
             _notyfService.Error(permissionsResponse2.Message);
             return RedirectToAction(nameof(Index));
         }
+
         dto.Permissions = permissionsResponse2.Result;
         return View(dto);
     }
@@ -111,13 +114,14 @@ public class RolesController : Controller
         if (!ModelState.IsValid)
         {
             _notyfService.Error("Complete los campos requeridos");
-            
+
             Response<List<PermissionsForRoleDTO>> permissionsResponse = await _rolesService.GetPermissionsAsync();
             if (!permissionsResponse.isSuccess)
             {
                 _notyfService.Error(permissionsResponse.Message);
                 return RedirectToAction(nameof(Index));
             }
+
             dto.Permissions = permissionsResponse.Result;
             return View(dto);
         }
@@ -128,19 +132,20 @@ public class RolesController : Controller
             _notyfService.Success(result.Message);
             return RedirectToAction(nameof(Index));
         }
-        
+
         _notyfService.Error(result.Message);
-        
+
         Response<List<PermissionsForRoleDTO>> permissionsResponse2 = await _rolesService.GetPermissionsAsync();
         if (!permissionsResponse2.isSuccess)
         {
             _notyfService.Error(permissionsResponse2.Message);
             return RedirectToAction(nameof(Index));
         }
+
         dto.Permissions = permissionsResponse2.Result;
         return View(dto);
     }
-    
+
     [HttpPost]
     [CustomAuthorize("rol.delete", "Roles")]
     public async Task<IActionResult> Delete(Guid id)
@@ -158,5 +163,4 @@ public class RolesController : Controller
 
         return RedirectToAction(nameof(Index));
     }
-    
 }
