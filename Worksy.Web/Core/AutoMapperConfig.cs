@@ -28,6 +28,21 @@ namespace Worksy.Web.Core
 
             CreateMap<User, UpdateProfileDTO>().ReverseMap();
             CreateMap<User, RegisterViewModel>().ReverseMap();
+            CreateMap<UpdateUserAdmin, User>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dest => dest.NormalizedUserName, opt => opt.Ignore())
+                .ForMember(dest => dest.NormalizedEmail, opt => opt.Ignore())
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.SecurityStamp, opt => opt.Ignore()) // NO TOCAR
+                .ForMember(dest => dest.ConcurrencyStamp, opt => opt.Ignore()) // NO TOCAR
+                .ForMember(dest => dest.EmailConfirmed, opt => opt.Ignore())
+                .ForMember(dest => dest.PhoneNumberConfirmed, opt => opt.Ignore())
+                .ForMember(dest => dest.TwoFactorEnabled, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) =>
+                    srcMember != null && !(srcMember is string s && string.IsNullOrWhiteSpace(s))
+                ));
+            CreateMap<User, UpdateUserAdmin>();
 
             // De entidad a DTO
             CreateMap<Category, CategoryDTO>();

@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop.Infrastructure;
 using Worksy.Web.Core;
 using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Core.Attributes;
@@ -29,6 +30,8 @@ namespace Worksy.Web.Controllers
             INotyfService notyf, IEmailSender emailSender, IUserService userService, ICombosHelper combosHelper)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
+            this._mapper = _mapper;
             _notyf = notyf;
             _emailSender = emailSender;
             _userService = userService;
@@ -78,293 +81,6 @@ namespace Worksy.Web.Controllers
             _notyf.Success("Registro exitoso. ¡Bienvenido!");
             return RedirectToAction("Login", "Account");
         }
-
-        // ===================== AUTH / PROFILE EXISTENTES =====================
-
-        // [HttpGet]
-        // public IActionResult Register() => View();
-
-        /*
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                _notyf.Error("Por favor completa los campos correctamente.");
-                return View("Register", model);
-            }
-
-            var existing = await _userManager.FindByEmailAsync(model.Email);
-            if (existing != null)
-            {
-                ModelState.AddModelError(nameof(model.Email), "El correo ya está registrado.");
-                _notyf.Error("El correo ya está registrado.");
-                return View("Register", model);
-            }
-
-
-
-            var userDto = new UserDTO
-            {
-                FirstName   = model.FirstName?.Trim() ?? string.Empty,
-                LastName    = model.LastName?.Trim() ?? string.Empty,
-                Email       = model.Email?.Trim() ?? string.Empty,
-                Password    = model.Password,
-                PhoneNumber = string.IsNullOrWhiteSpace(model.PhoneNumber) ? null : model.PhoneNumber.Trim(),
-                Address     = string.IsNullOrWhiteSpace(model.Address) ? string.Empty : model.Address.Trim(),
-                Biography   = null
-            };
-
-            var user = new User
-            {
-                FirstName   = userDto.FirstName, // required -> nunca null
-                LastName    = userDto.LastName,  // required -> nunca null
-                Address     = userDto.Address,   // required -> nunca null
-                Email       = userDto.Email,
-                UserName    = userDto.Email,
-                PhoneNumber = userDto.PhoneNumber
-            };
-
-
-            var result = await _userManager.CreateAsync(user, userDto.Password);
-
-            if (result.Succeeded)
-            {
-                try
-                {
-                    await _emailSender.SendEmailAsync(
-                        user.Email,
-                        "Bienvenido a Worksy",
-                        $"Hola {user.FirstName}, tu cuenta ha sido creada exitosamente."
-                    );
-                }
-                catch
-                {
-                    _notyf.Error("No se pudo enviar el correo de bienvenida. Verifica la configuración SMTP.");
-                }
-
-                _notyf.Success("Cuenta creada correctamente. ¡Bienvenido!");
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                _notyf.Success("Registro exitoso. ¡Bienvenido!");
-                return RedirectToAction("Index", "Home");
-            }
-
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
-
-            _notyf.Error("No se pudo registrar el usuario");
-            return View("Register", model);
-        }
-*/
-        /*
-
-         [HttpGet]
-         public IActionResult Login() => View();
-
-     */
-        /*
-             [HttpPost]
-             public async Task<IActionResult> Login(LoginViewModel model)
-             {
-                 if (!ModelState.IsValid)
-                 {
-                     _notyf.Error("Por favor completa los campos correctamente.");
-                     return View("Login", model);
-                 }
-
-                 var result = await _signInManager.PasswordSignInAsync(
-                     model.Email,
-                     model.Password,
-                     isPersistent: false,
-                     lockoutOnFailure: false);
-
-                 if (result.Succeeded)
-                 {
-                     _notyf.Success("Inicio de sesión exitoso");
-                     return RedirectToAction("Index", "Home");
-                 }
-
-                 _notyf.Error("Correo o contraseña incorrectos");
-                 return View("Login", model);
-             }
-     */
-
-        // [HttpPost]
-        // [ValidateAntiForgeryToken]
-        // public async Task<IActionResult> Logout()
-        // {
-        //     await _signInManager.SignOutAsync();
-        //     _notyf.Success("Sesión cerrada correctamente.");
-        //     return RedirectToAction("Index", "Home");
-        // }
-
-        // [HttpGet]
-        // public IActionResult AccessDenied() => View();
-
-        /*
-        [HttpGet]
-        public async Task<IActionResult> Profile()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user is null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            var dto = _mapper.Map<UpdateProfileDTO>(user);
-            return View(dto);
-        }*/
-
-        /*
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                _notyf.Error("Complete los campos requeridos");
-                return View(dto);
-            }
-
-            var user = await _userManager.GetUserAsync(User);
-            _mapper.Map(dto, user);
-            var result = await _userManager.UpdateAsync(user);
-
-            if (result.Succeeded)
-            {
-                _notyf.Success("Perfil actualizado exitosamente.");
-                return RedirectToAction("Profile");
-            }
-
-            _notyf.Error("Error al actualizar el perfil. Intente nuevamente.");
-            return View("Profile", dto);
-        }
-
-        [HttpGet]
-        public IActionResult ChangePassword()
-        {
-            return View(new ChangePasswordViewModel());
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                _notyf.Error("Complete los campos requeridos");
-                return View(dto);
-            }
-
-            var user = await _userManager.GetUserAsync(User);
-            if (user is null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
-            if (result.Succeeded)
-            {
-                await _signInManager.RefreshSignInAsync(user);
-                _notyf.Success("Contraseña actualizada exitosamente.");
-                return RedirectToAction("Profile");
-            }
-
-            foreach (var error in result.Errors)
-            {
-                if (error.Code.Equals("PasswordMismatch"))
-                {
-                    ModelState.AddModelError(nameof(dto.OldPassword), "La contraseña actual es incorrecta.");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                    _notyf.Error("" + error.Description);
-                }
-            }
-
-            return View(dto);
-        }
-
-        [HttpGet]
-        public IActionResult ForgotPassword() => View();
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                _notyf.Error("Complete el campo requerido");
-                return View(dto);
-            }
-
-            var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null)
-            {
-                _notyf.Success("Se envió un correo de recuperación al correo indicado");
-                return View();
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = Url.Action("ResetPassword", "Users", new
-            {
-                token,
-                email = user.Email
-            }, Request.Scheme);
-
-            await _emailSender.SendEmailAsync(user.Email, "Recuperar contraseña",
-                $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña");
-
-            _notyf.Success("Se envió un correo de recuperación al correo indicado");
-            return View();
-        }
-
-        [HttpGet]
-        public IActionResult ResetPassword(string token, string email)
-        {
-            if (token is null || email is null)
-            {
-                return RedirectToAction("Login");
-            }
-
-            var model = new ResetPasswordViewModel { Token = token, Email = email };
-            return View(model);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                _notyf.Error("Complete los campos requeridos");
-                return View(dto);
-            }
-
-            var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null)
-            {
-                _notyf.Error("Error al restablecer la contraseña");
-                return RedirectToAction("Login");
-            }
-
-            var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
-            if (result.Succeeded)
-            {
-                _notyf.Success("Contraseña restablecida exitosamente");
-                return RedirectToAction("Login");
-            }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-                _notyf.Error("" + error.Description);
-            }
-
-            return View(dto);
-        }*/
 
         // ===================== USERS TABLE / CRUD =====================
 
@@ -452,70 +168,79 @@ namespace Worksy.Web.Controllers
             if (!result.isSuccess)
             {
                 foreach (var e in result.Errors)
+                {
                     ModelState.AddModelError(string.Empty, e);
+                }
 
                 _notyf.Error("No se pudo crear el usuario.");
-
                 return View("Table/UsersTable", model);
             }
 
             _notyf.Success("Usuario creado correctamente.");
-            model.Roles = await _combosHelper.GetComboRoles();
             return RedirectToAction(nameof(UsersTable));
         }
 
         // EDIT
-        [CustomAuthorize("user.update", "Users")]
+        [CustomAuthorize("user.update", "Usuarios")]
         [HttpGet]
         public async Task<IActionResult> EditUser(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return NotFound();
-            return View("Table/EditUser", user);
-        }
+            User? user = await _userManager.FindByIdAsync(id.ToString());
 
-        [CustomAuthorize("user.update", "Users")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditUser(Guid id,
-            [Bind("Id,FirstName,LastName,Email,PhoneNumber,Address,Biography")] User model)
-        {
-            if (id != model.Id) return BadRequest();
-
-            var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return NotFound();
-
-            if (!ModelState.IsValid)
-                return View("Table/EditUser", model);
-
-            // required no null
-            user.FirstName = (model.FirstName ?? string.Empty).Trim();
-            user.LastName = (model.LastName ?? string.Empty).Trim();
-            user.Address = (model.Address ?? string.Empty).Trim();
-
-            // si cambia el correo, alinear UserName/Normalized*
-            if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+            if (user == null)
             {
-                user.Email = model.Email?.Trim();
-                user.UserName = model.Email?.Trim();
-                user.NormalizedEmail = user.Email?.ToUpperInvariant();
-                user.NormalizedUserName = user.UserName?.ToUpperInvariant();
+                return NotFound();
             }
 
-            user.PhoneNumber = string.IsNullOrWhiteSpace(model.PhoneNumber) ? null : model.PhoneNumber.Trim();
-            user.Biography = string.IsNullOrWhiteSpace(model.Biography) ? null : model.Biography.Trim();
+            UpdateUserAdmin dto = _mapper.Map<UpdateUserAdmin>(user);
 
+            dto.WorksyRoleId = user.WorksyRoleId;
+            dto.Roles = await _combosHelper.GetComboRoles();
+
+            return View("Table/EditUser", dto);
+        }
+
+        [CustomAuthorize("user.update", "Usuarios")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUser(
+            [Bind("Id,FirstName,LastName,Email,PhoneNumber,Address,Biography,WorksyRoleId")]
+            UpdateUserAdmin model)
+        {
+            if (!ModelState.IsValid)
+            {
+                _notyf.Error("Complete los campos requeridos");
+                model.Roles = await _combosHelper.GetComboRoles();
+                return View("Table/EditUser", model);
+            }
+
+            User? user = await _userManager.FindByIdAsync(model.Id.ToString());
+            if (user == null)
+            {
+                return NotFound();
+            }
+            
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.UserName = model.Email;
+            user.PhoneNumber = model.PhoneNumber;
+            user.Address = model.Address;
+            user.WorksyRole = model.WorksyRole;
+            user.WorksyRoleId = model.WorksyRoleId;
+            
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
                 foreach (var e in result.Errors)
                     ModelState.AddModelError(string.Empty, e.Description);
 
-                _notyf?.Error("No se pudo guardar el usuario.");
+                _notyf.Error("No se pudo guardar el usuario.");
+                model.Roles = await _combosHelper.GetComboRoles();
                 return View("Table/EditUser", model);
             }
 
-            _notyf?.Success("Usuario actualizado.");
+            _notyf.Success("Usuario actualizado.");
             return RedirectToAction(nameof(UsersTable));
         }
 
