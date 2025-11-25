@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Worksy.Web.Core;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.Models;
 using Worksy.Web.Services.Abstractions;
@@ -25,7 +26,7 @@ public class HomeController : Controller
     {
         var user = await _userManager.GetUserAsync(User);
 
-        if (await _userService.CurrentUserIsAuthorizedAsync("access.all", "Acceso completo"))
+        if (await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]))
         {
             return RedirectToAction("Index", "Admin");
         }

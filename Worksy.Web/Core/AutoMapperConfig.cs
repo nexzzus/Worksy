@@ -59,7 +59,7 @@ namespace Worksy.Web.Core
                     opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.CategoryIds,
                     opt => opt.MapFrom(src => src.Categories
-                        .Select(c => c.CategoryId)
+                        .Select(c => c.Id)
                         .ToList()));
             
             CreateMap<ServiceDTO, Service>()

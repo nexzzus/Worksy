@@ -1,4 +1,4 @@
-@model List<ServiceDTO>
+@model PaginationResponse<ServiceDTO>
 @{
     ViewBag.Title = "Publicaciones";
     ViewData["HeaderClass"] = "sticky-top";
@@ -11,7 +11,13 @@
     int pageSize = ViewBag.PageSize ?? 10;
     int totalPages = ViewBag.TotalPages ?? 1;
     int totalCount = ViewBag.TotalCount ?? 0;
-    string q = ViewBag.Q as string ?? "";
+
+    string search = Context.Request.Query["search"].ToString();
+    string currentCategory = Context.Request.Query["categoryId"].ToString();
+    string fromPrice = Context.Request.Query["fromPrice"].ToString();
+    string toPrice = Context.Request.Query["toPrice"].ToString();
+    
+    var categories = ViewBag.Categories as IEnumerable<CategoryDTO> ?? new List<CategoryDTO>();
 
     var sel5 = pageSize == 6 ? "selected" : "";
     var sel10 = pageSize == 12 ? "selected" : "";
@@ -29,45 +35,56 @@
 
     <!-- Filtros -->
     <form class="row g-2 align-items-center mb-3" method="get" asp-action="Index">
+        <input type="hidden" name="Page" value="@Model.CurrentPage" />
+        
         <div class="col-sm-6 col-md-4">
-            <input type="text" class="form-control" name="q" value="@q"
-                   placeholder="Buscar por título, descripción o categoría...">
+            <input type="text" class="form-control" name="q" value="@search"
+                   placeholder="Buscar por título o descripción">
         </div>
 
+        @*
+        <div class="col-md-3">
+            <select id="category" name="category" class="form-select">
+                <option value="">Todas las categorías</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat.CategoryId" selected="@(currentCategory == cat.CategoryId.ToString())">
+                        @cat.Name
+                    </option>
+                }
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <select id="fromPrice" name="fromPrice" class="form-select">
+                <option value="">Cualquier precio</option>
+                <option value="0">0</option>
+                <option value="50000">50000</option>
+                <option value="100000">100000</option>
+                <option value="250000">250000</option>
+                <option value="500000">50000</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <select id="toPrice" name="toPrice" class="form-select">
+                <option value="">Cualquier precio</option>
+                <option value="0">0</option>
+                <option value="50000">50000</option>
+                <option value="100000">100000</option>
+                <option value="250000">250000</option>
+                <option value="500000">50000</option>
+            </select>
+        </div>
+        *@
+
         <div class="col-sm-3 col-md-2">
-            <select name="pageSize" class="form-select" onchange="this.form.submit()">
-                @if (pageSize == 6)
-                {
-                    <option value="6" selected>6</option>
-                }
-                else
-                {
-                    <option value="6">6</option>
-                }
-                @if (pageSize == 12)
-                {
-                    <option value="12" selected>12</option>
-                }
-                else
-                {
-                    <option value="12">12</option>
-                }
-                @if (pageSize == 18)
-                {
-                    <option value="18" selected>18</option>
-                }
-                else
-                {
-                    <option value="18">18</option>
-                }
-                @if (pageSize == 24)
-                {
-                    <option value="24" selected>24</option>
-                }
-                else
-                {
-                    <option value="24">24</option>
-                }
+            <select name="RecordsPerPage" class="form-select" asp-for="RecordsPerPage">
+                <option value="2" selected="@(Model.RecordsPerPage == 2)">2</option>
+                <option value="10" selected="@(Model.RecordsPerPage == 10)">10</option>
+                <option value="15" selected="@(Model.RecordsPerPage == 15)">15</option>
+                <option value="30" selected="@(Model.RecordsPerPage == 30)">30</option>
+                <option value="50" selected="@(Model.RecordsPerPage == 50)">50</option>
             </select>
         </div>
 
@@ -76,12 +93,11 @@
             <a asp-action="Index" class="btn btn-link text-light">Limpiar</a>
         </div>
     </form>
-
-    <!-- Grid de fichas -->
-    @if (Model != null && Model.Any())
+    
+    @if (Model?.List != null && Model.List.Any())
     {
         <div class="row g-4">
-            @foreach (var item in Model)
+            @foreach (var item in Model.List)
             {
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100 bg-dark text-white border-0 shadow">
@@ -115,19 +131,19 @@
 
                             <div class="mt-auto">
                                 <div class="d-flex gap-2">
-                                    <a asp-action="Details" asp-route-id="@item.ServiceId"
+                                    <a asp-action="Details" asp-route-id="@item.Id"
                                        class="btn btn-sm btn-info flex-grow-1">Ver</a>
-                                    <a asp-action="Edit" asp-route-id="@item.ServiceId"
+                                    <a asp-action="Edit" asp-route-id="@item.Id"
                                        class="btn btn-sm btn-warning">Editar</a>
-                                    <form asp-action="Delete" asp-route-id="@item.ServiceId" method="post"
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post"
                                           class="d-inline"
                                           onsubmit="return confirm('¿Seguro que deseas eliminar esta publicación?');">
                                         <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
                                     </form>
                                     <a asp-controller="Conversations"
                                        asp-action="Open"
-                                       asp-route-prestadorId="@item.User.Id"
-                                       asp-route-serviceId="@item.ServiceId"
+                                       asp-route-prestadorId="@item.User!.Id"
+                                       asp-route-serviceId="@item.Id"
                                        class="btn btn-sm btn-success flex-grow-1">
                                         Contactar
                                     </a>
@@ -137,7 +153,7 @@
                         <div class="card-footer bg-transparent border-0 text-muted small">
                             Publicado por:
                             <span
-                                class="text-white">@item.ServiceId.ToString().Substring(0, 8)</span>
+                                class="text-white">@item.Id.ToString().Substring(0, 8)</span>
                         </div>
                     </div>
                 </div>
@@ -152,27 +168,5 @@
     }
 
     <!-- Paginación -->
-    @if (totalPages > 1)
-    {
-        <nav class="mt-4" aria-label="Paginación de servicios">
-            <ul class="pagination">
-                <li class="page-item @(page == 1 ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@(page - 1)"
-                       asp-route-pageSize="@pageSize" asp-route-q="@q">Anterior</a>
-                </li>
-                @for (int i = 1; i <= totalPages; i++)
-                {
-                    <li class="page-item @(i == page ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@i"
-                           asp-route-pageSize="@pageSize"
-                           asp-route-q="@q">@i</a>
-                    </li>
-                }
-                <li class="page-item @(page == totalPages ? "disabled" : "")">
-                    <a class="page-link" asp-action="Index" asp-route-page="@(page + 1)"
-                       asp-route-pageSize="@pageSize" asp-route-q="@q">Siguiente</a>
-                </li>
-            </ul>
-        </nav>
-    }
+    @await Html.PartialAsync("_PaginationComponent", Model)
 </div>

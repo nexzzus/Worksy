@@ -43,9 +43,12 @@ public class MessageService : IMessageService
         if (conversation == null)
             return Response<Message>.Failure("La conversación no existe.");
 
+        bool userIsParticipant =
+            conversation.CustomerId == senderId ||
+            conversation.ProviderId == senderId;
+        
         // 3. Validar que el usuario pertenezca a la conversación
-        if (conversation.CustomerId != senderId &&
-            conversation.ProviderId != senderId)
+        if (!userIsParticipant)
         {
             return Response<Message>.Failure("No puedes enviar mensajes en una conversación que no es tuya.");
         }

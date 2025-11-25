@@ -36,11 +36,11 @@
                                 <td>@s.Price.ToString("C")</td>
                                 <td class="text-end">
                                     <a asp-controller="Services" asp-action="Edit"
-                                       asp-route-id="@s.ServiceId"
+                                       asp-route-id="@s.Id"
                                        class="btn btn-sm btn-warning">Editar</a>
 
                                     <form asp-controller="Services" asp-action="Delete"
-                                          asp-route-id="@s.ServiceId" method="post"
+                                          asp-route-id="@s.Id" method="post"
                                           onsubmit="return confirm('¿Eliminar servicio?');"
                                           class="d-inline">
                                         <button class="btn btn-sm btn-danger">Eliminar</button>

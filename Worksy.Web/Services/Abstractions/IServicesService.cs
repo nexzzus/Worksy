@@ -1,4 +1,5 @@
 ﻿using Worksy.Web.Core;
+using Worksy.Web.Core.Pagination;
 using Worksy.Web.DTOs;
 
 namespace Worksy.Web.Services.Abstractions
@@ -14,6 +15,6 @@ namespace Worksy.Web.Services.Abstractions
         public Task<Response<List<CategoryDTO>>> GetAllCategoriesAsync();
         Task<Response<IEnumerable<ServiceDTO>>> GetServicesByProviderAsync(Guid providerId);
         public Guid GetCurrentUserId();
-
+        Task<Response<PaginationResponse<ServiceDTO>>> GetPaginatedListAsync(PaginationRequest request);
     }
 }

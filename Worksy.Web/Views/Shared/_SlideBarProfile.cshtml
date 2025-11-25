@@ -1,29 +1,43 @@
+@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
 <style>
-    .activate{
+    .profile-tabs a {
+        width: 100%;
+        text-align: center;
+        padding: 12px 20px;
+        text-decoration: none;
+        color: #e0e6ed;
+        background-color: #27364f;
+        border-right: 1px solid #1b263b;
+        transition: 0.3s;
+    }
+
+    .profile-tabs a:last-child {
+        border-right: none;
+    }
+
+    .profile-tabs a:hover {
         background-color: #2e3f5d;
+    }
+
+    .profile-tabs .active {
+        background-color: #415a77;
         color: #fff;
     }
 </style>
 
-<!-- Sidebar -->
-<div class="col-md-5 col-xl-4">
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Ajustes de perfil</h5>
-        </div>
-        @{
-            var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-        }
+<div class="card mb-4">
+    <div class="profile-tabs d-flex justify-content-start">
+        <a asp-action="Profile" asp-controller="Account"
+           class="@(currentAction == "Profile" ? "active" : "")">
+            Cuenta
+        </a>
 
-        <div class="list-group list-group-flush">
-            <a class="list-group-item list-group-item-action @(currentAction == "Profile" ? "activate" : "")"
-               asp-controller="Account" asp-action="Profile">
-                Cuenta
-            </a>
-            <a class="list-group-item list-group-item-action @(currentAction == "ChangePassword" ? "activate" : "")"
-               asp-controller="Account" asp-action="ChangePassword">
-                Contraseña
-            </a>
-        </div>
+        <a asp-action="ChangePassword" asp-controller="Account"
+           class="@(currentAction == "ChangePassword" ? "active" : "")">
+            Contraseña
+        </a>
     </div>
 </div>

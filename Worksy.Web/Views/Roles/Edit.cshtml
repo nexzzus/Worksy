@@ -31,18 +31,23 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-
+    @{
+        await Html.RenderPartialAsync("_Validationscriptspartial");
+    }
     <script>
-        (() => {
-            const form = document.getElementById('frmEdit');
-            const hiddenCsv = document.getElementById('PermissionsIds_Edit');
+        $(document).ready(function () {
+            $('#btnEdit').click(function (event) {
+                const permissions = $('.permission:checked');
 
-            form.addEventListener('submit', function () {
-                const ids = Array.from(document.querySelectorAll('.permission:checked'))
-                    .map(cb => cb.dataset.permissionId);
-                hiddenCsv.value = ids.join(',');
+                let permissionIds = [];
+
+                permissions.each(function () {
+                    const permissionId = $(this).data('permission-id');
+                    permissionIds.push(permissionId);
+                });
+                $('#permissionIds').val(JSON.stringify(permissionIds));
+
             });
-        })();
+        });
     </script>
 }

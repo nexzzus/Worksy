@@ -19,8 +19,7 @@ public class PermissionSeeder
             ..Users(),
             ..Services(),
             ..Categories(),
-            ..Valorations(),
-            ..FullAccess()
+            ..Valorations()
         ];
 
         foreach (var permission in permissions)
@@ -88,14 +87,6 @@ public class PermissionSeeder
             new Permission { Name = "valoration.show", Description = "Ver valoraciones", Module = "Valoraciones" },
             new Permission { Name = "valoration.create", Description = "Crear valoraciones", Module = "Valoraciones" },
             new Permission { Name = "valoration.delete", Description = "Eliminar valoraciones", Module = "Valoraciones" }
-        };
-    }
-    
-    private List<Permission> FullAccess()
-    {
-        return new()
-        {
-            new Permission { Name = "access.all", Description = "Acceso completo", Module = "Acceso completo" }
         };
     }
 }

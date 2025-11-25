@@ -5,7 +5,7 @@ namespace Worksy.Web.DTOs
 {
     public class ServiceDTO
     {
-        public Guid ServiceId { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "El título es obligatorio")]
         public string Title { get; set; }

@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
+using Worksy.Web.Core.Pagination;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
@@ -9,16 +10,12 @@ using Worksy.Web.Services.Abstractions;
 
 namespace Worksy.Web.Services.Implementations
 {
-    public class ServicesService : IServicesService
+    public class ServicesService : CustomQueryableOperationsService, IServicesService
     {
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ServicesService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        public ServicesService(DataContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(context, mapper)
         {
-            _context = context;
-            _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -54,7 +51,7 @@ namespace Worksy.Web.Services.Implementations
             {
                 Service? service = await _context.Services
                     .Include(s => s.Categories)
-                    .FirstOrDefaultAsync(s => s.ServiceId == id);
+                    .FirstOrDefaultAsync(s => s.Id == id);
 
                 if (service == null)
                 {
@@ -67,17 +64,17 @@ namespace Worksy.Web.Services.Implementations
 
                 ServiceDTO dto = new ServiceDTO
                 {
-                    ServiceId = service.ServiceId,
+                    Id = service.Id,
                     Title = service.Title,
                     Description = service.Description,
                     Price = service.Price,
                     Categories = service.Categories?.Select(c => new CategoryDTO
                     {
-                        CategoryId = c.CategoryId,
+                        Id = c.Id,
                         Name = c.Name,
                         Description = c.Description
                     }).ToList(),
-                    CategoryIds = service.Categories?.Select(c => c.CategoryId).ToList()
+                    CategoryIds = service.Categories?.Select(c => c.Id).ToList()
                 };
 
                 return new Response<ServiceDTO>
@@ -108,6 +105,24 @@ namespace Worksy.Web.Services.Implementations
             return id != null ? Guid.Parse(id) : Guid.Empty;
         }
 
+        public async Task<Response<PaginationResponse<ServiceDTO>>> GetPaginatedListAsync(PaginationRequest request)
+        {
+            IQueryable<Service> query = _context.Services
+                .Include(s=> s.Categories)
+                .Include(s => s.User)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Filter))
+            {
+                query = query.Where(r => 
+                    r.Title.ToLower().Contains(request.Filter.ToLower()) ||
+                    r.Description.ToLower().Contains(request.Filter.ToLower())
+                    );
+            }
+
+            return await GetPaginationAsync<Service, ServiceDTO>(request, query);
+        }
+
         public async Task<Response<ServiceDTO>> CreateAsync(ServiceDTO dto, Guid providerId)
         {
             try
@@ -133,20 +148,21 @@ namespace Worksy.Web.Services.Implementations
                 if (dto.CategoryIds != null && dto.CategoryIds.Any())
                 {
                     var cats = await _context.Categories
-                        .Where(c => dto.CategoryIds.Contains(c.CategoryId))
+                        .Where(c => dto.CategoryIds.Contains(c.Id))
                         .ToListAsync();
 
                     service.Categories = cats;
                 }
-
+                
+                service.Id = Guid.NewGuid();
                 await _context.Services.AddAsync(service);
                 await _context.SaveChangesAsync();
-                dto.ServiceId = service.ServiceId;
+                dto.Id = service.Id;
 
                 // devolver categorías mapeadas en DTO
                 dto.Categories = service.Categories?.Select(c => new CategoryDTO
                 {
-                    CategoryId = c.CategoryId,
+                    Id = c.Id,
                     Name = c.Name,
                     Description = c.Description
                 }).ToList();
@@ -165,14 +181,14 @@ namespace Worksy.Web.Services.Implementations
             {
                 Service? service = await _context.Services
                     .Include(s => s.Categories)
-                    .FirstOrDefaultAsync(s => s.ServiceId == dto.ServiceId);
+                    .FirstOrDefaultAsync(s => s.Id == dto.Id);
 
                 if (service == null)
                 {
                     return new Response<ServiceDTO>
                     {
                         isSuccess = false,
-                        Message = $"El servicio de id '{dto.ServiceId}' no existe.",
+                        Message = $"El servicio de id '{dto.Id}' no existe.",
                     };
                 }
 
@@ -184,7 +200,7 @@ namespace Worksy.Web.Services.Implementations
                 if (dto.CategoryIds != null)
                 {
                     var cats = await _context.Categories
-                        .Where(c => dto.CategoryIds.Contains(c.CategoryId))
+                        .Where(c => dto.CategoryIds.Contains(c.Id))
                         .ToListAsync();
 
                     // Reemplazar colección
@@ -202,7 +218,7 @@ namespace Worksy.Web.Services.Implementations
                 // Retornar DTO actualizado
                 dto.Categories = service.Categories?.Select(c => new CategoryDTO
                 {
-                    CategoryId = c.CategoryId,
+                    Id = c.Id,
                     Name = c.Name,
                     Description = c.Description
                 }).ToList();
@@ -231,7 +247,7 @@ namespace Worksy.Web.Services.Implementations
         {
             try
             {
-                Service? service = await _context.Services.FirstOrDefaultAsync(s => s.ServiceId == ServiceId);
+                Service? service = await _context.Services.FirstOrDefaultAsync(s => s.Id == ServiceId);
 
                 if (service == null)
                 {
@@ -271,17 +287,12 @@ namespace Worksy.Web.Services.Implementations
                 var cats = await _context.Categories.ToListAsync();
                 var dtos = cats.Select(c => new CategoryDTO
                 {
-                    CategoryId = c.CategoryId,
+                    Id = c.Id,
                     Name = c.Name,
                     Description = c.Description
                 }).ToList();
 
-                return new Response<List<CategoryDTO>>
-                {
-                    isSuccess = true,
-                    Message = "Categorías obtenidas exitosamente.",
-                    Result = dtos
-                };
+                return Response<List<CategoryDTO>>.Success(dtos, "Servicios obtenidos con exito.");
             }
             catch (Exception ex)
             {
@@ -301,11 +312,11 @@ namespace Worksy.Web.Services.Implementations
                 .Where(s => s.UserId == providerId)
                 .Select(s => new ServiceDTO
                 {
-                    ServiceId = s.ServiceId,
+                    Id = s.Id,
                     Title = s.Title,
                     Description = s.Description,
                     Price = s.Price,
-                    CategoryIds = s.Categories.Select(c => c.CategoryId).ToList()
+                    CategoryIds = s.Categories.Select(c => c.Id).ToList()
                 })
                 .ToListAsync();
 

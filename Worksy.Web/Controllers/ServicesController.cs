@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
 using Worksy.Web.Core.Attributes;
+using Worksy.Web.Core.Pagination;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
 
@@ -22,55 +23,30 @@ namespace Worksy.Web.Controllers
 
 
         [HttpGet("/Services")]
-        [CustomAuthorize("service.showAll", "Servicios")]
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? q = null)
+        [CustomAuthorize("service.show", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            Response<List<ServiceDTO>> response = await _servicesService.GetAllAsync();
+            Response<PaginationResponse<ServiceDTO>> response = await _servicesService.GetPaginatedListAsync(request);
 
+            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
-                return View(new List<ServiceDTO>());
+                return View(new PaginationResponse<ServiceDTO>());
             }
 
-            var data = response.Result ?? new List<ServiceDTO>();
-
-            if (!string.IsNullOrWhiteSpace(q))
+            if (isAdmin)
             {
-                var term = q.Trim().ToLower();
-                data = data.Where(s =>
-                    (!string.IsNullOrWhiteSpace(s.Title) && s.Title.ToLower().Contains(term)) ||
-                    (!string.IsNullOrWhiteSpace(s.Description) && s.Description.ToLower().Contains(term)) ||
-                    (s.Categories != null && s.Categories.Any(c =>
-                        !string.IsNullOrWhiteSpace(c.Name) && c.Name.ToLower().Contains(term)))
-                ).ToList();
+                return View(response.Result);
             }
 
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 12;
-
-            var totalCount = data.Count;
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            if (totalPages == 0) totalPages = 1;
-            if (page > totalPages) page = totalPages;
-
-            var paged = data
-                .OrderBy(s => s.Title)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalCount = totalCount;
-            ViewBag.TotalPages = totalPages;
-            ViewBag.Q = q;
-
-            return View(paged);
+            return RedirectToAction("Index", "Provider");
         }
 
 
         [CustomAuthorize("service.show", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN])]
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -117,7 +93,7 @@ namespace Worksy.Web.Controllers
 
             _notifyService.Success(response.Message);
 
-            var isAdmin = await _userService.CurrentUserIsAuthorizedAsync("service.showAll", "Servicios");
+            var isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
             if (isAdmin is false)
             {
                 return RedirectToAction("Index", "Provider");
@@ -183,6 +159,12 @@ namespace Worksy.Web.Controllers
             else
             {
                 _notifyService.Success(response.Message);
+            }
+
+            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
+            if (isAdmin is false)
+            {
+                return RedirectToAction("Index", "Provider");
             }
 
             return RedirectToAction(nameof(Index));

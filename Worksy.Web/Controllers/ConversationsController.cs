@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using Worksy.Web.Data.Entities;
 using Worksy.Web.Services.Abstractions;
 
 namespace Worksy.Web.Controllers
@@ -32,7 +31,7 @@ namespace Worksy.Web.Controllers
 
             // Crear nueva conversación
             var created = await _conversationService
-                .CreateConversationAsync(prestadorId, serviceId);
+                .CreateConversationAsync(userId, serviceId);
 
 
             if (!created.isSuccess || created.Result == null)

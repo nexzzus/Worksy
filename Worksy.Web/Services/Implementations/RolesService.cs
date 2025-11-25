@@ -11,7 +11,7 @@ using Worksy.Web.Services.Abstractions;
 
 namespace Worksy.Web.Services.Implementations;
 
-public class RolesService : CustomQueryableOperationService, IRolesService
+public class RolesService : CustomQueryableOperationsService, IRolesService
 {
     public RolesService(DataContext context, IMapper mapper) : base(context, mapper)
     {
@@ -121,7 +121,7 @@ public class RolesService : CustomQueryableOperationService, IRolesService
 
     public async Task<Response<WorksyRoleDTO>> GetOneAsync(Guid id)
     {
-        Response<WorksyRoleDTO> respose = await GetByIdAsync<WorksyRole, WorksyRoleDTO>(id);
+        Response<WorksyRoleDTO> respose = await GetOneAsync<WorksyRole, WorksyRoleDTO>(id);
         if (!respose.isSuccess)
         {
             return respose;

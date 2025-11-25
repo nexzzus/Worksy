@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using PrivateBlog.Web.Core.Extensions;
+using Worksy.Web.Core.Extensions;
 
 namespace Worksy.Web.Core.Pagination;
-
 
 public class PagedList<T> : List<T>
 {

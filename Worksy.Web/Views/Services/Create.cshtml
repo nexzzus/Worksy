@@ -38,9 +38,9 @@
                 @foreach (var c in allCats)
                 {
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="CategoryIds" value="@c.CategoryId"
-                               id="cat_@c.CategoryId" @(selected.Contains(c.CategoryId) ? "checked" : "")/>
-                        <label class="form-check-label text-white" for="cat_@c.CategoryId">@c.Name</label>
+                        <input class="form-check-input" type="checkbox" name="CategoryIds" value="@c.Id"
+                               id="cat_@c.Id" @(selected.Contains(c.Id) ? "checked" : "")/>
+                        <label class="form-check-label text-white" for="cat_@c.Id">@c.Name</label>
                     </div>
                 }
             </div>

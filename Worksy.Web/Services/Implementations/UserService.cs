@@ -271,4 +271,30 @@ public class UserService : IUserService
             .AnyAsync(p => (p.Module == module && p.Name == permission)
                            && p.RolePermissions.Any(rp => rp.WorksyRoleId == user.WorksyRoleId));
     }
+
+    public async Task<bool> CurrentUserHasRoleAsync(string[] roles)
+    {
+        ClaimsPrincipal? claimsUser = _httpContextAccessor.HttpContext?.User;
+
+        // Valida si hay sesión
+        if (claimsUser is null)
+        {
+            return false;
+        }
+        
+        string userName = claimsUser.Identity!.Name!;
+        User? user = await GetByEmailAsync(userName);
+
+        if (user is null)
+        {
+            return false;
+        }
+
+        if (user.WorksyRole.Name == Env.ROLE_ADMIN)
+        {
+            return true;
+        }
+
+        return roles.Contains(user.WorksyRole.Name);
+    }
 }

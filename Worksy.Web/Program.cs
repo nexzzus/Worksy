@@ -1,5 +1,4 @@
 using Worksy.Web;
-using Worksy.Web.Hubs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

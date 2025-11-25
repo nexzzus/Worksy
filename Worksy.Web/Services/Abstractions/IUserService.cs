@@ -28,4 +28,5 @@ public interface IUserService
     public Task<WorksyRole?> GetDefaultUserRoleIdAsync();
     public bool CurrentUserIsAuthenticateded();
     public Task<bool> CurrentUserIsAuthorizedAsync(string permission, string module);
+    Task<bool> CurrentUserHasRoleAsync(string[] roles);
 }

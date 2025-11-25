@@ -21,6 +21,7 @@ public class ConversationService : IConversationService
             .Include(c => c.Messages)
             .Include(c => c.Customer)
             .Include(c => c.Provider)
+            .Include(c => c.Service)
             .FirstOrDefaultAsync(c => c.Id == id);
 
         if (conversation == null)
@@ -56,7 +57,7 @@ public class ConversationService : IConversationService
     {
         // Obtener el proveedor REAL del servicio
         var service = await _context.Services
-            .FirstOrDefaultAsync(s => s.ServiceId == serviceId);
+            .FirstOrDefaultAsync(s => s.Id == serviceId);
 
         if (service == null)
             return Response<Conversation>.Failure("El servicio no existe.");

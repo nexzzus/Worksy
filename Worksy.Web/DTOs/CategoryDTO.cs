@@ -5,7 +5,7 @@ namespace Worksy.Web.DTOs
     public class CategoryDTO
     {
         [Key]
-        public Guid CategoryId { get; set; }
+        public Guid Id { get; set; }
         
         [MaxLength(32, ErrorMessage = "El campo '{0}' debe tener minimo {1} caracteres.")]
         [Required(ErrorMessage = "El campo '{0}' es obligatorio.")]

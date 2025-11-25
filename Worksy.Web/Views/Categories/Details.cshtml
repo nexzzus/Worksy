@@ -12,7 +12,6 @@
         <div class="container">
             <div class="d-flex align-items-center mb-3">
                 <h2 class="mb-0 fw-semibold text-white">Detalle de categoría</h2>
-                <a asp-action="Index" class="btn btn-link text-light ms-auto">Volver</a>
             </div>
 
             <div class="card bg-dark border-0 shadow-sm">
@@ -48,8 +47,8 @@
                     </dl>
 
                     <div>
-                        <a asp-action="Edit" asp-route-id="@Model.CategoryId" class="btn btn-warning me-2">Editar</a>
-                        <form asp-action="Delete" asp-route-id="@Model.CategoryId" method="post" class="d-inline">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">Editar</a>
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
                             <button type="submit" class="btn btn-danger"
                                     onclick="return confirm('¿Eliminar categoría?');">Eliminar
                             </button>
