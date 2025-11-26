@@ -2,9 +2,10 @@
 @inject IUserService _userService
 @{
     ViewBag.Title = "Usuarios";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = true;
+    ViewData["BreadcrumbParent"] = "Usuarios";
+    ViewData["BreadcrumbChild"] = "";
     var page = (int)(ViewBag.Page ?? 1);
     var pageSize = (int)(ViewBag.PageSize ?? 10);
     var totalPages = (int)(ViewBag.TotalPages ?? 1);
@@ -12,6 +13,7 @@
     string q = ViewBag.Q as string ?? "";
 }
 
+<div class="container-lg">
 <div class="container">
     <div class="d-flex align-items-center mb-3">
         <h2 class="mb-0">Usuarios</h2>
@@ -149,4 +151,5 @@
             </ul>
         </nav>
     }
+</div>
 </div>

@@ -2,9 +2,13 @@
 
 @{
     ViewBag.Title = "Ajustes de perfil";
-    Layout = "_Layout";
+    Layout = ViewData["Layout"]?.ToString();
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+    
+    
+    ViewData["BreadcrumbParent"] = "Perfil";
+    ViewData["BreadcrumbChild"] = "Cuenta";
 }
 
 <style>
@@ -50,13 +54,15 @@
     }
 </style>
 
-<div class="container p-4">
+<div class="container p-0">
     <div class="row justify-content-center">
-        <!-- Sidebar -->
-        @await Html.PartialAsync("_SlideBarProfile")
+      
 
         <!-- Content -->
         <div class="col-md-7 col-xl-8">
+            <!-- Sidebar -->
+            @await Html.PartialAsync("_SlideBarProfile")
+            
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Datos personales</h5>
@@ -70,13 +76,6 @@
                         <div class="mb-3">
                             <label asp-for="Email"></label>
                             <input value="@Model.Email" class="form-control" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Biography"></label>
-                            <textarea asp-for="Biography" class="form-control" rows="2"
-                                      placeholder="Cuéntanos sobre ti"></textarea>
-                            <span class="text-danger" asp-validation-for="Biography"></span>
                         </div>
 
                         <div class="row">
@@ -98,9 +97,19 @@
                         </div>
                         <div class="mb-3">
                             <label asp-for="PhoneNumber"></label>
+                            <small class="text-muted">Opcional</small>
                             <input type="text" class="form-control" asp-for="PhoneNumber" placeholder="Teléfono">
                             <span class="text-danger" asp-validation-for="PhoneNumber"></span>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Biography"></label>
+                            <small class="text-muted">Opcional</small>
+                            <textarea asp-for="Biography" class="form-control" rows="2"
+                                      placeholder="Cuéntanos sobre ti"></textarea>
+                            <span class="text-danger" asp-validation-for="Biography"></span>
+                        </div>
+                        
                         <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
                     </form>
                 </div>

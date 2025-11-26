@@ -16,9 +16,12 @@ namespace Worksy.Web.Data
 
         public DbSet<WorksyRole> WorksyRoles { get; set; }
 
+        public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
 
-        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
+
+        public DbSet<Message> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -42,12 +45,41 @@ namespace Worksy.Web.Data
                 .HasOne(rp => rp.Permission)
                 .WithMany(r => r.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId);
-            
+
             builder.Entity<Service>()
                 .HasOne(s => s.User)
-                .WithMany() // o .WithMany(u => u.Services) si tienes la colección en User
+                .WithMany()
                 .HasForeignKey(s => s.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            builder.Entity<Message>()
+                .HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId);
+
+            builder.Entity<Conversation>()
+                .HasOne(c => c.Customer)
+                .WithMany()
+                .HasForeignKey(c => c.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Conversation>()
+                .HasOne(c => c.Provider)
+                .WithMany()
+                .HasForeignKey(c => c.ProviderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Conversation>()
+                .HasOne(c => c.Service)
+                .WithMany()
+                .HasForeignKey(c => c.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void ConfigureIndex(ModelBuilder builder)

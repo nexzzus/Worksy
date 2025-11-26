@@ -5,6 +5,8 @@ namespace Worksy.Web.ViewModels
 {
     public class RegisterViewModel
     {
+        public Guid Id { get; set; }
+        
         [Required(ErrorMessage = "El nombre es obligatorio.")]
         [Display(Name = "Nombres")]
         [StringLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]

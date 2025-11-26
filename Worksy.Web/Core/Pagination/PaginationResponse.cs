@@ -1,7 +1,6 @@
-using Worksy.Web.Core.Pagination.Abstractions;
+using Worksy.Web.Core.Pagination.Abstraction;
 
 namespace Worksy.Web.Core.Pagination;
-
 
 public class PaginationResponse<T> : IPagination
 {

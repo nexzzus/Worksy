@@ -73,6 +73,46 @@ public class UserService : IUserService
             isSuccess = result.Succeeded,
         };
     }
+    
+    public async Task<Response<IdentityResult>> AddCollabAsync(RegisterViewModel model, string password)
+    {
+        User? exist = await _userManager.FindByEmailAsync(model.Email);
+        if (exist != null)
+        {
+            return Response<IdentityResult>.Failure("El correo ya está en uso");
+        }
+
+        User user = _mapper.Map<User>(model);
+
+        user.UserName = model.Email;
+
+        Guid roleId;
+        if (model.RoleId != Guid.Empty)
+        {
+            WorksyRole? role = await _context.WorksyRoles.FindAsync(model.RoleId);
+            roleId = role.Id;
+        }
+        else
+        {
+            WorksyRole? role = await _context.WorksyRoles.FirstOrDefaultAsync(r => r.Name == Env.ROLE_COLLAB);
+            if (role is null)
+            {
+                return Response<IdentityResult>.Failure("El rol por defecto 'Colaborador' no existe en la base de datos");
+            }
+
+            roleId = role.Id;
+        }
+
+        user.WorksyRoleId = roleId;
+
+        IdentityResult result = await _userManager.CreateAsync(user, password);
+
+        return new Response<IdentityResult>
+        {
+            Result = result,
+            isSuccess = result.Succeeded,
+        };
+    }
 
 
     public async Task<Response<SignInResult>> LoginAsync(LoginViewModel model)
@@ -189,7 +229,7 @@ public class UserService : IUserService
 
     public async Task<User> GetUserAsync(Guid id)
     {
-        return await _context.Users.FindAsync(id);
+        return (await _context.Users.FindAsync(id))!;
     }
 
     public async Task<WorksyRole?> GetDefaultUserRoleIdAsync()
@@ -230,5 +270,31 @@ public class UserService : IUserService
         return await _context.Permissions.Include(p => p.RolePermissions)
             .AnyAsync(p => (p.Module == module && p.Name == permission)
                            && p.RolePermissions.Any(rp => rp.WorksyRoleId == user.WorksyRoleId));
+    }
+
+    public async Task<bool> CurrentUserHasRoleAsync(string[] roles)
+    {
+        ClaimsPrincipal? claimsUser = _httpContextAccessor.HttpContext?.User;
+
+        // Valida si hay sesión
+        if (claimsUser is null)
+        {
+            return false;
+        }
+        
+        string userName = claimsUser.Identity!.Name!;
+        User? user = await GetByEmailAsync(userName);
+
+        if (user is null)
+        {
+            return false;
+        }
+
+        if (user.WorksyRole.Name == Env.ROLE_ADMIN)
+        {
+            return true;
+        }
+
+        return roles.Contains(user.WorksyRole.Name);
     }
 }

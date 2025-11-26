@@ -1,4 +1,5 @@
-namespace Worksy.Web.Core.Pagination.Abstractions;
+
+namespace Worksy.Web.Core.Pagination.Abstraction;
 
 public interface IPagination
 {

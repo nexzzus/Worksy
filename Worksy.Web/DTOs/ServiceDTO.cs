@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Worksy.Web.Data.Entities;
 
 namespace Worksy.Web.DTOs
 {
     public class ServiceDTO
     {
-        public Guid ServiceId { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "El título es obligatorio")]
         public string Title { get; set; }
@@ -17,6 +18,9 @@ namespace Worksy.Web.DTOs
         public decimal Price { get; set; }
         
         public Guid UserId { get; set; }
+
+        public Guid UserId { get; set; }
+        public User? User { get; set; }
 
         public List<CategoryDTO>? Categories { get; set; }
 

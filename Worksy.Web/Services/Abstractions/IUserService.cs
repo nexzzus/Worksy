@@ -11,6 +11,7 @@ namespace Worksy.Web.Services.Abstractions;
 public interface IUserService
 {
     public Task<Response<IdentityResult>> AddUserAsync(RegisterViewModel dto, string password);
+    public Task<Response<IdentityResult>> AddCollabAsync(RegisterViewModel dto, string password);
     public Task<Response<SignInResult>> LoginAsync(LoginViewModel model);
     public Task LogoutAsync();
 
@@ -27,4 +28,5 @@ public interface IUserService
     public Task<WorksyRole?> GetDefaultUserRoleIdAsync();
     public bool CurrentUserIsAuthenticateded();
     public Task<bool> CurrentUserIsAuthorizedAsync(string permission, string module);
+    Task<bool> CurrentUserHasRoleAsync(string[] roles);
 }

@@ -10,4 +10,5 @@ public interface ICategoriesService
     public Task<Response<CategoryDTO>> GetOneAsync(Guid id);
     public Task<Response<List<CategoryDTO>>> GetAllAsync();
     public Task<Response<CategoryDTO>> UpdateAsync(CategoryDTO dto);
+
 }

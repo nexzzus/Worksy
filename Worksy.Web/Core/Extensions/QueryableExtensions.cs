@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core.Pagination;
 
-namespace PrivateBlog.Web.Core.Extensions;
+namespace Worksy.Web.Core.Extensions;
 
 public static class QueryableExtensions
 {

@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Worksy.Web.Data.Abstractions;
 
 namespace Worksy.Web.Data.Entities
 {
-    public class Service
+    public class Service: IId
     {
         [Key]
-        public Guid ServiceId { get; set; }
+        public Guid Id { get; set; }
 
         [MaxLength(32, ErrorMessage = "El campo '{0}' debe tener maximo {1} caracteres.")]
         [Required(ErrorMessage = "El campo '{0}' es obligatorio.")]
@@ -22,7 +23,6 @@ namespace Worksy.Web.Data.Entities
         public string? Location { get; set; }
         
         public Guid? UserId { get; set; }
-        
         public User? User { get; set; }
         
         public DateTime? PublicationDate { get; set; }

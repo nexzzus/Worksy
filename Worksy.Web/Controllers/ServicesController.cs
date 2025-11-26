@@ -1,8 +1,8 @@
-﻿using System.Security.Claims;
-using AspNetCoreHero.ToastNotification.Abstractions;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
 using Worksy.Web.Core.Attributes;
+using Worksy.Web.Core.Pagination;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
 
@@ -11,64 +11,42 @@ namespace Worksy.Web.Controllers
     public class ServicesController : Controller
     {
         private readonly IServicesService _servicesService;
-        public INotyfService _notifyService { get; }
+        private readonly INotyfService _notifyService;
+        private readonly IUserService _userService;
 
-        public ServicesController(IServicesService servicesService, INotyfService notifyService)
+        public ServicesController(IServicesService servicesService, INotyfService notify, IUserService userService)
         {
             _servicesService = servicesService;
-            _notifyService = notifyService;
+            _notifyService = notify;
+            _userService = userService;
         }
-        
-        
-        [HttpGet("/Services")]
-        [CustomAuthorize("service.show","Services")]
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? q = null)
-        {
-            Response<List<ServiceDTO>> response = await _servicesService.GetAllAsync();
 
+
+        [HttpGet("/Services")]
+        [CustomAuthorize("service.show", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
+        {
+            Response<PaginationResponse<ServiceDTO>> response = await _servicesService.GetPaginatedListAsync(request);
+
+            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
-                return View(new List<ServiceDTO>());
+                return View(new PaginationResponse<ServiceDTO>());
             }
 
-            var data = response.Result ?? new List<ServiceDTO>();
-
-            if (!string.IsNullOrWhiteSpace(q))
+            if (isAdmin)
             {
-                var term = q.Trim().ToLower();
-                data = data.Where(s =>
-                    (!string.IsNullOrWhiteSpace(s.Title)       && s.Title.ToLower().Contains(term)) ||
-                    (!string.IsNullOrWhiteSpace(s.Description) && s.Description.ToLower().Contains(term)) ||
-                    (s.Categories != null && s.Categories.Any(c => !string.IsNullOrWhiteSpace(c.Name) && c.Name.ToLower().Contains(term)))
-                ).ToList();
+                return View(response.Result);
             }
 
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 12;
-
-            var totalCount = data.Count;
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            if (totalPages == 0) totalPages = 1;
-            if (page > totalPages) page = totalPages;
-
-            var paged = data
-                .OrderBy(s => s.Title)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalCount = totalCount;
-            ViewBag.TotalPages = totalPages;
-            ViewBag.Q = q;
-
-            return View(paged);
+            return RedirectToAction("Index", "Provider");
         }
 
 
-        [CustomAuthorize("service.show","Sevices")]
+        [CustomAuthorize("service.show", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN])]
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -76,11 +54,12 @@ namespace Worksy.Web.Controllers
             {
                 return NotFound();
             }
+
             return View(response.Result);
         }
 
         [HttpGet]
-        [CustomAuthorize("service.create","Services")]
+        [CustomAuthorize("service.create", "Servicios")]
         public async Task<IActionResult> Create()
         {
             // Cargar categorías para el formulario
@@ -90,7 +69,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.create","Services")]
+        [CustomAuthorize("service.create", "Servicios")]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -101,13 +80,8 @@ namespace Worksy.Web.Controllers
                 return View(dto);
             }
 
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (Guid.TryParse(userIdString, out var userId))
-            {
-                dto.UserId = userId;
-            }
-
-            Response<ServiceDTO> response = await _servicesService.CreateAsync(dto);
+            var userId = _servicesService.GetCurrentUserId();
+            Response<ServiceDTO> response = await _servicesService.CreateAsync(dto, userId);
 
             if (!response.isSuccess)
             {
@@ -118,12 +92,18 @@ namespace Worksy.Web.Controllers
             }
 
             _notifyService.Success(response.Message);
+
+            var isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
+            if (isAdmin is false)
+            {
+                return RedirectToAction("Index", "Provider");
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
-
         [HttpGet]
-        [CustomAuthorize("service.update","Services")]
+        [CustomAuthorize("service.update", "Servicios")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<ServiceDTO> response = await _servicesService.GetOneAsync(id);
@@ -141,7 +121,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.update","Services")]
+        [CustomAuthorize("service.update", "Servicios")]
         public async Task<IActionResult> Edit(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -167,7 +147,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.delete","Services")]
+        [CustomAuthorize("service.delete", "Servicios")]
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _servicesService.DeleteAsync(id);
@@ -179,6 +159,12 @@ namespace Worksy.Web.Controllers
             else
             {
                 _notifyService.Success(response.Message);
+            }
+
+            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
+            if (isAdmin is false)
+            {
+                return RedirectToAction("Index", "Provider");
             }
 
             return RedirectToAction(nameof(Index));

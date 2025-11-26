@@ -38,10 +38,10 @@ public class PermissionSeeder
     {
         return new()
         {
+            new Permission { Name = "rol.show", Description = "Ver roles", Module = "Roles" },
             new Permission { Name = "rol.create", Description = "Crear roles", Module = "Roles" },
             new Permission { Name = "rol.update", Description = "Actualizar roles", Module = "Roles" },
-            new Permission { Name = "rol.delete", Description = "Eliminar roles", Module = "Roles" },
-            new Permission { Name = "rol.show", Description = "Ver roles", Module = "Roles" }
+            new Permission { Name = "rol.delete", Description = "Eliminar roles", Module = "Roles" }
         };
     }
 
@@ -49,11 +49,11 @@ public class PermissionSeeder
     {
         return new()
         {
-            new Permission { Name = "service.show", Description = "Ver servicios", Module = "Services" },
-            new Permission { Name = "service.showAll", Description = "Ver lista de servicios", Module = "Services" },
-            new Permission { Name = "service.create", Description = "Crear servicios", Module = "Services" },
-            new Permission { Name = "service.update", Description = "Actualizar servicios", Module = "Services" },
-            new Permission { Name = "service.delete", Description = "Eliminar servicios", Module = "Services" }
+            new Permission { Name = "service.show", Description = "Ver servicios", Module = "Servicios" },
+            new Permission { Name = "service.showAll", Description = "Ver lista de servicios", Module = "Servicios" },
+            new Permission { Name = "service.create", Description = "Crear servicios", Module = "Servicios" },
+            new Permission { Name = "service.update", Description = "Actualizar servicios", Module = "Servicios" },
+            new Permission { Name = "service.delete", Description = "Eliminar servicios", Module = "Servicios" }
         };
     }
 
@@ -61,10 +61,10 @@ public class PermissionSeeder
     {
         return new()
         {
-            new Permission { Name = "category.show", Description = "Ver categorías", Module = "Categories" },
-            new Permission { Name = "category.create", Description = "Crear categorías", Module = "Categories" },
-            new Permission { Name = "category.update", Description = "Actualizar categorías", Module = "Categories" },
-            new Permission { Name = "category.delete", Description = "Eliminar categorías", Module = "Categories" }
+            new Permission { Name = "category.show", Description = "Ver categorías", Module = "Categorias" },
+            new Permission { Name = "category.create", Description = "Crear categorías", Module = "Categorias" },
+            new Permission { Name = "category.update", Description = "Actualizar categorías", Module = "Categorias" },
+            new Permission { Name = "category.delete", Description = "Eliminar categorías", Module = "Categorias" }
         };
     }
 
@@ -72,11 +72,11 @@ public class PermissionSeeder
     {
         return new()
         {
-            new Permission { Name = "user.showAll", Description = "Ver usuarios", Module = "Users" },
-            new Permission { Name = "user.show", Description = "Ver usuario", Module = "Users" },
-            new Permission { Name = "user.create", Description = "Crear usuarios", Module = "Users" },
-            new Permission { Name = "user.update", Description = "Actualizar usuarios", Module = "Users" },
-            new Permission { Name = "user.delete", Description = "Eliminar usuarios", Module = "Users" }
+            new Permission { Name = "user.showAll", Description = "Ver usuarios", Module = "Usuarios" },
+            new Permission { Name = "user.show", Description = "Ver usuario", Module = "Usuarios" },
+            new Permission { Name = "user.create", Description = "Crear usuarios", Module = "Usuarios" },
+            new Permission { Name = "user.update", Description = "Actualizar usuarios", Module = "Usuarios" },
+            new Permission { Name = "user.delete", Description = "Eliminar usuarios", Module = "Usuarios" }
         };
     }
 
@@ -84,9 +84,9 @@ public class PermissionSeeder
     {
         return new()
         {
-            new Permission { Name = "valoration.show", Description = "Ver valoraciones", Module = "Valorations" },
-            new Permission { Name = "valoration.create", Description = "Crear valoraciones", Module = "Valorations" },
-            new Permission { Name = "valoration.delete", Description = "Eliminar valoraciones", Module = "Valorations" }
+            new Permission { Name = "valoration.show", Description = "Ver valoraciones", Module = "Valoraciones" },
+            new Permission { Name = "valoration.create", Description = "Crear valoraciones", Module = "Valoraciones" },
+            new Permission { Name = "valoration.delete", Description = "Eliminar valoraciones", Module = "Valoraciones" }
         };
     }
 }

@@ -9,6 +9,7 @@ using Worksy.Web.Data.Entities;
 using Worksy.Web.Data.Seeders;
 using Worksy.Web.Herpers.Abstractions;
 using Worksy.Web.Herpers.Implementations;
+using Worksy.Web.Hubs;
 using Worksy.Web.Services.Abstractions;
 using Worksy.Web.Services.Implementations;
 
@@ -65,14 +66,20 @@ public static class CustomConfig
 
     public static void AddServices(WebApplicationBuilder builder)
     {
+        builder.Services.AddSignalR();
+        builder.Services.AddHttpContextAccessor();
+        
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IServicesService, ServicesService>();
         builder.Services.AddScoped<ICategoriesService, CategoriesService>();
         builder.Services.AddScoped<IRolesService, RolesService>();
+        builder.Services.AddScoped<IConversationService, ConversationService>();
+        builder.Services.AddScoped<IMessageService, MessageService>();
 
         builder.Services.AddTransient<IEmailSender, EmailSender>();
         builder.Services.AddTransient<SeedDB>();
         builder.Services.AddTransient<ICombosHelper, CombosHelper>();
+
     }
 
     public static void AddCookies(WebApplicationBuilder builder)
@@ -90,6 +97,8 @@ public static class CustomConfig
     public static WebApplication AddCustomAppConfig(this WebApplication app)
     {
         app.UseNotyf();
+        
+        app.MapHub<ChatHub>("/chatHub");
         
         SeedData(app);
         

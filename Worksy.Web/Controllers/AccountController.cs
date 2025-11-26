@@ -31,43 +31,6 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Register()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            _notyf.Error("Complete los campos requeridos");
-            return View(model);
-        }
-
-        Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
-
-        if (!result.isSuccess)
-        {
-            _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
-            return View(model);
-        }
-
-
-        /*
-        await _emailSender.SendEmailAsync(
-            model.Email,
-            "Bienvenido a Worksy",
-            $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
-        );*/
-        
-        _notyf.Success("Registro exitoso. ¡Bienvenido!");
-        await _userService.LoginAsync(new LoginViewModel { Email = model.Email, Password = model.Password });
-        return RedirectToAction("Index", "Home");
-    }
-
-    [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -96,8 +59,15 @@ public class AccountController : Controller
         {
             return Redirect(returnUrl);
         }
-
+        
         _notyf.Success("Inicio de sesión exitoso. ¡Bienvenido de nuevo!");
+        
+        bool isAdmin = await _userService.CurrentUserIsAuthorizedAsync("all.access", "Todos");
+        if (isAdmin)
+        {
+            return RedirectToAction("Index", "Admin");
+        }
+        
         return RedirectToAction("Index", "Home");
     }
 
@@ -181,12 +151,16 @@ public class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> Profile()
     {
-        User? user = await _userService.GetByEmailAsync(User.Identity.Name);
+        User? user = await _userService.GetByEmailAsync(User.Identity!.Name!);
         if (user is null)
         {
             return NotFound();
         }
 
+        var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+        ViewData["Layout"] = currentRol
+            ? "_Dashboard"
+            : "_Layout";
         UpdateProfileDTO dto = _mapper.Map<UpdateProfileDTO>(user);
         return View(dto);
     }
@@ -216,8 +190,12 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult ChangePassword()
+    public async Task<IActionResult> ChangePassword()
     {
+        var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+        ViewData["Layout"] = currentRol
+            ? "_Dashboard"
+            : "_Layout";
         return View(new ChangePasswordViewModel());
     }
 
@@ -229,6 +207,10 @@ public class AccountController : Controller
         if (!ModelState.IsValid)
         {
             _notyf.Error("Complete los campos requeridos");
+            var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+            ViewData["Layout"] = currentRol
+                ? "_Dashboard"
+                : "_Layout";
             return View(dto);
         }
 
@@ -259,6 +241,10 @@ public class AccountController : Controller
             }
         }
 
+        var currentRol2 = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+        ViewData["Layout"] = currentRol2
+            ? "_Dashboard"
+            : "_Layout";
         return View(dto);
     }
 }

@@ -1,3 +1,4 @@
+@using Worksy.Web.Core
 @using Worksy.Web.Data.Entities
 @inject IUserService _userService
 @{
@@ -52,29 +53,21 @@
                         <ul>
                             <li>
                                 <a class="@(currentAction == "Register" ? "active" : "")"
-                                   asp-controller="Users" asp-action="Register">Regístrate</a>
+                                   asp-controller="Users" asp-action="Register">Registrarme</a>
                             </li>
+
+                            <li>
+                                <a class="@(currentAction == "Register" ? "active" : "")"
+                                   asp-controller="Users" asp-action="Register" asp-route-type="collab">
+                                    Registrarme como colaborador
+                                </a>
+                            </li>
+
                         </ul>
                     </li>
                 }
                 else
                 {
-                    if (await _userService.CurrentUserIsAuthorizedAsync("user.showAll", "Users"))
-                    {
-                        <li>
-                            <a class="@(currentAction == "UsersTable" ? "active" : "")"
-                               asp-controller="Users" asp-action="UsersTable">Usuarios</a>
-                        </li>
-                    }
-
-                    if (await _userService.CurrentUserIsAuthorizedAsync("rol.show", "Roles"))
-                    {
-                        <li>
-                            <a class="@(currentAction == "Roles" ? "active" : "")"
-                               asp-controller="Roles" asp-action="Index">Roles</a>
-                        </li> 
-                    }
-
                     <div class="dropdown ms-3">
                         @if (user != null)
                         {
@@ -96,6 +89,13 @@
                                    asp-controller="Account" asp-action="Profile">Perfil</a>
                             </li>
 
+                            @if (await _userService.CurrentUserHasRoleAsync([Env.ROLE_COLLAB]))
+                            {
+                                <li>
+                                    <a class="dropdown-item @(currentAction == "" ? "active" : "")"
+                                       asp-controller="Provider" asp-action="Index">Servicios</a>
+                                </li>
+                            }
                             <li>
                                 <hr class="dropdown-divider"/>
                             </li>

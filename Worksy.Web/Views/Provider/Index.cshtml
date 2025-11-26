@@ -1,0 +1,66 @@
+@model IEnumerable<ServiceDTO>
+
+@{
+}
+
+<h2 class="text-white mb-4">Panel del Colaborador</h2>
+
+<div class="row">
+
+    <!-- Servicios -->
+    <div class="col-md-8">
+        <div class="card bg-dark text-white mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Mis servicios</h4>
+            </div>
+
+            <div class="card-body">
+                <a asp-controller="Services" asp-action="Create"
+                   class="btn btn-primary mb-3">Crear nuevo servicio</a>
+
+                <table class="table table-dark table-hover">
+                    <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Precio</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var s in Model)
+                        {
+                            <tr>
+                                <td>@s.Title</td>
+                                <td>@s.Price.ToString("C")</td>
+                                <td class="text-end">
+                                    <a asp-controller="Services" asp-action="Edit"
+                                       asp-route-id="@s.Id"
+                                       class="btn btn-sm btn-warning">Editar</a>
+
+                                    <form asp-controller="Services" asp-action="Delete"
+                                          asp-route-id="@s.Id" method="post"
+                                          onsubmit="return confirm('¿Eliminar servicio?');"
+                                          class="d-inline">
+                                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center text-white-50">
+                                No tienes servicios creados.
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>

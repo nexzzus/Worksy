@@ -20,5 +20,6 @@ public class SeedDB
     {
         await new PermissionSeeder(_context).SeedAsync();
         await  new RolesSeeder(_userService, _context, _userManager).SeedAsync();
+        await new CategorySeeder(_context).SeedAsync();
     }
 }

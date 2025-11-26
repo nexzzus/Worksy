@@ -7,12 +7,12 @@ using Worksy.Web.Data.Abstractions;
 
 namespace Worksy.Web.Services;
 
-public class CustomQueryableOperationService
+public class CustomQueryableOperationsService
 {
-    protected readonly DataContext _context;
-    protected readonly IMapper _mapper;
+    private protected readonly DataContext _context;
+    private protected readonly IMapper _mapper;
 
-    public CustomQueryableOperationService(DataContext context, IMapper mapper)
+    public CustomQueryableOperationsService(DataContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
@@ -30,7 +30,9 @@ public class CustomQueryableOperationService
             await _context.AddAsync(entity);
             await _context.SaveChangesAsync();
 
-            return Response<TDTO>.Success(dto, "Registro creado exitosamente.");
+            //dto.Id = Id;
+
+            return Response<TDTO>.Success(dto, "Registro creado exitosamente");
         }
         catch (Exception e)
         {
@@ -43,16 +45,17 @@ public class CustomQueryableOperationService
         try
         {
             TEntity? entity = await _context.Set<TEntity>()
-                .FirstOrDefaultAsync(e => e.Id == id);
+                .FirstOrDefaultAsync(s => s.Id == id);
+
             if (entity is null)
             {
-                return Response<object>.Failure($"No se encontró el registro con Id: {id}");
+                return Response<object>.Failure($"No existe el registro con id: {id}");
             }
 
             _context.Set<TEntity>().Remove(entity);
             await _context.SaveChangesAsync();
 
-            return Response<object>.Success("Registro eliminado exitosamente.");
+            return Response<object>.Success("Registro eliminado exitosamente");
         }
         catch (Exception e)
         {
@@ -60,7 +63,7 @@ public class CustomQueryableOperationService
         }
     }
 
-    public async Task<Response<TDTO>> UpdateAsync<TEntity, TDTO>(TDTO dto, Guid id) where TEntity : class, IId
+    public async Task<Response<TDTO>> EditAsync<TEntity, TDTO>(TDTO dto, Guid id) where TEntity : IId
     {
         try
         {
@@ -71,7 +74,9 @@ public class CustomQueryableOperationService
             _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
-            return Response<TDTO>.Success(dto, "Registro actualizado exitosamente.");
+            //dto.Id = Id;
+
+            return Response<TDTO>.Success(dto, "Registro actualizado exitosamente");
         }
         catch (Exception e)
         {
@@ -79,7 +84,7 @@ public class CustomQueryableOperationService
         }
     }
 
-    public async Task<Response<TDTO>> GetByIdAsync<TEntity, TDTO>(Guid id) where TEntity : class, IId
+    public async Task<Response<TDTO>> GetOneAsync<TEntity, TDTO>(Guid id) where TEntity : class, IId
     {
         try
         {
@@ -109,17 +114,18 @@ public class CustomQueryableOperationService
             {
                 query = _context.Set<TEntity>();
             }
-            List<TEntity> entities = await query.ToListAsync();
-            List<TDTO> dtos = _mapper.Map<List<TDTO>>(entities);
-            
-            return Response<List<TDTO>>.Success(dtos);
+
+            List<TEntity> entity = await query.ToListAsync();
+            List<TDTO> dto = _mapper.Map<List<TDTO>>(entity);
+
+            return Response<List<TDTO>>.Success(dto);
         }
         catch (Exception e)
         {
             return Response<List<TDTO>>.Failure(e);
         }
     }
-    
+
     public async Task<Response<PaginationResponse<TDTO>>> GetPaginationAsync<TEntity, TDTO>(PaginationRequest request,
         IQueryable<TEntity> query = null) where TEntity: class
         where TDTO: class
