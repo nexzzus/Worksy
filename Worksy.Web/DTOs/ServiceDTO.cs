@@ -15,6 +15,8 @@ namespace Worksy.Web.DTOs
         [Required(ErrorMessage = "El precio es obligatorio")]
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor a 0")]
         public decimal Price { get; set; }
+        
+        public Guid UserId { get; set; }
 
         public List<CategoryDTO>? Categories { get; set; }
 

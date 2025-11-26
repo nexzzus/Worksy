@@ -1,4 +1,5 @@
-﻿using AspNetCoreHero.ToastNotification.Abstractions;
+﻿using System.Security.Claims;
+using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
 using Worksy.Web.Core.Attributes;
@@ -92,13 +93,18 @@ namespace Worksy.Web.Controllers
         [CustomAuthorize("service.create","Services")]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
-
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
                 var catsResp = await _servicesService.GetAllCategoriesAsync();
                 ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
+            }
+
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (Guid.TryParse(userIdString, out var userId))
+            {
+                dto.UserId = userId;
             }
 
             Response<ServiceDTO> response = await _servicesService.CreateAsync(dto);
@@ -114,6 +120,7 @@ namespace Worksy.Web.Controllers
             _notifyService.Success(response.Message);
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpGet]
         [CustomAuthorize("service.update","Services")]
