@@ -19,7 +19,7 @@
 <header id="header" class="header d-flex align-items-center @(ViewData["HeaderClass"] ?? "fixed-top")">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-        <a asp-controller="Home" asp-action="Index" class="logo d-flex align-items-center">
+        <a asp-controller="@ViewData["Controller"]" asp-action="Index" class="logo d-flex align-items-center">
             <img src="~/img/logos/2.png" alt="">
             <h1>Worksy</h1>
         </a>
@@ -31,7 +31,7 @@
             <ul>
                 <li>
                     <a class="@(currentAction == "Index" ? "active" : "")"
-                       asp-controller="Home" asp-action="Index">Inicio</a>
+                       asp-controller="@ViewData["Controller"]" asp-action="Index">Inicio</a>
                 </li>
                 <li>
                     <a class="@(currentAction == "About" ? "active" : "")"
@@ -96,11 +96,11 @@
                                        asp-controller="Provider" asp-action="Index">Servicios</a>
                                 </li>
                             }
-                            @if (await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]))
+                            @if (!await _userService.CurrentUserHasRoleAsync([Env.ROLE_COLLAB, Env.ROLE_ADMIN]))
                             {
                                 <li>
                                     <a class="dropdown-item @(currentAction == "" ? "active" : "")"
-                                       asp-controller="Dashboard" asp-action="Index">Panel Admin</a>
+                                       asp-controller="Admin" asp-action="Index">Chats</a>
                                 </li>
                             }
                             <li>

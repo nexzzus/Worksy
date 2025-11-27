@@ -16,17 +16,19 @@ public class MessageController : Controller
     private readonly IConversationService _conversationService;
     private readonly IHubContext<ChatHub> _hubContext;
     private readonly INotyfService _notyfService;
+    private readonly IUserService _userService;
 
     public MessageController(
         IMessageService messageService,
         IConversationService conversationService,
         INotyfService notyfService,
-        IHubContext<ChatHub> hubContext)
+        IHubContext<ChatHub> hubContext, IUserService userService)
     {
         _messageService = messageService;
         _conversationService = conversationService;
         _notyfService = notyfService;
         _hubContext = hubContext;
+        _userService = userService;
     }
 
 
@@ -51,6 +53,11 @@ public class MessageController : Controller
         }
 
         ViewBag.ConversationId = conversationId;
+        
+        var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+        ViewData["Layout"] = currentRol
+            ? "_Dashboard"
+            : "_Layout";
 
         return View(messages.Result);
     }

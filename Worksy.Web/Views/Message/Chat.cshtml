@@ -1,12 +1,15 @@
 @using System.Security.Claims
+@using Worksy.Web.Core
 @model List<Message>
+@inject IUserService _UserService
 
 @{
     
     ViewData["HideFooter"] = true;
     ViewData["IsChat"] = true;
-    ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideBreadcrumb"] = true;
+    // Layout = ViewData["Layout"]?.ToString();
+
     
     var conversationId = (Guid)ViewBag.ConversationId;
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
@@ -56,7 +59,18 @@
 
 <div class="container-lg chat-container">
 
-    <h4 class="mb-3">Chat</h4>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="m-0">Chat</h4>
+        @if (!await _UserService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]))
+        {
+            <a asp-controller="Publications"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Volver
+            </a>
+        }
+    </div>
+    
 
     <div id="messagesList" class="rounded p-3 mb-3">
 
@@ -82,7 +96,7 @@
 
     <!-- INPUT -->
     <form method="post" asp-action="Send" asp-controller="Message">
-        <input type="hidden" name="conversationId" value="@conversationId" />
+        <input type="hidden" name="conversationId" value="@conversationId"/>
 
         <div class="input-group">
             <input name="content" class="form-control" placeholder="Escribe un mensaje...">

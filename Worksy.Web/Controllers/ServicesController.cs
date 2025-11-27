@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
 using Worksy.Web.Core.Attributes;
@@ -26,7 +27,8 @@ namespace Worksy.Web.Controllers
 
         // ==================== LISTA / INDEX ====================
         [HttpGet("/Services")]
-        [CustomAuthorize("service.show", "Services")]
+        [CustomAuthorize("service.show", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
             // Traer lista paginada de servicios
@@ -37,26 +39,27 @@ namespace Worksy.Web.Controllers
             {
                 _notifyService.Error(response.Message);
                 // Devuelves el Index de Services vacío si falla
-                return View("Index", new PaginationResponse<ServiceDTO>());
+                return View(new PaginationResponse<ServiceDTO>());
             }
 
             // Verificar si el usuario actual es ADMIN
-            bool isAdmin = await _userService.CurrentUserHasRoleAsync(new[] { Env.ROLE_ADMIN });
+            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
 
-            if (isAdmin)
+            if (isAdmin is false)
             {
                 // Si es admin -> redirigir al panel de Provider
                 return RedirectToAction("Index", "Provider");
             }
 
             // Si NO es admin -> mostrar la vista Index.cshtml de Services
-            return View("Index", response.Result);
+            return View(response.Result);
         }
 
 
         // ==================== DETALLES ====================
 
-        [CustomAuthorize("service.show", "Services")]
+        [CustomAuthorize("service.show", "Servicios")]
+        [Authorize]
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -64,6 +67,11 @@ namespace Worksy.Web.Controllers
             {
                 return NotFound();
             }
+            
+            var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+            ViewData["Layout"] = currentRol
+                ? "_Dashboard"
+                : "_Layout";
 
             return View(response.Result);
         }
@@ -71,7 +79,8 @@ namespace Worksy.Web.Controllers
         // ==================== CREAR ====================
 
         [HttpGet]
-        [CustomAuthorize("service.create", "Services")]
+        [CustomAuthorize("service.create", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Create()
         {
             var catsResp = await _servicesService.GetAllCategoriesAsync();
@@ -80,7 +89,8 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.create", "Services")]
+        [CustomAuthorize("service.create", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -120,7 +130,8 @@ namespace Worksy.Web.Controllers
         // ==================== EDITAR ====================
 
         [HttpGet]
-        [CustomAuthorize("service.update", "Services")]
+        [CustomAuthorize("service.update", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<ServiceDTO> response = await _servicesService.GetOneAsync(id);
@@ -138,7 +149,8 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.update", "Services")]
+        [CustomAuthorize("service.update", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Edit(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -166,7 +178,8 @@ namespace Worksy.Web.Controllers
         // ==================== ELIMINAR ====================
 
         [HttpPost]
-        [CustomAuthorize("service.delete", "Services")]
+        [CustomAuthorize("service.delete", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _servicesService.DeleteAsync(id);
@@ -180,7 +193,7 @@ namespace Worksy.Web.Controllers
                 _notifyService.Success(response.Message);
             }
 
-            var isAdmin = await _userService.CurrentUserHasRoleAsync(new[] { Env.ROLE_ADMIN });
+            var isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
             if (isAdmin is false)
             {
                 return RedirectToAction("Index", "Provider");

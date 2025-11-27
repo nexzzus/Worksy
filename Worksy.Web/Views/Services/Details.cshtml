@@ -3,6 +3,8 @@
     ViewBag.Title = "Detalle de publicación";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+    Layout = ViewData["Layout"]?.ToString();
+
     
     ViewData["BreadcrumbParent"] = "Servicios";
     ViewData["BreadcrumbChild"] = "Detalle de Servicio";
@@ -29,6 +31,23 @@
             </p>
 
             <a asp-action="Index" class="btn btn-secondary">Volver</a>
+            
+            @if (Model.UserId != Guid.Empty)
+            {
+                <a asp-controller="Conversations"
+                   asp-action="Open"
+                   asp-route-prestadorId="@Model.UserId"
+                   asp-route-serviceId="@Model.Id"
+                   class="btn btn-sm btn-success flex-grow-1">
+                    Contactar
+                </a>
+            }
+            else
+            {
+                <p class="text-warning">El prestador no está disponible.</p>
+                <p>@Model.UserId</p>
+            }
+
             @if (User.IsInRole("Admin"))
             {
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>

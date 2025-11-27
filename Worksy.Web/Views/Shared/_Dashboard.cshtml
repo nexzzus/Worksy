@@ -1,3 +1,6 @@
+@using Worksy.Web.Core
+@inject IUserService _userService
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,16 +14,18 @@
 </head>
 <body>
 <!-- Sidebar-->
-<div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
-  @await Html.PartialAsync("_DashboardSidebar")
-</div>
+
+  <div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
+    @await Html.PartialAsync("_DashboardSidebar")
+  </div>
 
 <!-- Wrapper-->
 <div class="wrapper d-flex flex-column min-vh-100">
-  
-  <!-- Header-->
-  @await Html.PartialAsync("_DashboardHeader")
-
+  @if (await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]))
+  {
+    <!-- Header-->
+    @await Html.PartialAsync("_DashboardHeader")
+  }
   <div class="body flex-grow-1 px-3">
     <div class="container-lg">
       @RenderBody()
