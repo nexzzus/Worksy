@@ -96,6 +96,13 @@
                                        asp-controller="Provider" asp-action="Index">Servicios</a>
                                 </li>
                             }
+                            @if (await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]))
+                            {
+                                <li>
+                                    <a class="dropdown-item @(currentAction == "" ? "active" : "")"
+                                       asp-controller="Dashboard" asp-action="Index">Panel Admin</a>
+                                </li>
+                            }
                             <li>
                                 <hr class="dropdown-divider"/>
                             </li>

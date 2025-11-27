@@ -14,39 +14,49 @@ namespace Worksy.Web.Controllers
         private readonly INotyfService _notifyService;
         private readonly IUserService _userService;
 
-        public ServicesController(IServicesService servicesService, INotyfService notify, IUserService userService)
+        public ServicesController(
+            IServicesService servicesService,
+            INotyfService notifyService,
+            IUserService userService)
         {
             _servicesService = servicesService;
-            _notifyService = notify;
+            _notifyService = notifyService;
             _userService = userService;
         }
 
-
+        // ==================== LISTA / INDEX ====================
         [HttpGet("/Services")]
-        [CustomAuthorize("service.show", "Servicios")]
-        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
+        [CustomAuthorize("service.show", "Services")]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            Response<PaginationResponse<ServiceDTO>> response = await _servicesService.GetPaginatedListAsync(request);
+            // Traer lista paginada de servicios
+            Response<PaginationResponse<ServiceDTO>> response =
+                await _servicesService.GetPaginatedListAsync(request);
 
-            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
-                return View(new PaginationResponse<ServiceDTO>());
+                // Devuelves el Index de Services vacío si falla
+                return View("Index", new PaginationResponse<ServiceDTO>());
             }
+
+            // Verificar si el usuario actual es ADMIN
+            bool isAdmin = await _userService.CurrentUserHasRoleAsync(new[] { Env.ROLE_ADMIN });
 
             if (isAdmin)
             {
-                return View(response.Result);
+                // Si es admin -> redirigir al panel de Provider
+                return RedirectToAction("Index", "Provider");
             }
 
-            return RedirectToAction("Index", "Provider");
+            // Si NO es admin -> mostrar la vista Index.cshtml de Services
+            return View("Index", response.Result);
         }
 
 
-        [CustomAuthorize("service.show", "Servicios")]
-        [CustomRoleAuthorize([Env.ROLE_ADMIN])]
+        // ==================== DETALLES ====================
+
+        [CustomAuthorize("service.show", "Services")]
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -58,18 +68,19 @@ namespace Worksy.Web.Controllers
             return View(response.Result);
         }
 
+        // ==================== CREAR ====================
+
         [HttpGet]
-        [CustomAuthorize("service.create", "Servicios")]
+        [CustomAuthorize("service.create", "Services")]
         public async Task<IActionResult> Create()
         {
-            // Cargar categorías para el formulario
             var catsResp = await _servicesService.GetAllCategoriesAsync();
             ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
             return View();
         }
 
         [HttpPost]
-        [CustomAuthorize("service.create", "Servicios")]
+        [CustomAuthorize("service.create", "Services")]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -80,7 +91,9 @@ namespace Worksy.Web.Controllers
                 return View(dto);
             }
 
+            // ASIGNAR SIEMPRE EL USER ACTUAL
             var userId = _servicesService.GetCurrentUserId();
+
             Response<ServiceDTO> response = await _servicesService.CreateAsync(dto, userId);
 
             if (!response.isSuccess)
@@ -93,17 +106,21 @@ namespace Worksy.Web.Controllers
 
             _notifyService.Success(response.Message);
 
-            var isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
+            var isAdmin = await _userService.CurrentUserHasRoleAsync(new[] { Env.ROLE_ADMIN });
             if (isAdmin is false)
             {
+                // colab / user → a su panel de proveedor
                 return RedirectToAction("Index", "Provider");
             }
 
+            // admin → vuelve al panel de servicios
             return RedirectToAction(nameof(Index));
         }
 
+        // ==================== EDITAR ====================
+
         [HttpGet]
-        [CustomAuthorize("service.update", "Servicios")]
+        [CustomAuthorize("service.update", "Services")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<ServiceDTO> response = await _servicesService.GetOneAsync(id);
@@ -121,7 +138,7 @@ namespace Worksy.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("service.update", "Servicios")]
+        [CustomAuthorize("service.update", "Services")]
         public async Task<IActionResult> Edit(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
@@ -146,8 +163,10 @@ namespace Worksy.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ==================== ELIMINAR ====================
+
         [HttpPost]
-        [CustomAuthorize("service.delete", "Servicios")]
+        [CustomAuthorize("service.delete", "Services")]
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _servicesService.DeleteAsync(id);
@@ -161,7 +180,7 @@ namespace Worksy.Web.Controllers
                 _notifyService.Success(response.Message);
             }
 
-            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
+            var isAdmin = await _userService.CurrentUserHasRoleAsync(new[] { Env.ROLE_ADMIN });
             if (isAdmin is false)
             {
                 return RedirectToAction("Index", "Provider");

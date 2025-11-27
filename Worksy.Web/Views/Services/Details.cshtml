@@ -29,13 +29,16 @@
             </p>
 
             <a asp-action="Index" class="btn btn-secondary">Volver</a>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
-            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('¿Seguro que deseas eliminar esta publicación?');">
-                    Eliminar
-                </button>
-            </form>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('¿Seguro que deseas eliminar esta publicación?');">
+                        Eliminar
+                    </button>
+                </form>
+            }
         </div>
     </div>
 </div>

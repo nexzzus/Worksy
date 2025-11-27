@@ -19,7 +19,6 @@ namespace Worksy.Web.DTOs
         
         public Guid UserId { get; set; }
 
-        public Guid UserId { get; set; }
         public User? User { get; set; }
 
         public List<CategoryDTO>? Categories { get; set; }
