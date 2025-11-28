@@ -19,7 +19,7 @@
 <header id="header" class="header d-flex align-items-center @(ViewData["HeaderClass"] ?? "fixed-top")">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-        <a asp-controller="@ViewData["Controller"]" asp-action="Index" class="logo d-flex align-items-center">
+        <a asp-controller="Home" asp-action="Index" class="logo d-flex align-items-center">
             <img src="~/img/logos/2.png" alt="">
             <h1>Worksy</h1>
         </a>
@@ -31,7 +31,7 @@
             <ul>
                 <li>
                     <a class="@(currentAction == "Index" ? "active" : "")"
-                       asp-controller="@ViewData["Controller"]" asp-action="Index">Inicio</a>
+                       asp-controller="Home" asp-action="Index">Inicio</a>
                 </li>
                 <li>
                     <a class="@(currentAction == "About" ? "active" : "")"
@@ -40,6 +40,9 @@
                 <li>
                     <a class="@(currentAction == "Contact" ? "active" : "")"
                        asp-controller="Home" asp-action="Contact">Contacto</a>
+                </li>
+                <li>
+                    <a asp-controller="TodosDemo" asp-action="Index">API</a>
                 </li>
 
                 @if (!User.Identity.IsAuthenticated)
