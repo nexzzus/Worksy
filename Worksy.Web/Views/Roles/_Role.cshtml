@@ -1,0 +1,16 @@
+@model Worksy.Web.DTOs.WorksyRoleDTO
+
+
+<input type="hidden" id="permissionIds" name="PermissionsIds" />
+<div class="card bg-dark text-white border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <div class="mb-2">
+            <label asp-for="Name" class="form-label">Nombre del rol</label>
+            <input asp-for="Name"
+                   class="form-control form-control-sm"
+                   maxlength="64"
+                   placeholder="Ej: Administrador" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+@model Worksy.Web.DTOs.WorksyRoleDTO
+@{
+    ViewBag.Title = "Editar Rol";
+    ViewData["HeaderClass"] = "sticky-top";
+    ViewData["HideFooter"] = true;
+    ViewData["BreadcrumbParent"] = "Roles";
+    ViewData["BreadcrumbChild"] = "Editar Rol";
+}
+
+<div class="container-lg container mb-5 py-4">
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0">Editar Rol</h2>
+        <a asp-action="Index" class="btn btn-link ms-auto">Volver</a>
+    </div>
+
+    <form asp-action="Edit" method="post" id="frmEdit" class="row g-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        @await Html.PartialAsync("_Role", Model)
+
+        <!-- Campo oculto que enviará el CSV de permisos -->
+        <input type="hidden" asp-for="PermissionsIds" id="PermissionsIds_Edit" />
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary" id="btnEdit">Guardar cambios</button>
+        </div>
+    </form>
+
+    @await Html.PartialAsync("_Permissions", Model)
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_Validationscriptspartial");
+    }
+    <script>
+        $(document).ready(function () {
+            $('#btnEdit').click(function (event) {
+                const permissions = $('.permission:checked');
+
+                let permissionIds = [];
+
+                permissions.each(function () {
+                    const permissionId = $(this).data('permission-id');
+                    permissionIds.push(permissionId);
+                });
+                $('#permissionIds').val(JSON.stringify(permissionIds));
+
+            });
+        });
+    </script>
+}

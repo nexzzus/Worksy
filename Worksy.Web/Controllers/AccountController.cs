@@ -1,8 +1,9 @@
 using AspNetCoreHero.ToastNotification.Abstractions;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
-using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
@@ -15,53 +16,18 @@ public class AccountController : Controller
 {
     private readonly IUserService _userService;
     private readonly INotyfService _notyf;
-    private readonly IEmailSender _emailSender;
     private readonly UserManager<User> _userManager;
+    private readonly IMapper _mapper;
+    private readonly SignInManager<User> _signInManager;
 
-    public AccountController(IUserService userService, IEmailSender emailSender, INotyfService notyf,
-        UserManager<User> userManager)
+    public AccountController(IUserService userService, INotyfService notyf,
+        UserManager<User> userManager, IMapper mapper, SignInManager<User> signInManager)
     {
         _userService = userService;
-        _emailSender = emailSender;
         _notyf = notyf;
         _userManager = userManager;
-    }
-
-    [HttpGet]
-    public IActionResult Register()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model)
-    {
-        if (!ModelState.IsValid)
-        {
-            _notyf.Error("Complete los campos requeridos");
-            return View(model);
-        }
-
-        Response<IdentityResult> result = await _userService.AddUserAsync(model, model.Password);
-
-        if (!result.isSuccess)
-        {
-            _notyf.Error("Ocurrió un error durante el registro, inténtelo nuevamente.");
-            return View(model);
-        }
-
-
-        /*
-        await _emailSender.SendEmailAsync(
-            model.Email,
-            "Bienvenido a Worksy",
-            $"Hola {model.FirstName}, tu cuenta ha sido creada exitosamente."
-        );*/
-        
-        _notyf.Success("Registro exitoso. ¡Bienvenido!");
-        await _userService.LoginAsync(new LoginViewModel { Email = model.Email, Password = model.Password });
-        return RedirectToAction("Index", "Home");
+        _mapper = mapper;
+        _signInManager = signInManager;
     }
 
     [HttpGet]
@@ -93,9 +59,16 @@ public class AccountController : Controller
         {
             return Redirect(returnUrl);
         }
-
+        
         _notyf.Success("Inicio de sesión exitoso. ¡Bienvenido de nuevo!");
-        return RedirectToAction("Index", "Home");
+        
+        bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
+        if (isAdmin)
+        {
+            return RedirectToAction("Index", "Admin");
+        }
+        
+        return RedirectToAction("Index", "Publications");
     }
 
     [HttpPost]
@@ -129,18 +102,12 @@ public class AccountController : Controller
             return View(model);
         }
 
-        User? user = await _userManager.FindByEmailAsync(model.Email);
+        var result = await _userService.ForgotPasswordAsync(model.Email, Url, Request.Scheme);
 
-        if (user != null)
+        if (!result.isSuccess)
         {
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
-
-            await _emailSender.SendEmailAsync(
-                user.Email,
-                "Restablecer contraseña",
-                $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña"
-            );
+            _notyf.Error(result.Message);
+            return View();
         }
 
         _notyf.Error("Se envió un correo de recuperación al correo indicado");
@@ -169,21 +136,115 @@ public class AccountController : Controller
             return View(model);
         }
 
-        User? user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null)
+        var result = await _userService.ResetPasswordAsync(model);
+
+        if (!result.isSuccess)
         {
-            _notyf.Error("Ocurrió un error al restablecer la contraseña.");
+            _notyf.Error(result.Message);
             return RedirectToAction("Login");
         }
 
-        var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
-        if (!result.Succeeded)
+        _notyf.Success(result.Message);
+        return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Profile()
+    {
+        User? user = await _userService.GetByEmailAsync(User.Identity!.Name!);
+        if (user is null)
         {
-            _notyf.Error("Ocurrió un error al restablecer la contraseña.");
+            return NotFound();
+        }
+
+        var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+        ViewData["Layout"] = currentRol
+            ? "_Dashboard"
+            : "_Layout";
+        UpdateProfileDTO dto = _mapper.Map<UpdateProfileDTO>(user);
+        return View(dto);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileDTO dto)
+    {
+        if (ModelState.IsValid)
+        {
+            Response<UpdateProfileDTO> result = await _userService.UpdateAsync(dto);
+            if (result.isSuccess)
+            {
+                _notyf.Success(result.Message);
+                return RedirectToAction("Profile");
+            }
+            else
+            {
+                _notyf.Error(result.Message);
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        _notyf.Error("Complete los campos requeridos");
+        return View("Profile", dto);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ChangePassword()
+    {
+        var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+        ViewData["Layout"] = currentRol
+            ? "_Dashboard"
+            : "_Layout";
+        return View(new ChangePasswordViewModel());
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            _notyf.Error("Complete los campos requeridos");
+            var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+            ViewData["Layout"] = currentRol
+                ? "_Dashboard"
+                : "_Layout";
+            return View(dto);
+        }
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
             return RedirectToAction("Login");
         }
 
-        _notyf.Success("Contraseña restablecida exitosamente.");
-        return RedirectToAction("Login");
+        var result = await _userManager.ChangePasswordAsync(user, dto.OldPassword, dto.NewPassword);
+        if (result.Succeeded)
+        {
+            await _signInManager.RefreshSignInAsync(user);
+            _notyf.Success("Contraseña actualizada exitosamente.");
+            return RedirectToAction("Profile");
+        }
+
+        foreach (var error in result.Errors)
+        {
+            if (error.Code.Equals("PasswordMismatch"))
+            {
+                ModelState.AddModelError(nameof(dto.OldPassword), "La contraseña actual es incorrecta.");
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+                _notyf.Error("" + error.Description);
+            }
+        }
+
+        var currentRol2 = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+        ViewData["Layout"] = currentRol2
+            ? "_Dashboard"
+            : "_Layout";
+        return View(dto);
     }
 }

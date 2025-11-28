@@ -45,14 +45,11 @@
                                         <div class="form-outline mb-4 position-relative">
                                             <label class="form-label" asp-for="Password">Contraseña</label>
                                             <input asp-for="Password" id="txtPasswordIniciar" class="form-control" type="password" placeholder="Contraseña" />
-                                            @*TODO: Corregir el ícono para este campo*@
-                                            <button id="show_password" class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="mostrarPassword()">
-                                                <img src="~/img/ojo.png" style="width: 20px;">
+                                            <button class="btn position-absolute top-50 end-0 translate-middle-y me-2" type="button" onclick="togglePassword('txtPasswordIniciar', 'show_password')">
+                                                <img id="show_password" src="~/img/ojo.png" alt="mostrar/ocultar" style="width: 20px; padding-top: 35px">
                                             </button>
                                             <span asp-validation-for="Password" class="text-danger"></span>
                                         </div>
-                                        
-                                        @*TODO: Check remember me*@
 
                                         <div class="text-center pt-1 mb-4 pb-1">
                                             <button type="submit" class="btn btn-outline-primary">Iniciar sesión</button>
@@ -81,7 +78,7 @@
                                         ¡Regístrate y descubre un mundo de oportunidades y servicios personalizados!
                                         Si ya haces parte de Worksy, inicia sesión y continúa aprovechando todos nuestros beneficios.
                                     </p>
-                                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light">Regístrate</a>
+                                    <a asp-controller="Users" asp-action="Register" class="btn btn-outline-light">Regístrate</a>
                                 </div>
                             </div>
                         </div> <!-- row -->
@@ -95,18 +92,7 @@
 <!-- Template Main JS File -->
 <script src="~/js/script.js"></script>
 
-<script type="text/javascript">
-    function mostrarPassword() {
-        var cambio = document.getElementById("txtPasswordIniciar");
-        if (cambio.type === "password") {
-            cambio.type = "text";
-            $('#show_password img').attr('src', '~/img/ojo-cerrado.png');
-        } else {
-            cambio.type = "password";
-            $('#show_password img').attr('src', '~/img/ojo.png');
-        }
-    }
-</script>
+<script src="~/js/viewpassword.js"></script>
 
 @section Scripts {
     @{

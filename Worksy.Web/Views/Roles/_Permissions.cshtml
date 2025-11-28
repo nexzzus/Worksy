@@ -1,0 +1,54 @@
+@model Worksy.Web.DTOs.WorksyRoleDTO
+
+<div class="mt-3">
+    <h4 class="mb-2">Permisos</h4>
+
+    <div class="row">
+        @if (Model.Permissions != null && Model.Permissions.Any())
+        {
+            foreach (var module in Model.Permissions.GroupBy(p => p.Module))
+            {
+                <div class="col-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card bg-dark text-white h-100 border-0">
+                        @*<div class="card-header py-2">
+                            <strong>@module.Key</strong>
+                        </div>*@
+                        <h5>@module.Key</h5>
+                        <div class="card-body py-2">
+                            @foreach (PermissionsForRoleDTO permission in module)
+                            {
+                                @*<div class="form-check form-switch mb-1">
+                                    <input class="form-check-input permission"
+                                           type="checkbox"
+                                           data-permission-id="@permission.Id"
+                                           id="permission_@permission.Id"
+                                           @(permission.Selected ? "checked" : "") />
+
+                                    <label class="form-check-label small"
+                                           for="permission_@permission.Id">@permission.Description
+                                    </label>
+                                </div>*@
+                                <div class="form-check form-switch">
+
+                                    <input class="form-check-input permission"
+                                           type="checkbox"
+                                           data-permission-id="@permission.Id"
+                                           id="permission_@permission.Id"
+                                           @(permission.Selected ? "checked" : "") />
+
+                                    <label class="form-check-label" for="permission_@permission.Id">@permission.Description</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-secondary">No hay permisos para mostrar.</div>
+            </div>
+        }
+    </div>
+</div>

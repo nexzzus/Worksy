@@ -1,6 +1,9 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
+using Worksy.Web.Core.Attributes;
+using Worksy.Web.Core.Pagination;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
 
@@ -9,62 +12,54 @@ namespace Worksy.Web.Controllers
     public class ServicesController : Controller
     {
         private readonly IServicesService _servicesService;
-        public INotyfService _notifyService { get; }
+        private readonly INotyfService _notifyService;
+        private readonly IUserService _userService;
 
-        public ServicesController(IServicesService servicesService, INotyfService notifyService)
+        public ServicesController(
+            IServicesService servicesService,
+            INotyfService notifyService,
+            IUserService userService)
         {
             _servicesService = servicesService;
             _notifyService = notifyService;
+            _userService = userService;
         }
-        
-        
+
+        // ==================== LISTA / INDEX ====================
         [HttpGet("/Services")]
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? q = null)
+        [CustomAuthorize("service.show", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            Response<List<ServiceDTO>> response = await _servicesService.GetAllAsync();
+            // Traer lista paginada de servicios
+            Response<PaginationResponse<ServiceDTO>> response =
+                await _servicesService.GetPaginatedListAsync(request);
 
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
-                return View(new List<ServiceDTO>());
+                // Devuelves el Index de Services vacío si falla
+                return View(new PaginationResponse<ServiceDTO>());
             }
 
-            var data = response.Result ?? new List<ServiceDTO>();
+            // Verificar si el usuario actual es ADMIN
+            bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
 
-            if (!string.IsNullOrWhiteSpace(q))
+            if (isAdmin is false)
             {
-                var term = q.Trim().ToLower();
-                data = data.Where(s =>
-                    (!string.IsNullOrWhiteSpace(s.Title)       && s.Title.ToLower().Contains(term)) ||
-                    (!string.IsNullOrWhiteSpace(s.Description) && s.Description.ToLower().Contains(term)) ||
-                    (s.Categories != null && s.Categories.Any(c => !string.IsNullOrWhiteSpace(c.Name) && c.Name.ToLower().Contains(term)))
-                ).ToList();
+                // Si es admin -> redirigir al panel de Provider
+                return RedirectToAction("Index", "Provider");
             }
 
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 10;
-
-            var totalCount = data.Count;
-            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-            if (totalPages == 0) totalPages = 1;
-            if (page > totalPages) page = totalPages;
-
-            var paged = data
-                .OrderBy(s => s.Title)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            ViewBag.Page = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.TotalCount = totalCount;
-            ViewBag.TotalPages = totalPages;
-            ViewBag.Q = q;
-
-            return View(paged);
+            // Si NO es admin -> mostrar la vista Index.cshtml de Services
+            return View(response.Result);
         }
 
 
+        // ==================== DETALLES ====================
+
+        [CustomAuthorize("service.show", "Servicios")]
+        [Authorize]
         public async Task<IActionResult> Details(Guid id)
         {
             var response = await _servicesService.GetOneAsync(id);
@@ -72,38 +67,71 @@ namespace Worksy.Web.Controllers
             {
                 return NotFound();
             }
+            
+            var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+            ViewData["Layout"] = currentRol
+                ? "_Dashboard"
+                : "_Layout";
+
             return View(response.Result);
         }
 
+        // ==================== CREAR ====================
+
         [HttpGet]
-        public IActionResult Create()
+        [CustomAuthorize("service.create", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
+        public async Task<IActionResult> Create()
         {
+            var catsResp = await _servicesService.GetAllCategoriesAsync();
+            ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
             return View();
         }
 
         [HttpPost]
+        [CustomAuthorize("service.create", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Create(ServiceDTO dto)
         {
-
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
-            Response<ServiceDTO> response = await _servicesService.CreateAsync(dto);
+            // ASIGNAR SIEMPRE EL USER ACTUAL
+            var userId = _servicesService.GetCurrentUserId();
+
+            Response<ServiceDTO> response = await _servicesService.CreateAsync(dto, userId);
 
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
             _notifyService.Success(response.Message);
+
+            var isAdmin = await _userService.CurrentUserHasRoleAsync(new[] { Env.ROLE_ADMIN });
+            if (isAdmin is false)
+            {
+                // colab / user → a su panel de proveedor
+                return RedirectToAction("Index", "Provider");
+            }
+
+            // admin → vuelve al panel de servicios
             return RedirectToAction(nameof(Index));
         }
 
+        // ==================== EDITAR ====================
+
         [HttpGet]
+        [CustomAuthorize("service.update", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<ServiceDTO> response = await _servicesService.GetOneAsync(id);
@@ -114,15 +142,22 @@ namespace Worksy.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var catsResp = await _servicesService.GetAllCategoriesAsync();
+            ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
+
             return View(response.Result);
         }
 
         [HttpPost]
+        [CustomAuthorize("service.update", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Edit(ServiceDTO dto)
         {
             if (!ModelState.IsValid)
             {
                 _notifyService.Error("Debe ajustar los errores de validación");
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -131,6 +166,8 @@ namespace Worksy.Web.Controllers
             if (!response.isSuccess)
             {
                 _notifyService.Error(response.Message);
+                var catsResp = await _servicesService.GetAllCategoriesAsync();
+                ViewBag.Categories = catsResp.isSuccess ? catsResp.Result : new List<CategoryDTO>();
                 return View(dto);
             }
 
@@ -138,10 +175,11 @@ namespace Worksy.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
+        // ==================== ELIMINAR ====================
 
         [HttpPost]
-
+        [CustomAuthorize("service.delete", "Servicios")]
+        [CustomRoleAuthorize([Env.ROLE_ADMIN, Env.ROLE_COLLAB])]
         public async Task<IActionResult> Delete(Guid id)
         {
             Response<object> response = await _servicesService.DeleteAsync(id);
@@ -150,10 +188,15 @@ namespace Worksy.Web.Controllers
             {
                 _notifyService.Error(response.Message);
             }
-
             else
             {
                 _notifyService.Success(response.Message);
+            }
+
+            var isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
+            if (isAdmin is false)
+            {
+                return RedirectToAction("Index", "Provider");
             }
 
             return RedirectToAction(nameof(Index));

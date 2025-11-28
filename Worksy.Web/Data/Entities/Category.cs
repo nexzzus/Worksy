@@ -1,10 +1,14 @@
-﻿namespace Worksy.Web.Data.Entities
+﻿using System.ComponentModel.DataAnnotations;
+using Worksy.Web.Data.Abstractions;
+
+namespace Worksy.Web.Data.Entities
 {
-    public class Category
+    public class Category: IId
     {
-        public Guid CategoryId { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        [Key]
+        public Guid Id { get; set; }
+        public required string Name { get; set; }
+        public required string Description { get; set; }
 
         public ICollection<Service> Services { get; set; } = new List<Service>();
     }

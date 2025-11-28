@@ -1,16 +1,18 @@
 @model ServiceDTO 
 @{
     ViewBag.Title = "Editar publicación";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+    
+    ViewData["BreadcrumbParent"] = "Servicios";
+    ViewData["BreadcrumbChild"] = "Editar Servicio";
 }
 
-<div class="container">
+<div class="container-lg">
     <h2 class="mb-4 text-white">Editar publicación</h2>
 
     <form asp-action="Edit" method="post" class="text-white">
-        <input type="hidden" asp-for="ServiceId" />
+        <input type="hidden" asp-for="Id" />
         <div class="mb-3">
             <label asp-for="Title" class="form-label text-white">Título</label>
             <input asp-for="Title" class="form-control" />
@@ -27,7 +29,23 @@
             <span asp-validation-for="Price" class="text-danger"></span>
         </div>
 
-        <!-- Si tienes un selector de categorías, agrégalo aquí -->
+        <div class="mb-3">
+            <label class="form-label text-white">Categorías</label>
+            <div>
+                @{
+                    var allCats = ViewBag.Categories as List<CategoryDTO> ?? new List<CategoryDTO>();
+                    var selected = Model?.CategoryIds ?? new List<Guid>();
+                }
+                @foreach (var c in allCats)
+                {
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="CategoryIds" value="@c.Id"
+                               id="cat_@c.Id" @(selected.Contains(c.Id) ? "checked" : "") />
+                        <label class="form-check-label text-white" for="cat_@c.Id">@c.Name</label>
+                    </div>
+                }
+            </div>
+        </div>
 
         <button type="submit" class="btn btn-primary">Guardar cambios</button>
         <a asp-action="Index" class="btn btn-secondary">Cancelar</a>

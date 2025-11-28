@@ -6,6 +6,10 @@ using Worksy.Web.Core;
 using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
+using Worksy.Web.Data.Seeders;
+using Worksy.Web.Herpers.Abstractions;
+using Worksy.Web.Herpers.Implementations;
+using Worksy.Web.Hubs;
 using Worksy.Web.Services.Abstractions;
 using Worksy.Web.Services.Implementations;
 
@@ -23,11 +27,12 @@ public static class CustomConfig
         // AutoMapper
         builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
-        // Identity Access Managment
-        AddIAM(builder);
-
         // Services
         AddServices(builder);
+        builder.Services.AddHttpContextAccessor();
+        
+        // Identity Access Managment
+        AddIAM(builder);
 
         // Cookies
         AddCookies(builder);
@@ -57,38 +62,55 @@ public static class CustomConfig
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
-
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            options.Cookie.Name = "Auth";
-            options.ExpireTimeSpan = TimeSpan.FromDays(100);
-            options.LoginPath = "/Account/Login";
-            options.AccessDeniedPath = "/Error/AccessDenied";
-        });
     }
 
     public static void AddServices(WebApplicationBuilder builder)
     {
+        builder.Services.AddSignalR();
+        builder.Services.AddHttpContextAccessor();
+        
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IServicesService, ServicesService>();
+        builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+        builder.Services.AddScoped<IRolesService, RolesService>();
+        builder.Services.AddScoped<IConversationService, ConversationService>();
+        builder.Services.AddScoped<IMessageService, MessageService>();
 
         builder.Services.AddTransient<IEmailSender, EmailSender>();
+        builder.Services.AddTransient<SeedDB>();
+        builder.Services.AddTransient<ICombosHelper, CombosHelper>();
 
-        builder.Services.AddScoped<IServicesService, ServicesService>();
     }
 
     public static void AddCookies(WebApplicationBuilder builder)
     {
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            options.LoginPath = "/Users/Login";
-            options.AccessDeniedPath = "/Users/AccessDenied";
+            options.Cookie.Name = "Auth";
+            
+            options.ExpireTimeSpan = TimeSpan.FromDays(100);
+            options.LoginPath = "/Account/Login";
+            options.AccessDeniedPath = "/Account/AccessDenied";
         });
     }
 
     public static WebApplication AddCustomAppConfig(this WebApplication app)
     {
         app.UseNotyf();
-
+        
+        app.MapHub<ChatHub>("/chatHub");
+        
+        SeedData(app);
+        
         return app;
+    }
+
+    public static void SeedData(WebApplication app)
+    {
+        IServiceScopeFactory scopeFactory = app.Services.GetService<IServiceScopeFactory>();
+        
+        using IServiceScope scope = scopeFactory.CreateScope();
+        SeedDB service = scope.ServiceProvider.GetService<SeedDB>();
+        service.SeedAsync().Wait();
     }
 }

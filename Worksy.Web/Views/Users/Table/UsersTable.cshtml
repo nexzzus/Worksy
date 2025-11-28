@@ -1,9 +1,11 @@
 ﻿@model IEnumerable<Worksy.Web.Data.Entities.User>
+@inject IUserService _userService
 @{
     ViewBag.Title = "Usuarios";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = true;
+    ViewData["BreadcrumbParent"] = "Usuarios";
+    ViewData["BreadcrumbChild"] = "";
     var page = (int)(ViewBag.Page ?? 1);
     var pageSize = (int)(ViewBag.PageSize ?? 10);
     var totalPages = (int)(ViewBag.TotalPages ?? 1);
@@ -11,6 +13,7 @@
     string q = ViewBag.Q as string ?? "";
 }
 
+<div class="container-lg">
 <div class="container">
     <div class="d-flex align-items-center mb-3">
         <h2 class="mb-0">Usuarios</h2>
@@ -74,6 +77,7 @@
                 <th>Nombre</th>
                 <th>Teléfono</th>
                 <th>Dirección</th>
+                <th>Rol</th>
                 <th style="width: 240px;">Acciones</th>
             </tr>
             </thead>
@@ -87,15 +91,27 @@
                         <td>@(string.Join(" ", new[] { u.FirstName, u.LastName }.Where(x => !string.IsNullOrWhiteSpace(x))))</td>
                         <td>@u.PhoneNumber</td>
                         <td>@u.Address</td>
+                        <td>@u.WorksyRole?.Name</td>
                         <td>
-                            <a asp-action="UserDetails" asp-route-id="@u.Id" class="btn btn-sm btn-info me-1">Ver</a>
-                            <a asp-action="EditUser" asp-route-id="@u.Id" class="btn btn-sm btn-warning me-1">Editar</a>
 
-                            <form asp-action="DeleteUser" asp-route-id="@u.Id" method="post" class="d-inline"
-                                  onsubmit="return confirm('¿Eliminar este usuario?');">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                            </form>
+                            @if (await _userService.CurrentUserIsAuthorizedAsync("user.show", "Users"))
+                            {
+                                <a asp-action="UserDetails" asp-route-id="@u.Id"
+                                   class="btn btn-sm btn-info me-1">Ver</a>
+                            }
+                            @if (await _userService.CurrentUserIsAuthorizedAsync("user.update", "Users"))
+                            {
+                                <a asp-action="EditUser" asp-route-id="@u.Id"
+                                   class="btn btn-sm btn-warning me-1">Editar</a>
+                            }
+                    @if (await _userService.CurrentUserIsAuthorizedAsync("user.delete", "Users"))
+                            {
+                                <form asp-action="DeleteUser" asp-route-id="@u.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('¿Eliminar este usuario?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }
@@ -135,4 +151,5 @@
             </ul>
         </nav>
     }
+</div>
 </div>

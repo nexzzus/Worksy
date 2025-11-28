@@ -1,12 +1,16 @@
 @model ServiceDTO
 @{
     ViewBag.Title = "Detalle de publicación";
-    Layout = "_Layout";
     ViewData["HeaderClass"] = "sticky-top";
     ViewData["HideFooter"] = false;
+    Layout = ViewData["Layout"]?.ToString();
+
+    
+    ViewData["BreadcrumbParent"] = "Servicios";
+    ViewData["BreadcrumbChild"] = "Detalle de Servicio";
 }
 
-<div class="container">
+<div class="container-lg">
     <h2 class="mb-4 text-white">Detalle de publicación</h2>
 
     <div class="card mb-3 bg-black">
@@ -27,13 +31,33 @@
             </p>
 
             <a asp-action="Index" class="btn btn-secondary">Volver</a>
-            <a asp-action="Edit" asp-route-id="@Model.ServiceId" class="btn btn-warning">Editar</a>
-            <form asp-action="Delete" asp-route-id="@Model.ServiceId" method="post" class="d-inline">
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('¿Seguro que deseas eliminar esta publicación?');">
-                    Eliminar
-                </button>
-            </form>
+            
+            @if (Model.UserId != Guid.Empty)
+            {
+                <a asp-controller="Conversations"
+                   asp-action="Open"
+                   asp-route-prestadorId="@Model.UserId"
+                   asp-route-serviceId="@Model.Id"
+                   class="btn btn-sm btn-success flex-grow-1">
+                    Contactar
+                </a>
+            }
+            else
+            {
+                <p class="text-warning">El prestador no está disponible.</p>
+                <p>@Model.UserId</p>
+            }
+
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('¿Seguro que deseas eliminar esta publicación?');">
+                        Eliminar
+                    </button>
+                </form>
+            }
         </div>
     </div>
 </div>

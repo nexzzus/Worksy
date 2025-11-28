@@ -1,0 +1,19 @@
+@model (string Parent, string? Child)
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb my-0 ms-2">
+        <li class="breadcrumb-item">
+            <a href="/">Home</a>
+        </li>
+
+        @if (!string.IsNullOrEmpty(Model.Parent))
+        {
+            <li class="breadcrumb-item">@Model.Parent</li>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Child))
+        {
+            <li class="breadcrumb-item active">@Model.Child</li>
+        }
+    </ol>
+</nav>

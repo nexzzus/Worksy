@@ -24,15 +24,15 @@ namespace Worksy.Web.Migrations
 
             modelBuilder.Entity("CategoryService", b =>
                 {
-                    b.Property<Guid>("CategoriesCategoryId")
+                    b.Property<Guid>("CategoriesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ServicesServiceId")
+                    b.Property<Guid>("ServicesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("CategoriesCategoryId", "ServicesServiceId");
+                    b.HasKey("CategoriesId", "ServicesId");
 
-                    b.HasIndex("ServicesServiceId");
+                    b.HasIndex("ServicesId");
 
                     b.ToTable("CategoryService");
                 });
@@ -170,7 +170,7 @@ namespace Worksy.Web.Migrations
 
             modelBuilder.Entity("Worksy.Web.Data.Entities.Category", b =>
                 {
-                    b.Property<Guid>("CategoryId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -182,21 +182,119 @@ namespace Worksy.Web.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CategoryId");
+                    b.HasKey("Id");
 
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("Worksy.Web.Data.Entities.Service", b =>
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Conversation", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ProviderId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Permission", b =>
+                {
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.RolePermission", b =>
+                {
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("WorksyRoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PermissionId", "WorksyRoleId");
+
+                    b.HasIndex("WorksyRoleId");
+
+                    b.ToTable("RolePermissions");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Service", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(264)
+                        .HasColumnType("nvarchar(264)");
 
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
@@ -215,7 +313,7 @@ namespace Worksy.Web.Migrations
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ServiceId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
@@ -294,6 +392,9 @@ namespace Worksy.Web.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<Guid>("WorksyRoleId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -304,20 +405,41 @@ namespace Worksy.Web.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+                    b.HasIndex("WorksyRoleId");
+
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.WorksyRole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("WorksyRoles");
                 });
 
             modelBuilder.Entity("CategoryService", b =>
                 {
                     b.HasOne("Worksy.Web.Data.Entities.Category", null)
                         .WithMany()
-                        .HasForeignKey("CategoriesCategoryId")
+                        .HasForeignKey("CategoriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Worksy.Web.Data.Entities.Service", null)
                         .WithMany()
-                        .HasForeignKey("ServicesServiceId")
+                        .HasForeignKey("ServicesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -373,6 +495,71 @@ namespace Worksy.Web.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Conversation", b =>
+                {
+                    b.HasOne("Worksy.Web.Data.Entities.User", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Worksy.Web.Data.Entities.User", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Worksy.Web.Data.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Provider");
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Message", b =>
+                {
+                    b.HasOne("Worksy.Web.Data.Entities.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Worksy.Web.Data.Entities.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.RolePermission", b =>
+                {
+                    b.HasOne("Worksy.Web.Data.Entities.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Worksy.Web.Data.Entities.WorksyRole", "WorksyRole")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("WorksyRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("WorksyRole");
+                });
+
             modelBuilder.Entity("Worksy.Web.Data.Entities.Service", b =>
                 {
                     b.HasOne("Worksy.Web.Data.Entities.User", "User")
@@ -381,6 +568,32 @@ namespace Worksy.Web.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.User", b =>
+                {
+                    b.HasOne("Worksy.Web.Data.Entities.WorksyRole", "WorksyRole")
+                        .WithMany()
+                        .HasForeignKey("WorksyRoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WorksyRole");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Conversation", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("Worksy.Web.Data.Entities.WorksyRole", b =>
+                {
+                    b.Navigation("RolePermissions");
                 });
 #pragma warning restore 612, 618
         }

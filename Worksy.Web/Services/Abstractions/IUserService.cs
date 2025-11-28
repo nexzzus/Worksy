@@ -1,13 +1,17 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Worksy.Web.Core;
+using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.ViewModels;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Worksy.Web.Services.Abstractions;
 
 public interface IUserService
 {
     public Task<Response<IdentityResult>> AddUserAsync(RegisterViewModel dto, string password);
+    public Task<Response<IdentityResult>> AddCollabAsync(RegisterViewModel dto, string password);
     public Task<Response<SignInResult>> LoginAsync(LoginViewModel model);
     public Task LogoutAsync();
 
@@ -17,5 +21,12 @@ public interface IUserService
     public Task<Response<object>> DeleteAsync(Guid id);
     public Task<Response<IdentityResult>> GetOneAsync(Guid id);
     public Task<Response<List<IdentityResult>>> GetAllAsync();
-    public Task<Response<IdentityResult>> UpdateAsync(UserDTO user);
+    public Task<Response<UpdateProfileDTO>> UpdateAsync(UpdateProfileDTO dto);
+    public Task<User?> GetByEmailAsync(string email);
+    public Task<Response<object>> ForgotPasswordAsync(string email, IUrlHelper url, string scheme);
+    public Task<Response<object>> ResetPasswordAsync(ResetPasswordViewModel model);
+    public Task<WorksyRole?> GetDefaultUserRoleIdAsync();
+    public bool CurrentUserIsAuthenticateded();
+    public Task<bool> CurrentUserIsAuthorizedAsync(string permission, string module);
+    Task<bool> CurrentUserHasRoleAsync(string[] roles);
 }

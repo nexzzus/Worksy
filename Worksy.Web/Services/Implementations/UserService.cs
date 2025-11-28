@@ -1,11 +1,16 @@
+using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Worksy.Web.Core;
+using Worksy.Web.Core.Abstractions;
 using Worksy.Web.Data;
 using Worksy.Web.Data.Entities;
 using Worksy.Web.DTOs;
 using Worksy.Web.Services.Abstractions;
 using Worksy.Web.ViewModels;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Worksy.Web.Services.Implementations;
 
@@ -15,20 +20,50 @@ public class UserService : IUserService
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
     private readonly IMapper _mapper;
+    private readonly IEmailSender _emailSender;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserService(DataContext context, UserManager<User> userManager, SignInManager<User> signInManager,
-        IMapper mapper)
+        IMapper mapper, IEmailSender emailSender, IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _userManager = userManager;
         _signInManager = signInManager;
         _mapper = mapper;
+        _emailSender = emailSender;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Response<IdentityResult>> AddUserAsync(RegisterViewModel model, string password)
     {
+        User? exist = await _userManager.FindByEmailAsync(model.Email);
+        if (exist != null)
+        {
+            return Response<IdentityResult>.Failure("El correo ya está en uso");
+        }
+
         User user = _mapper.Map<User>(model);
+
         user.UserName = model.Email;
+
+        Guid roleId;
+        if (model.RoleId != Guid.Empty)
+        {
+            WorksyRole? role = await _context.WorksyRoles.FindAsync(model.RoleId);
+            roleId = role.Id;
+        }
+        else
+        {
+            WorksyRole? role = await _context.WorksyRoles.FirstOrDefaultAsync(r => r.Name == Env.ROLE_USER);
+            if (role is null)
+            {
+                return Response<IdentityResult>.Failure("El rol por defecto 'User' no existe en la base de datos");
+            }
+
+            roleId = role.Id;
+        }
+
+        user.WorksyRoleId = roleId;
 
         IdentityResult result = await _userManager.CreateAsync(user, password);
 
@@ -36,15 +71,60 @@ public class UserService : IUserService
         {
             Result = result,
             isSuccess = result.Succeeded,
-            IErrors = result.Errors
+        };
+    }
+    
+    public async Task<Response<IdentityResult>> AddCollabAsync(RegisterViewModel model, string password)
+    {
+        User? exist = await _userManager.FindByEmailAsync(model.Email);
+        if (exist != null)
+        {
+            return Response<IdentityResult>.Failure("El correo ya está en uso");
+        }
+
+        User user = _mapper.Map<User>(model);
+
+        user.UserName = model.Email;
+
+        Guid roleId;
+        if (model.RoleId != Guid.Empty)
+        {
+            WorksyRole? role = await _context.WorksyRoles.FindAsync(model.RoleId);
+            roleId = role.Id;
+        }
+        else
+        {
+            WorksyRole? role = await _context.WorksyRoles.FirstOrDefaultAsync(r => r.Name == Env.ROLE_COLLAB);
+            if (role is null)
+            {
+                return Response<IdentityResult>.Failure("El rol por defecto 'Colaborador' no existe en la base de datos");
+            }
+
+            roleId = role.Id;
+        }
+
+        user.WorksyRoleId = roleId;
+
+        IdentityResult result = await _userManager.CreateAsync(user, password);
+
+        return new Response<IdentityResult>
+        {
+            Result = result,
+            isSuccess = result.Succeeded,
         };
     }
 
 
     public async Task<Response<SignInResult>> LoginAsync(LoginViewModel model)
     {
+        User? user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return Response<SignInResult>.Failure("Usuario no encontrado");
+        }
+
         SignInResult result =
-            await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+            await _signInManager.PasswordSignInAsync(user.UserName, model.Password, model.RememberMe, false);
 
         return new Response<SignInResult>
         {
@@ -83,8 +163,138 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public Task<Response<IdentityResult>> UpdateAsync(UserDTO user)
+    public async Task<Response<UpdateProfileDTO>> UpdateAsync(UpdateProfileDTO dto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            User user = await GetUserAsync(dto.Id);
+            user.PhoneNumber = dto.PhoneNumber;
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.Address = dto.Address;
+            user.Biography = dto.Biography;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Response<UpdateProfileDTO>.Success(dto, "Datos actualizados correctamente");
+        }
+        catch (Exception e)
+        {
+            return Response<UpdateProfileDTO>.Failure(e);
+        }
+    }
+
+    public async Task<User?> GetByEmailAsync(string email)
+    {
+        return await _context.Users.Include(u => u.WorksyRole)
+            .FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<Response<object>> ForgotPasswordAsync(string email, IUrlHelper url, string scheme)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return Response<object>.Failure("Usuario no encontrado");
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var resetLink = url.Action("ResetPassword", "Account", new { token, email = user.Email }, scheme);
+        await _emailSender.SendEmailAsync(
+            user.Email,
+            "Restablecer contraseña",
+            $"Haga clic <a href='{resetLink}'>aquí</a> para restablecer su contraseña"
+        );
+
+        return Response<object>.Success(null, "Se envió un correo de recuperación al correo indicado");
+    }
+
+    public async Task<Response<object>> ResetPasswordAsync(ResetPasswordViewModel model)
+    {
+        User? user = await _userManager.FindByEmailAsync(model.Email);
+        if (user is null)
+        {
+            return Response<object>.Failure("Ocurrió un error al restablecer la contraseña.");
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            return Response<object>.Failure("Ocurrió un error al restablecer la contraseña.");
+        }
+
+        return Response<object>.Success(null, "Contraseña restablecida exitosamente.");
+    }
+
+    public async Task<User> GetUserAsync(Guid id)
+    {
+        return (await _context.Users.FindAsync(id))!;
+    }
+
+    public async Task<WorksyRole?> GetDefaultUserRoleIdAsync()
+    {
+        return await _context.WorksyRoles
+            .FirstOrDefaultAsync(r => r.Name == Env.ROLE_USER);
+    }
+
+    public bool CurrentUserIsAuthenticateded()
+    {
+        ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
+        return user?.Identity is not null && user.Identity.IsAuthenticated;
+    }
+
+    public async Task<bool> CurrentUserIsAuthorizedAsync(string permission, string module)
+    {
+        ClaimsPrincipal? claimsUser = _httpContextAccessor.HttpContext?.User;
+
+        // Valida si hay sesión
+        if (claimsUser is null)
+        {
+            return false;
+        }
+
+        string userName = claimsUser.Identity!.Name!;
+        User? user = await GetByEmailAsync(userName);
+
+        if (user is null)
+        {
+            return false;
+        }
+
+        if (user.WorksyRole.Name == Env.ROLE_ADMIN)
+        {
+            return true;
+        }
+
+        return await _context.Permissions.Include(p => p.RolePermissions)
+            .AnyAsync(p => (p.Module == module && p.Name == permission)
+                           && p.RolePermissions.Any(rp => rp.WorksyRoleId == user.WorksyRoleId));
+    }
+
+    public async Task<bool> CurrentUserHasRoleAsync(string[] roles)
+    {
+        ClaimsPrincipal? claimsUser = _httpContextAccessor.HttpContext?.User;
+
+        // Valida si hay sesión
+        if (claimsUser is null)
+        {
+            return false;
+        }
+        
+        string userName = claimsUser.Identity!.Name!;
+        User? user = await GetByEmailAsync(userName);
+
+        if (user is null)
+        {
+            return false;
+        }
+
+        if (user.WorksyRole.Name == Env.ROLE_ADMIN)
+        {
+            return true;
+        }
+
+        return roles.Contains(user.WorksyRole.Name);
     }
 }

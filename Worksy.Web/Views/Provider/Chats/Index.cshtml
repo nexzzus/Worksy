@@ -1,0 +1,23 @@
+@model IEnumerable<Conversation>
+
+<h2 class="text-white mb-4">Mis Chats</h2>
+
+@if (!Model.Any())
+{
+    <p class="text-white-50">No tienes chats aún.</p>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var c in Model)
+        {
+            <a asp-controller="Message" asp-action="Chat" asp-route-conversationId="@c.Id"
+               class="list-group-item list-group-item-action bg-dark text-white mb-2">
+
+                <strong>Chat con cliente:</strong> @c.CustomerId.ToString().Substring(0, 6)
+                <div class="small text-muted">Iniciado @c.CreatedAt.ToString("g")</div>
+
+            </a>
+        }
+    </div>
+}
