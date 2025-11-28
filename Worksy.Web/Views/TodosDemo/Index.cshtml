@@ -1,0 +1,210 @@
+﻿@{
+ViewBag.Title = "Demo API REST (To-Dos)";
+Layout = "_Layout";
+ViewData["HeaderClass"] = "sticky-top";
+ViewData["HideFooter"] = false;
+}
+
+<div class="container-fluid text-light min-vh-100 py-5">
+    <div class="container">
+
+        <h1 class="mb-2 fw-bold text-primary">Demo API REST (To-Dos)</h1>
+        <p class="text-muted mb-4">
+            CRUD sencillo contra <code class="text-danger">/api/todos</code> usando JSON y
+            <code class="text-info">fetch</code>.
+        </p>
+
+        <!-- Input para crear nuevo todo -->
+        <div class="input-group input-group-lg mb-4">
+            <input id="newTodoTitle"
+                   class="form-control"
+                   placeholder="Nuevo todo..." />
+            <button id="addTodoBtn" class="btn btn-primary">
+                Añadir
+            </button>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover align-middle mb-0">
+                <thead class="table-primary text-dark">
+                <tr>
+                    <th style="width: 80px;">Id</th>
+                    <th>Título</th>
+                    <th style="width: 140px;" class="text-center">Completado</th>
+                    <th style="width: 200px;">Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="todosBody">
+                @* Se llena por JavaScript *@
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const apiUrl = '/api/todos';
+
+        const tbody = document.getElementById('todosBody');
+        const addBtn = document.getElementById('addTodoBtn');
+        const newTitleInput = document.getElementById('newTodoTitle');
+
+        // ===== Helpers =====
+
+        async function loadTodos() {
+            try {
+                const res = await fetch(apiUrl);
+                if (!res.ok) throw new Error('Error al obtener los todos');
+
+                const data = await res.json();
+                renderRows(data);
+            } catch (err) {
+                console.error(err);
+                alert('Error al cargar los To-Dos');
+            }
+        }
+
+        function renderRows(todos) {
+            tbody.innerHTML = '';
+
+            todos.forEach(todo => {
+                // Soporta JSON devuelto con Id/Title/IsCompleted o id/title/completed
+                const id        = todo.id        ?? todo.Id;
+                const title     = todo.title     ?? todo.Title     ?? '';
+                const completed = todo.completed ?? todo.isCompleted ?? todo.IsCompleted ?? false;
+
+                const tr = document.createElement('tr');
+                tr.dataset.id = id;
+
+                // Escapar comillas del título para no romper el HTML
+                const safeTitle = String(title).replace(/"/g, '&quot;');
+
+                tr.innerHTML = `
+                        <td>${id ?? ''}</td>
+                        <td>
+                            <input class="form-control todo-title" value="${safeTitle}">
+                        </td>
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   class="form-check-input todo-completed"
+                                   ${completed ? 'checked' : ''}>
+                        </td>
+                        <td>
+                            <button class="btn btn-success btn-sm me-2 btn-save">Guardar</button>
+                            <button class="btn btn-danger btn-sm btn-delete">Eliminar</button>
+                        </td>
+                    `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function addTodo() {
+            const title = newTitleInput.value.trim();
+            if (!title) return;
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        // nombres en camelCase; el model binding de ASP.NET es case-insensitive
+                        title: title,
+                        isCompleted: false
+                    })
+                });
+
+                if (!res.ok) throw new Error('Error al crear el todo');
+
+                newTitleInput.value = '';
+                await loadTodos();
+            } catch (err) {
+                console.error(err);
+                alert('Error al crear el To-Do');
+            }
+        }
+
+        async function updateTodo(id, title, completed) {
+            try {
+                const res = await fetch(`${apiUrl}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        title: title,
+                        isCompleted: completed
+                    })
+                });
+
+                if (!res.ok) throw new Error('Error al actualizar el todo');
+            } catch (err) {
+                console.error(err);
+                alert('Error al actualizar el To-Do');
+            }
+        }
+
+        async function deleteTodo(id) {
+            if (!confirm('¿Seguro que deseas eliminar este To-Do?')) return;
+
+            try {
+                const res = await fetch(`${apiUrl}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!res.ok) throw new Error('Error al eliminar el todo');
+
+                await loadTodos();
+            } catch (err) {
+                console.error(err);
+                alert('Error al eliminar el To-Do');
+            }
+        }
+
+        // ===== Eventos =====
+
+        addBtn.addEventListener('click', e => {
+            e.preventDefault();
+            addTodo();
+        });
+
+        newTitleInput.addEventListener('keyup', e => {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        tbody.addEventListener('click', e => {
+            const tr = e.target.closest('tr');
+            if (!tr) return;
+
+            const id = tr.dataset.id;
+            if (!id) return;
+
+            if (e.target.classList.contains('btn-save')) {
+                const titleInput = tr.querySelector('.todo-title');
+                const checkbox   = tr.querySelector('.todo-completed');
+
+                const title     = titleInput.value.trim();
+                const completed = checkbox.checked;
+
+                updateTodo(id, title, completed);
+            }
+
+            if (e.target.classList.contains('btn-delete')) {
+                deleteTodo(id);
+            }
+        });
+
+        // Cargar datos al entrar
+        loadTodos();
+    });
+</script>
+}

@@ -17,8 +17,9 @@ namespace Worksy.Web.DTOs
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor a 0")]
         public decimal Price { get; set; }
 
-        public Guid UserId { get; set; }
         public User? User { get; set; }
+        
+        public Guid UserId { get; set; }
 
         public List<CategoryDTO>? Categories { get; set; }
 

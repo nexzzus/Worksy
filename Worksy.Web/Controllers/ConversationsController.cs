@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Worksy.Web.Core;
 using Worksy.Web.Services.Abstractions;
 
 namespace Worksy.Web.Controllers
@@ -7,10 +8,12 @@ namespace Worksy.Web.Controllers
     public class ConversationsController : Controller
     {
         private readonly IConversationService _conversationService;
+        private readonly IUserService _userService;
 
-        public ConversationsController(IConversationService conversationService)
+        public ConversationsController(IConversationService conversationService, IUserService userService)
         {
             _conversationService = conversationService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Open(Guid prestadorId, Guid serviceId)
@@ -38,6 +41,11 @@ namespace Worksy.Web.Controllers
             {
                 return BadRequest("No se pudo crear la conversación.");
             }
+            
+            var currentRol = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN, Env.ROLE_COLLAB]);
+            ViewData["Layout"] = currentRol
+                ? "_Dashboard"
+                : "_Layout";
 
             return RedirectToAction("Chat", "Message", new
             {

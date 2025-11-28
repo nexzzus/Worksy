@@ -25,13 +25,13 @@ public class HomeController : Controller
     public async Task<IActionResult> Start()
     {
         var user = await _userManager.GetUserAsync(User);
-
+        
         if (await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]))
         {
             return RedirectToAction("Index", "Admin");
         }
         
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction("Index", "Publications");
     }
 
     public IActionResult Index()

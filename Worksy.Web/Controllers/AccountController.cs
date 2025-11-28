@@ -62,13 +62,13 @@ public class AccountController : Controller
         
         _notyf.Success("Inicio de sesión exitoso. ¡Bienvenido de nuevo!");
         
-        bool isAdmin = await _userService.CurrentUserIsAuthorizedAsync("all.access", "Todos");
+        bool isAdmin = await _userService.CurrentUserHasRoleAsync([Env.ROLE_ADMIN]);
         if (isAdmin)
         {
             return RedirectToAction("Index", "Admin");
         }
         
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index", "Publications");
     }
 
     [HttpPost]

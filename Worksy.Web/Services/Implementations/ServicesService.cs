@@ -50,6 +50,7 @@ namespace Worksy.Web.Services.Implementations
             try
             {
                 Service? service = await _context.Services
+                    .Include(s => s.User)
                     .Include(s => s.Categories)
                     .FirstOrDefaultAsync(s => s.Id == id);
 
@@ -68,6 +69,8 @@ namespace Worksy.Web.Services.Implementations
                     Title = service.Title,
                     Description = service.Description,
                     Price = service.Price,
+                    UserId = (Guid)service.UserId!,
+                    User = service.User,
                     Categories = service.Categories?.Select(c => new CategoryDTO
                     {
                         Id = c.Id,

@@ -1,10 +1,12 @@
+@using Worksy.Web.Core
 @inject IUserService _userService
 
 
 <div class="sidebar-header border-bottom">
     <div class="sidebar-brand">
-        @*<img src="~/img/logos/2.svg" alt="Worksy Logo" width="60" height="60">*@
-        <h3>Worksy</h3>
+        <a asp-controller="Home" asp-action="Index" class="logo d-flex align-items-center text-decoration-none">
+            <h3>Worksy</h3>
+        </a>
     </div>
 
     <button class="btn-close d-lg-none" type="button"
@@ -14,19 +16,20 @@
 
 <ul class="sidebar-nav" data-coreui="navigation" data-simplebar>
 
-    <li class="nav-item">
-        <a class="nav-link" href="#">
-            <svg class="nav-icon">
-                <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-speedometer")"></use>
-            </svg>
-            Dashboard
-        </a>
-    </li>
-
+    @if (User.IsInRole("Admin"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <svg class="nav-icon">
+                    <use xlink:href="@Url.Content("~/assets/sprites/free.svg#cil-speedometer")"></use>
+                </svg>
+                Dashboard
+            </a>
+        </li>
+    }
     <li class="nav-title">Acciones</li>
 
-    @if (await _userService.CurrentUserIsAuthorizedAsync("service.showAll", "Servicios") &&
-         await _userService.CurrentUserIsAuthorizedAsync("all.access", "Todos"))
+    @if (await _userService.CurrentUserIsAuthorizedAsync("service.showAll", "Servicios"))
     {
         <li class="nav-item">
             <a class="nav-link" asp-controller="Services" asp-action="Index">
@@ -37,7 +40,7 @@
             </a>
         </li>
     }
-    else if (await _userService.CurrentUserIsAuthorizedAsync("service.show", "Servicios"))
+    else if (await _userService.CurrentUserHasRoleAsync([Env.ROLE_COLLAB]))
     {
         <li class="nav-item">
             <a class="nav-link" asp-controller="Provider" asp-action="Index">
